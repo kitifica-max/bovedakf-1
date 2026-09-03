@@ -11,7 +11,6 @@
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
   if (localStorage.getItem('kap-installed') === '1') return;
-  try { if (sessionStorage.getItem('kap-dismissed') === '1') return; } catch {}
 
   // ── Detección de dispositivo ─────────────────────────────────────────────
   var ua = navigator.userAgent;
@@ -253,22 +252,18 @@
 
   setDevice(initDev);
 
-  // Dismiss: X button, click outside the card, or Escape. Stays closed for
-  // the rest of the browser session so it doesn't nag on every visit.
-  document.getElementById('kap-close').addEventListener('click', kapDismiss);
+  // Close for this view only (X, click outside the card, or Escape). It is
+  // NOT remembered — the popup shows again on the next load until the app is
+  // actually installed / running standalone.
+  document.getElementById('kap-close').addEventListener('click', kapClose);
   document.getElementById('kap-overlay').addEventListener('click', function (e) {
-    if (e.target === document.getElementById('kap-overlay')) kapDismiss();
+    if (e.target === document.getElementById('kap-overlay')) kapClose();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' || e.key === 'Esc') kapDismiss();
+    if (e.key === 'Escape' || e.key === 'Esc') kapClose();
   });
 
   // ── Funciones ─────────────────────────────────────────────────────────────
-  function kapDismiss() {
-    try { sessionStorage.setItem('kap-dismissed', '1'); } catch {}
-    kapClose();
-  }
-
   function setDevice(key) {
     var d = DEVS[key];
     document.querySelectorAll('.kap-tab').forEach(function (b) {
