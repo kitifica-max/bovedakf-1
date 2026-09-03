@@ -29,7 +29,7 @@ const stats = [
 const securityBadges = [
   { label: "AES-256", note: "El cifrado que usan bancos y gobiernos.", Icon: KeyRoundIcon },
   { label: "GCM", note: "Garantiza que el dato no fue alterado.", Icon: ShieldCheckIcon },
-  { label: "E2E", note: "La clave viaja en el link, nunca por el servidor.", Icon: ArrowLeftRightIcon },
+  { label: "E2E", note: "Ni nosotros podemos leer lo que compartís.", Icon: ArrowLeftRightIcon },
   { label: "2FA", note: "Doble verificación al iniciar sesión.", Icon: FingerprintIcon },
 ];
 
