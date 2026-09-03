@@ -2,9 +2,11 @@ import NextAuth, { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Passkey from "next-auth/providers/passkey";
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { decryptAtRest, verifyPassword } from "@/lib/crypto";
 import { matchBackupCode, verifyTotp, type BackupCode } from "@/lib/totp";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 class TotpRequiredSignin extends CredentialsSignin {
   code = "TotpRequired";
@@ -42,6 +44,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = creds?.password as string | undefined;
         const totpCode = (creds?.totpCode as string | undefined)?.trim();
         if (!email || !password) return null;
+
+        // Enforcement point for online password guessing — checkPasswordAction
+        // throttles the normal UI flow, but a script can POST here directly.
+        // Shares the `login:<ip>` bucket so the two compound.
+        try {
+          if (!rateLimit(`login:${clientIp(await headers())}`, 10).success) return null;
+        } catch {
+          // headers() unavailable in this context — fail open rather than
+          // block every login.
+        }
 
         const user = await db.user.findUnique({ where: { email } });
         if (!user) return null;

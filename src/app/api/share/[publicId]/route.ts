@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
+
+// Carries a live (encrypted) secret — never let a proxy, CDN, or the browser
+// cache the response.
+const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = clientIp(req.headers);
 
   const { success } = rateLimit(`share:${ip}`);
   if (!success) {
-    return NextResponse.json({ error: "Demasiadas solicitudes, intenta más tarde." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Demasiadas solicitudes, intenta más tarde." },
+      { status: 429, headers: NO_STORE }
+    );
   }
 
   const link = await db.shareLink.findUnique({
@@ -27,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
         userAgent: req.headers.get("user-agent") ?? undefined,
       },
     });
-    return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410 });
+    return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
   }
 
   await db.auditLog.create({
@@ -41,9 +48,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
     },
   });
 
-  return NextResponse.json({
-    payload: link.payload,
-    permission: link.permission,
-    expiresAt: link.expiresAt,
-  });
+  return NextResponse.json(
+    {
+      payload: link.payload,
+      permission: link.permission,
+      expiresAt: link.expiresAt,
+    },
+    { headers: NO_STORE }
+  );
 }

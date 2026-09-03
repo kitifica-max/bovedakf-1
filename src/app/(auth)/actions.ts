@@ -1,8 +1,10 @@
 "use server";
 
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/crypto";
 import { loginSchema, registerSchema } from "@/lib/validation";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function registerAction(_prev: string | null, formData: FormData) {
   const parsed = registerSchema.safeParse({
@@ -14,10 +16,16 @@ export async function registerAction(_prev: string | null, formData: FormData) {
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
+  if (!rateLimit(`register:${clientIp(await headers())}`, 8).success) {
+    return "Demasiados intentos. Esperá un minuto e intentá de nuevo.";
+  }
+
   const { email, password, companyName, industry, bottleneck } = parsed.data;
 
   const existing = await db.user.findUnique({ where: { email } });
-  if (existing) return "Ese email ya está registrado.";
+  // ponytail: vague message + rate limit is the most we can do without email
+  // verification — a definitive "ese email ya existe" is an account oracle.
+  if (existing) return "No se pudo crear la bóveda con esos datos.";
 
   const { hash, salt } = hashPassword(password);
   const user = await db.user.create({
@@ -48,6 +56,9 @@ export async function checkPasswordAction(
     password: formData.get("password"),
   });
   if (!parsed.success) return { ok: false };
+
+  // Throttle online password guessing / credential stuffing per IP.
+  if (!rateLimit(`login:${clientIp(await headers())}`, 10).success) return { ok: false };
 
   const user = await db.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) return { ok: false };
