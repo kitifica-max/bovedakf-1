@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
@@ -9,8 +10,23 @@ import {
   encryptForLink,
   generateLinkKey,
   generatePublicId,
+  hashPassword,
 } from "@/lib/crypto";
-import { credentialSchema, dashboardSurveySchema, shareLinkSchema, updateCompanyNameSchema } from "@/lib/validation";
+import {
+  generateBackupCodes,
+  generateTotpSecret,
+  matchBackupCode,
+  totpAuthUrl,
+  verifyTotp,
+  type BackupCode,
+} from "@/lib/totp";
+import {
+  credentialSchema,
+  dashboardSurveySchema,
+  shareLinkSchema,
+  totpCodeSchema,
+  updateCompanyNameSchema,
+} from "@/lib/validation";
 
 async function requireVaultOwnership(vaultId: string) {
   const session = await auth();
@@ -152,4 +168,84 @@ export async function revokeShareLinkAction(vaultId: string, shareLinkId: string
   if (count === 0) return;
   await db.auditLog.create({ data: { vaultId, shareLinkId, action: "link_revoked" } });
   revalidatePath(`/dashboard/${vaultId}`);
+}
+
+// ── Two-factor authentication (TOTP) ────────────────────────────────────
+//
+// Enrollment is two steps: this generates and persists a secret + backup
+// codes right away (totpEnabled stays false), then confirmTotpEnrollmentAction
+// flips totpEnabled on only once the user proves they can produce a valid
+// code from it. An abandoned enrollment never affects login.
+
+export async function initTotpEnrollmentAction(): Promise<
+  { error: string } | { error: null; qrDataUrl: string; secret: string; backupCodes: string[] }
+> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autenticado" };
+
+  const secret = generateTotpSecret();
+  const backupCodes = generateBackupCodes();
+  const hashedCodes: BackupCode[] = backupCodes.map((code) => {
+    const { hash, salt } = hashPassword(code);
+    return { hash, salt, usedAt: null };
+  });
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: {
+      totpSecret: encryptAtRest(secret),
+      totpEnabled: false,
+      totpBackupCodes: hashedCodes,
+    },
+  });
+
+  const qrDataUrl = await QRCode.toDataURL(totpAuthUrl(secret, session.user.email ?? ""), {
+    margin: 1,
+    width: 220,
+  });
+
+  return { error: null, qrDataUrl, secret, backupCodes };
+}
+
+export async function confirmTotpEnrollmentAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  if (!parsed.success) return parsed.error.issues[0].message;
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user?.totpSecret) return "Primero iniciá la activación.";
+
+  const secret = decryptAtRest(user.totpSecret);
+  if (!verifyTotp(secret, parsed.data.code)) return "Código incorrecto.";
+
+  await db.user.update({ where: { id: session.user.id }, data: { totpEnabled: true } });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+export async function disableTotpAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  if (!parsed.success) return parsed.error.issues[0].message;
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
+  if (!user?.totpEnabled || !user.totpSecret) return "2FA no está activo.";
+
+  const secret = decryptAtRest(user.totpSecret);
+  const validTotp = verifyTotp(secret, parsed.data.code);
+  const validBackup =
+    !validTotp &&
+    matchBackupCode((user.totpBackupCodes as BackupCode[] | null) ?? [], parsed.data.code) !== -1;
+  if (!validTotp && !validBackup) return "Código incorrecto.";
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { totpEnabled: false, totpSecret: null, totpBackupCodes: [] },
+  });
+  revalidatePath("/dashboard", "layout");
+  return null;
 }

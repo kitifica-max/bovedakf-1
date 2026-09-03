@@ -29,8 +29,18 @@ export default async function VaultPage({
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
-    db.user.findUnique({ where: { id: vault.ownerId }, select: { surveyDismissedAt: true } }),
+    db.user.findUnique({
+      where: { id: vault.ownerId },
+      select: { surveyDismissedAt: true, totpEnabled: true },
+    }),
   ]);
 
-  return <VaultView vault={vault} auditLogs={auditLogs} showSurvey={!owner?.surveyDismissedAt} />;
+  return (
+    <VaultView
+      vault={vault}
+      auditLogs={auditLogs}
+      showSurvey={!owner?.surveyDismissedAt}
+      totpEnabled={owner?.totpEnabled ?? false}
+    />
+  );
 }

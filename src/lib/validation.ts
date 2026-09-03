@@ -16,6 +16,15 @@ export const dashboardSurveySchema = z.object({
   answer: z.string().trim().min(1).max(120),
 });
 
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const totpCodeSchema = z.object({
+  code: z.string().trim().min(6, "Código inválido").max(20),
+});
+
 export const credentialSchema = z.object({
   vaultId: z.string().min(1),
   service: z.string().min(1).max(120),
