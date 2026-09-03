@@ -48,15 +48,22 @@ function shell(opts: {
   const { preview, heading, bodyHtml, cta, footnote } = opts;
   return `<!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="supported-color-schemes" content="dark">
+<style>:root{color-scheme:dark;supported-color-schemes:dark}</style>
+</head>
 <body style="margin:0;padding:0;background:#0a0e15;">
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preview)}</div>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preview)}${"&#847;&zwnj;&nbsp;".repeat(30)}</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e15;padding:32px 16px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+      <!--[if mso]><table role="presentation" width="480" align="center" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;">
         <tr><td style="padding:0 4px 20px;">
-          <span style="font-family:'Courier New',ui-monospace,monospace;font-weight:700;font-size:18px;letter-spacing:2px;color:#edf0f4;">BÓVEDA</span>
-          <span style="font-family:'Courier New',ui-monospace,monospace;font-weight:700;font-size:14px;letter-spacing:1px;color:#ffffff;background:#1d5f8f;padding:3px 8px;border-radius:6px;margin-left:6px;">KF-1</span>
+          <span style="font-family:'Arial Black','Arial Bold',Arial,Helvetica,sans-serif;font-weight:800;font-size:18px;letter-spacing:1px;color:#edf0f4;">BÓVEDA</span>
+          <span style="font-family:'Arial Black','Arial Bold',Arial,Helvetica,sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;color:#ffffff;background:#1d5f8f;padding:3px 8px;border-radius:6px;margin-left:6px;">KF-1</span>
         </td></tr>
         <tr><td style="background:#212631;border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:32px;">
           <h1 style="margin:0 0 16px;font-family:'Archivo',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#edf0f4;">${esc(heading)}</h1>
@@ -64,22 +71,23 @@ function shell(opts: {
           ${
             cta
               ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 4px;"><tr><td style="border-radius:999px;background:#1d5f8f;">
-                   <a href="${esc(cta.href)}" style="display:inline-block;padding:12px 28px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(cta.label)}</a>
+                   <a href="${esc(cta.href)}" style="display:inline-block;padding:12px 28px;mso-padding-alt:12px 28px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(cta.label)}</a>
                  </td></tr></table>
-                 <p style="margin:12px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#8b93a1;word-break:break-all;">O pegá este enlace: ${esc(cta.href)}</p>`
+                 <p style="margin:12px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#9aa2b1;word-break:break-all;">O pegá este enlace: ${esc(cta.href)}</p>`
               : ""
           }
           ${
             footnote
-              ? `<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#8b93a1;">${esc(footnote)}</p>`
+              ? `<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#9aa2b1;">${esc(footnote)}</p>`
               : ""
           }
         </td></tr>
-        <tr><td style="padding:18px 4px 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#6b7280;">
+        <tr><td style="padding:18px 4px 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#7b8494;">
           Bóveda KF-1 · Compartí credenciales sin dejar rastro en el chat.<br>
-          <a href="${esc(APP_URL)}" style="color:#8b93a1;text-decoration:underline;">${esc(APP_URL.replace(/^https?:\/\//, ""))}</a>
+          <a href="${esc(APP_URL)}" style="color:#9aa2b1;text-decoration:underline;">${esc(APP_URL.replace(/^https?:\/\//, ""))}</a>
         </td></tr>
       </table>
+      <!--[if mso]></td></tr></table><![endif]-->
     </td></tr>
   </table>
 </body>
