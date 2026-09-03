@@ -35,7 +35,7 @@ export function VaultView({
         <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue text-paper">
           <ShieldCheckIcon className="h-4 w-4" />
         </span>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">{vault.name}</h1>
+        <h1 className="font-pixel text-xl leading-[1.3] tracking-tight text-ink">{vault.name}</h1>
       </div>
       <AddCredentialForm vaultId={vault.id} />
       <ul className="flex flex-col gap-3">

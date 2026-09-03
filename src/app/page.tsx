@@ -18,7 +18,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { HeroReveal } from "@/components/hero-reveal";
 
 const stats = [
-  { label: "Credenciales gratis en el plan inicial", value: "20", Icon: KeyRoundIcon },
+  { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
   { label: "Rango de expiración configurable por link", value: "1h–7d", Icon: ClockIcon },
 ];
 
@@ -286,7 +286,7 @@ export default function HomePage() {
       </section>
 
       {/* FAQ */}
-      <section aria-labelledby="faq-heading" className="w-full max-w-3xl">
+      <section aria-labelledby="faq-heading" className="w-full max-w-5xl">
         <h2 id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
           Preguntas frecuentes
         </h2>
