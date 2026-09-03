@@ -140,9 +140,12 @@ export function duplicateSignupEmail(appUrl: string) {
 
 export function linkOpenedEmail(service: string, appUrl: string) {
   return {
-    subject: `Abrieron tu link compartido — ${service}`,
+    // Service name stays out of the subject and preheader — both surface in
+    // lock-screen / notification previews, which is exactly the leak the
+    // product exists to avoid. It only appears inside the email body.
+    subject: "Abrieron un link compartido de tu bóveda",
     html: shell({
-      preview: `El link de la credencial "${service}" fue abierto por primera vez.`,
+      preview: "Uno de tus links compartidos se abrió por primera vez.",
       heading: "Abrieron tu link compartido",
       bodyHtml: `<p style='margin:0 0 12px;'>El link que compartiste para <strong>${esc(
         service
