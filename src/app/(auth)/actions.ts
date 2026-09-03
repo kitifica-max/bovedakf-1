@@ -62,6 +62,20 @@ export async function registerAction(_prev: string | null, formData: FormData) {
     },
   });
   await db.vault.create({ data: { name: "Mi bóveda", ownerId: user.id } });
+
+  // Accept any invites already waiting for this address.
+  const pendingInvites = await db.vaultInvite.findMany({
+    where: { email: email.toLowerCase(), acceptedAt: null, expiresAt: { gt: new Date() } },
+  });
+  for (const inv of pendingInvites) {
+    await db.vaultMember.upsert({
+      where: { vaultId_userId: { vaultId: inv.vaultId, userId: user.id } },
+      create: { vaultId: inv.vaultId, userId: user.id, role: inv.role },
+      update: { role: inv.role },
+    });
+    await db.vaultInvite.update({ where: { id: inv.id }, data: { acceptedAt: new Date() } });
+  }
+
   await sendVerification(email);
 
   return null;
