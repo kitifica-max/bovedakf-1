@@ -146,7 +146,7 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
   }
 
   return (
-    <li className="rounded-2xl border border-border-soft bg-paper p-5">
+    <li className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-5">
       <button
         type="button"
         className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
