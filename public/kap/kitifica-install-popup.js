@@ -11,7 +11,7 @@
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
   if (localStorage.getItem('kap-installed') === '1') return;
-  try { if (sessionStorage.getItem('kap-dismissed') === '1') return; } catch (e) {}
+  try { if (sessionStorage.getItem('kap-dismissed') === '1') return; } catch {}
 
   // ── Detección de dispositivo ─────────────────────────────────────────────
   var ua = navigator.userAgent;
@@ -265,7 +265,7 @@
 
   // ── Funciones ─────────────────────────────────────────────────────────────
   function kapDismiss() {
-    try { sessionStorage.setItem('kap-dismissed', '1'); } catch (e) {}
+    try { sessionStorage.setItem('kap-dismissed', '1'); } catch {}
     kapClose();
   }
 
