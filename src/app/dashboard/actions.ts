@@ -10,7 +10,7 @@ import {
   generateLinkKey,
   generatePublicId,
 } from "@/lib/crypto";
-import { credentialSchema, shareLinkSchema } from "@/lib/validation";
+import { credentialSchema, dashboardSurveySchema, shareLinkSchema, updateCompanyNameSchema } from "@/lib/validation";
 
 async function requireVaultOwnership(vaultId: string) {
   const session = await auth();
@@ -18,6 +18,47 @@ async function requireVaultOwnership(vaultId: string) {
   const vault = await db.vault.findUnique({ where: { id: vaultId } });
   if (!vault || vault.ownerId !== session.user.id) throw new Error("Bóveda no encontrada");
   return session.user.id;
+}
+
+export async function updateCompanyNameAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const parsed = updateCompanyNameSchema.safeParse({ companyName: formData.get("companyName") });
+  if (!parsed.success) return parsed.error.issues[0].message;
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { companyName: parsed.data.companyName },
+  });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+export async function submitSurveyAnswerAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const parsed = dashboardSurveySchema.safeParse({ answer: formData.get("answer") });
+  if (!parsed.success) return parsed.error.issues[0].message;
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { surveyAnswer: parsed.data.answer, surveyDismissedAt: new Date() },
+  });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+export async function dismissSurveyAction() {
+  const session = await auth();
+  if (!session?.user?.id) return;
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { surveyDismissedAt: new Date() },
+  });
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function createCredentialAction(formData: FormData) {

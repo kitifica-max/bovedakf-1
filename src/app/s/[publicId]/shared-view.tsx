@@ -87,22 +87,14 @@ export function SharedCredentialView() {
         </div>
 
         {state.status === "ready" && (
-          <div
-            className={`mt-5 flex flex-col gap-1.5 rounded-2xl bg-gray/60 p-4 text-sm ${state.permission === "READ" ? "select-none" : ""}`}
-            onCopy={(e) => {
-              if (state.permission === "READ") e.preventDefault();
-            }}
-            onContextMenu={(e) => {
-              if (state.permission === "READ") e.preventDefault();
-            }}
-          >
+          <div className="mt-5 flex flex-col gap-1.5 rounded-2xl bg-gray/60 p-4 text-sm">
             <div className="flex items-center justify-between gap-2">
               <p><span className="text-ink-soft">Servicio:</span> {state.data.service}</p>
-              {state.permission === "DOWNLOAD" && <CopyButton value={state.data.service} label="Copiar servicio" />}
+              <CopyButton value={state.data.service} label="Copiar servicio" />
             </div>
             <div className="flex items-center justify-between gap-2">
               <p><span className="text-ink-soft">Usuario:</span> {state.data.username}</p>
-              {state.permission === "DOWNLOAD" && <CopyButton value={state.data.username} label="Copiar usuario" />}
+              <CopyButton value={state.data.username} label="Copiar usuario" />
             </div>
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-1.5">
@@ -124,13 +116,13 @@ export function SharedCredentialView() {
                     <EyeIcon aria-hidden="true" className="h-3.5 w-3.5" />
                   )}
                 </button>
-                {state.permission === "DOWNLOAD" && <CopyButton value={state.data.secret} label="Copiar secreto" />}
+                <CopyButton value={state.data.secret} label="Copiar secreto" />
               </span>
             </div>
             {state.data.notes && (
               <div className="flex items-center justify-between gap-2">
                 <p className="text-ink-soft">Notas: {state.data.notes}</p>
-                {state.permission === "DOWNLOAD" && <CopyButton value={state.data.notes} label="Copiar notas" />}
+                <CopyButton value={state.data.notes} label="Copiar notas" />
               </div>
             )}
 

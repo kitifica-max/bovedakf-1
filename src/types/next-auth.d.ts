@@ -4,6 +4,16 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      companyName: string | null;
     } & DefaultSession["user"];
+  }
+  interface User {
+    companyName?: string | null;
+  }
+}
+
+declare module "@auth/core/jwt" {
+  interface JWT {
+    companyName?: string | null;
   }
 }

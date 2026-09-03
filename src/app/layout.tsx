@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -38,7 +38,21 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: { icon: "/favicon.svg" },
   alternates: { canonical: "/" },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  keywords: [
+    "gestor de credenciales",
+    "compartir contraseñas de forma segura",
+    "vault de contraseñas para equipos",
+    "encriptación AES-256",
+    "links temporales de credenciales",
+    "zero-knowledge",
+  ],
+  authors: [{ name: "Kitifica", url: "https://www.kitifica.com" }],
+  category: "technology",
   openGraph: {
     type: "website",
     locale: "es_ES",
@@ -52,6 +66,11 @@ export const metadata: Metadata = {
     title,
     description,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1d5f8f",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -23,11 +23,14 @@ export default async function VaultPage({
 
   if (!vault || vault.ownerId !== session?.user.id) notFound();
 
-  const auditLogs = await db.auditLog.findMany({
-    where: { vaultId },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const [auditLogs, owner] = await Promise.all([
+    db.auditLog.findMany({
+      where: { vaultId },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    db.user.findUnique({ where: { id: vault.ownerId }, select: { surveyDismissedAt: true } }),
+  ]);
 
-  return <VaultView vault={vault} auditLogs={auditLogs} />;
+  return <VaultView vault={vault} auditLogs={auditLogs} showSurvey={!owner?.surveyDismissedAt} />;
 }

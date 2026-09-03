@@ -9,8 +9,9 @@ import {
   revealCredentialAction,
   revokeShareLinkAction,
 } from "../actions";
-import { EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldCheckIcon, Trash2Icon, XCircleIcon } from "@/components/icons";
+import { ChevronDownIcon, EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldCheckIcon, Trash2Icon, XCircleIcon } from "@/components/icons";
 import { CopyButton } from "@/components/copy-button";
+import { DashboardSurvey } from "@/components/dashboard-survey";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
@@ -25,9 +26,11 @@ const dangerLinkBtnCls =
 export function VaultView({
   vault,
   auditLogs,
+  showSurvey,
 }: {
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
+  showSurvey: boolean;
 }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -37,6 +40,7 @@ export function VaultView({
         </span>
         <h1 className="font-pixel text-xl leading-[1.3] tracking-tight text-ink">{vault.name}</h1>
       </div>
+      {showSurvey && <DashboardSurvey />}
       <AddCredentialForm vaultId={vault.id} />
       <ul className="flex flex-col gap-3">
         {vault.credentials.map((c) => (
@@ -107,20 +111,47 @@ function AddCredentialForm({ vaultId }: { vaultId: string }) {
 }
 
 function CredentialRow({ vaultId, credential }: { vaultId: string; credential: CredentialWithLinks }) {
+  const [expanded, setExpanded] = useState(false);
   const [revealed, setRevealed] = useState<{ secret: string; notes: string } | null>(null);
   const [sharing, setSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
   const idPrefix = useId();
 
+  function toggleExpanded() {
+    setExpanded((wasExpanded) => {
+      if (wasExpanded) {
+        // Collapsing — close any open secret/share panel so it doesn't linger hidden.
+        setRevealed(null);
+        setSharing(false);
+        setShareUrl(null);
+        setShareError(null);
+      }
+      return !wasExpanded;
+    });
+  }
+
   return (
     <li className="rounded-2xl border border-border-soft bg-paper p-5">
-      <div className="flex items-center justify-between">
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
+        aria-expanded={expanded}
+        onClick={toggleExpanded}
+      >
         <div>
           <p className="font-display text-lg font-semibold text-ink">{credential.service}</p>
           <p className="text-sm text-ink-soft">{credential.username}</p>
         </div>
-        <div className="flex gap-3 text-sm">
+        <ChevronDownIcon
+          aria-hidden="true"
+          className={`h-4 w-4 shrink-0 text-ink-soft transition-transform ${expanded ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {expanded && (
+      <>
+      <div className="mt-4 flex justify-end gap-3 border-t border-border-soft pt-4 text-sm">
           <button
             className={linkBtnCls}
             aria-expanded={!!revealed}
@@ -144,7 +175,6 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
             <Trash2Icon aria-hidden="true" className="h-3.5 w-3.5" />
             Eliminar
           </button>
-        </div>
       </div>
 
       {revealed && (
@@ -184,17 +214,32 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
         >
           <div className="flex flex-wrap items-center gap-2">
             <label htmlFor={`${idPrefix}-permission`} className="sr-only">Permiso del link</label>
-            <select id={`${idPrefix}-permission`} name="permission" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
-              <option value="READ">Solo lectura</option>
-              <option value="DOWNLOAD">Lectura + descarga</option>
-            </select>
+            <div className="relative w-auto">
+              <select
+                id={`${idPrefix}-permission`}
+                name="permission"
+                className={`${inputCls} w-auto cursor-pointer appearance-none py-1.5 pr-9`}
+              >
+                <option value="READ">Solo lectura</option>
+                <option value="DOWNLOAD">Lectura + descarga</option>
+              </select>
+              <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-ink-soft" />
+            </div>
             <label htmlFor={`${idPrefix}-expires`} className="sr-only">Expiración del link</label>
-            <select id={`${idPrefix}-expires`} name="expiresInHours" defaultValue="24" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
-              <option value="1">1 hora</option>
-              <option value="24">24 horas</option>
-              <option value="72">3 días</option>
-              <option value="168">7 días</option>
-            </select>
+            <div className="relative w-auto">
+              <select
+                id={`${idPrefix}-expires`}
+                name="expiresInHours"
+                defaultValue="24"
+                className={`${inputCls} w-auto cursor-pointer appearance-none py-1.5 pr-9`}
+              >
+                <option value="1">1 hora</option>
+                <option value="24">24 horas</option>
+                <option value="72">3 días</option>
+                <option value="168">7 días</option>
+              </select>
+              <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-ink-soft" />
+            </div>
           </div>
           <button className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-soft px-4 py-1.5 text-sm font-medium text-ink-reverse transition hover:brightness-95">
             <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
@@ -261,6 +306,8 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
             })}
           </ul>
         </div>
+      )}
+      </>
       )}
     </li>
   );

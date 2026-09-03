@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { LogOutIcon } from "@/components/icons";
 import { KitificaCredit } from "@/components/kitifica-credit";
+import { CompanyNameEditor } from "@/components/company-name-editor";
 
 export const metadata: Metadata = {
   title: "Mi bóveda",
@@ -19,7 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />
         <div className="flex items-center gap-4 text-sm">
-          <span className="hidden text-gray/70 sm:inline">{session.user.email}</span>
+          <CompanyNameEditor initialName={session.user.companyName || session.user.email || ""} />
           <form
             action={async () => {
               "use server";

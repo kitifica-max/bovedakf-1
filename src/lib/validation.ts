@@ -3,6 +3,17 @@ import { z } from "zod";
 export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(10, "Mínimo 10 caracteres"),
+  companyName: z.string().trim().min(1, "Nombre de empresa requerido").max(120),
+  industry: z.string().trim().min(1, "Elegí un rubro").max(80),
+  bottleneck: z.string().trim().max(500).optional().or(z.literal("")),
+});
+
+export const updateCompanyNameSchema = z.object({
+  companyName: z.string().trim().min(1, "Nombre de empresa requerido").max(120),
+});
+
+export const dashboardSurveySchema = z.object({
+  answer: z.string().trim().min(1).max(120),
 });
 
 export const credentialSchema = z.object({
