@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 251.97 92.14">
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 252 252">
+  <!-- Generator: Adobe Illustrator 30.5.1, SVG Export Plug-In . SVG Version: 2.1.4 Build 3)  -->
   <defs>
     <style>
-      .cls-1 {
+      .st0 {
         fill: #1d5f8f;
       }
 
-      .cls-2 {
+      .st1 {
         fill: #fff;
       }
     </style>
   </defs>
-  <g id="Layer_1-2" data-name="Layer 1">
-    <g>
-      <rect class="cls-1" x="0" y="0" width="251.97" height="92.14"/>
-      <g>
-        <path class="cls-2" d="M35.19,44.54h20.22v10.1h-20.22v20.24h-10.12V24.33h10.12v20.22ZM65.5,34.42v10.12h-10.1v-10.12h10.1ZM65.5,64.76h-10.1v-10.12h10.1v10.12ZM75.62,24.33v10.1h-10.12v-10.1h10.12ZM75.62,74.88h-10.12v-10.12h10.12v10.12Z"/>
-        <path class="cls-2" d="M85.74,24.33h50.55v10.1h-40.43v10.12h30.31v10.1h-30.31v20.24h-10.12V24.33Z"/>
-        <path class="cls-2" d="M146.41,54.64v-10.1h20.22v10.1h-20.22Z"/>
-        <path class="cls-2" d="M207.08,64.76h20.22v10.12h-50.55v-10.12h20.22v-30.34h-10.1v-10.1h20.22v40.43ZM176.75,44.54v-10.12h10.12v10.12h-10.12Z"/>
-      </g>
-    </g>
+  <rect class="st0" width="252" height="252"/>
+  <g>
+    <path class="st1" d="M35,122.7h20.2v10.1h-20.2v20.2h-10.1v-50.5h10.1v20.2h0ZM65.3,112.6v10.1h-10.1v-10.1h10.1ZM65.3,142.9h-10.1v-10.1h10.1v10.1ZM75.4,102.5v10.1h-10.1v-10.1h10.1ZM75.4,153h-10.1v-10.1h10.1v10.1Z"/>
+    <path class="st1" d="M85.5,102.5h50.5v10.1h-40.4v10.1h30.3v10.1h-30.3v20.2h-10.1s0-50.6,0-50.6Z"/>
+    <path class="st1" d="M146.2,132.8v-10.1h20.2v10.1h-20.2Z"/>
+    <path class="st1" d="M206.9,142.9h20.2v10.1h-50.6v-10.1h20.2v-30.3h-10.1v-10.1h20.2v40.4h0ZM176.6,122.7v-10.1h10.1v10.1h-10.1Z"/>
   </g>
 </svg>

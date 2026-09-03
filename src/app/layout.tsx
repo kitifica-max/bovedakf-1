@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -36,7 +37,14 @@ export const metadata: Metadata = {
   description,
   applicationName: "Bóveda KF-1",
   manifest: "/manifest.json",
-  icons: { icon: "/favicon.svg" },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   alternates: { canonical: "/" },
   robots: {
     index: true,
@@ -81,6 +89,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
+        {/* Kitifica "App Directa" install prompt — detects the device and
+            suggests installing this PWA. Suppressed automatically once
+            already installed (see public/kap/kitifica-install-popup.js). */}
+        <Script src="/kap/kitifica-install-popup.js" strategy="afterInteractive" />
       </body>
     </html>
   );
