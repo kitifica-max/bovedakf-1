@@ -157,20 +157,38 @@ export default function HomePage() {
                   Ya tengo cuenta
                 </Link>
               </div>
+              <div data-reveal className="mt-8 flex flex-wrap items-center gap-6 border-t border-border-soft pt-5">
+                {stats.map((s) => (
+                  <div key={s.label} className="flex items-center gap-2.5">
+                    <s.Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-blue" />
+                    <div>
+                      <p className="font-display text-lg leading-none font-semibold text-ink">{s.value}</p>
+                      <p className="mt-1 text-xs text-ink-soft">{s.label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  data-reveal
-                  className="glass col-span-2 flex flex-col justify-between rounded-2xl p-5 lg:col-span-1"
-                >
-                  <s.Icon aria-hidden="true" className="h-5 w-5 text-blue" />
-                  <p className="mt-6 font-display text-3xl font-semibold text-ink">{s.value}</p>
-                  <p className="mt-1 text-sm text-ink-soft">{s.label}</p>
+            <div data-reveal className="glass flex flex-col items-center justify-center gap-6 rounded-2xl p-8 text-center sm:p-10">
+              <div className="grid h-28 w-28 place-items-center rounded-full bg-blue-soft/10 ring-1 ring-blue/30">
+                <div className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-blue-soft/20 ring-1 ring-blue/40">
+                  <LockIcon aria-hidden="true" className="h-8 w-8 text-blue-soft" />
                 </div>
-              ))}
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {["AES-256", "GCM", "E2E"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="font-pixel rounded-full border border-blue/40 bg-blue/10 px-2.5 py-1 text-[10px] text-blue-soft"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <p className="max-w-[15rem] text-sm text-ink-soft">
+                Cifrado en tu navegador antes de tocar nuestra base de datos.
+              </p>
             </div>
           </div>
         </HeroReveal>
@@ -180,7 +198,7 @@ export default function HomePage() {
       <section aria-labelledby="problema-heading" className="w-full max-w-5xl">
         <div className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">El problema</p>
-          <h2 id="problema-heading" className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">
+          <h2 id="problema-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             No es la contraseña. Es dónde vive.
           </h2>
         </div>
@@ -199,7 +217,7 @@ export default function HomePage() {
       <section aria-labelledby="como-funciona-heading" className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-6 sm:p-10">
         <div className="mb-8 max-w-xl">
           <p className="text-sm font-medium text-blue">Cómo funciona</p>
-          <h2 id="como-funciona-heading" className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">
+          <h2 id="como-funciona-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             Tres pasos, cero fricción
           </h2>
         </div>
@@ -221,7 +239,7 @@ export default function HomePage() {
       <section aria-labelledby="features-heading" className="w-full max-w-5xl">
         <div className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">Qué incluye</p>
-          <h2 id="features-heading" className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">
+          <h2 id="features-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             Diseñado para que nadie tenga que confiar a ciegas
           </h2>
         </div>
@@ -241,7 +259,7 @@ export default function HomePage() {
       {/* Mecanismo de seguridad */}
       <section aria-labelledby="seguridad-heading" className="glass w-full max-w-5xl rounded-2xl p-6 sm:p-10">
         <p className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
-        <h2 id="seguridad-heading" className="mt-1 max-w-2xl font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+        <h2 id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] tracking-tight text-ink sm:text-2xl">
           La clave de cada link vive solo en la URL — nunca en nuestra base de datos
         </h2>
         <p className="mt-3 max-w-2xl text-sm text-ink-soft">
@@ -255,7 +273,7 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section aria-labelledby="faq-heading" className="w-full max-w-3xl">
-        <h2 id="faq-heading" className="mb-6 text-center font-display text-3xl font-semibold tracking-tight text-ink">
+        <h2 id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
           Preguntas frecuentes
         </h2>
         <div className="flex flex-col gap-3">
