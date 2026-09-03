@@ -27,14 +27,7 @@ import {
   totpCodeSchema,
   updateCompanyNameSchema,
 } from "@/lib/validation";
-
-async function requireVaultOwnership(vaultId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("No autenticado");
-  const vault = await db.vault.findUnique({ where: { id: vaultId } });
-  if (!vault || vault.ownerId !== session.user.id) throw new Error("Bóveda no encontrada");
-  return session.user.id;
-}
+import { requireVaultAccess } from "@/lib/vault-access";
 
 export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
@@ -88,7 +81,7 @@ export async function createCredentialAction(formData: FormData) {
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { vaultId, service, username, secret, notes } = parsed.data;
-  await requireVaultOwnership(vaultId);
+  await requireVaultAccess(vaultId, "EDITOR");
 
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
@@ -100,9 +93,17 @@ export async function createCredentialAction(formData: FormData) {
 }
 
 export async function revealCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultOwnership(vaultId);
+  const { email } = await requireVaultAccess(vaultId, "VIEWER");
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
   if (!credential) throw new Error("Credencial no encontrada");
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: "credential_viewed",
+      credentialService: credential.service,
+      actorEmail: email,
+    },
+  });
   return JSON.parse(decryptAtRest(credential.encryptedData)) as {
     secret: string;
     notes: string;
@@ -110,7 +111,7 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
 }
 
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultOwnership(vaultId);
+  await requireVaultAccess(vaultId, "EDITOR");
   await db.credential.deleteMany({ where: { id: credentialId, vaultId } });
   revalidatePath(`/dashboard/${vaultId}`);
 }
@@ -123,7 +124,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
-  await requireVaultOwnership(vaultId);
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
   const { credentialId, permission, expiresInHours } = parsed.data;
 
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -149,7 +150,13 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   });
 
   await db.auditLog.create({
-    data: { vaultId, action: "link_created", shareLinkId: created.id, credentialService: credential.service },
+    data: {
+      vaultId,
+      action: "link_created",
+      shareLinkId: created.id,
+      credentialService: credential.service,
+      actorEmail,
+    },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
@@ -158,7 +165,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
 }
 
 export async function revokeShareLinkAction(vaultId: string, shareLinkId: string) {
-  await requireVaultOwnership(vaultId);
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
   // Scoped by vaultId too — an id alone isn't enough, or any authenticated
   // owner of any vault could revoke another tenant's share link by id.
   const { count } = await db.shareLink.updateMany({
@@ -171,7 +178,7 @@ export async function revokeShareLinkAction(vaultId: string, shareLinkId: string
     select: { credential: { select: { service: true } } },
   });
   await db.auditLog.create({
-    data: { vaultId, shareLinkId, action: "link_revoked", credentialService: link?.credential.service },
+    data: { vaultId, shareLinkId, action: "link_revoked", credentialService: link?.credential.service, actorEmail },
   });
   revalidatePath(`/dashboard/${vaultId}`);
 }
