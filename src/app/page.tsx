@@ -28,9 +28,9 @@ const stats = [
 
 const securityBadges = [
   { label: "AES-256", note: "El cifrado que usan bancos y gobiernos.", Icon: KeyRoundIcon },
-  { label: "GCM", note: "Avisa si alguien alteró el dato.", Icon: ShieldCheckIcon },
-  { label: "E2E", note: "La clave nunca llega a nuestro servidor.", Icon: ArrowLeftRightIcon },
-  { label: "2FA", note: "Una contraseña robada no alcanza.", Icon: FingerprintIcon },
+  { label: "GCM", note: "Garantiza que el dato no fue alterado.", Icon: ShieldCheckIcon },
+  { label: "E2E", note: "La clave viaja en el link, nunca por el servidor.", Icon: ArrowLeftRightIcon },
+  { label: "2FA", note: "Doble verificación al iniciar sesión.", Icon: FingerprintIcon },
 ];
 
 const problems = [
