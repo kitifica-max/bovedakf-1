@@ -11,6 +11,9 @@ import { VerifyResult } from "@/components/verify-result";
 
 export function LoginForm() {
   const router = useRouter();
+  const nextUrl =
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+  const dest = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [step, setStep] = useState<"password" | "totp">("password");
@@ -35,7 +38,7 @@ export function LoginForm() {
         setError("No se pudo verificar la passkey.");
         return;
       }
-      router.push("/dashboard");
+      router.push(dest);
     } catch {
       setPending(false);
       setError("Tu navegador no soporta passkeys, o cancelaste la solicitud.");
@@ -71,7 +74,7 @@ export function LoginForm() {
       setError("Email o contraseña incorrectos.");
       return;
     }
-    router.push("/dashboard");
+    router.push(dest);
   }
 
   async function onSubmitTotp(e: React.FormEvent<HTMLFormElement>) {
@@ -93,7 +96,7 @@ export function LoginForm() {
       setError("Código incorrecto.");
       return;
     }
-    router.push("/dashboard");
+    router.push(dest);
   }
 
   if (step === "totp") {
