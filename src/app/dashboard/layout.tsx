@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { LogOutIcon } from "@/components/icons";
 import { KitificaCredit } from "@/components/kitifica-credit";
 import { CompanyNameEditor } from "@/components/company-name-editor";
@@ -22,6 +24,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />
         <div className="flex items-center gap-4 text-sm">
+          {isAdmin(session.user.email) && (
+            <Link href="/admin" className="rounded-full border border-gray/25 px-3 py-1.5 transition hover:bg-gray/10">
+              Admin
+            </Link>
+          )}
           <CompanyNameEditor initialName={session.user.companyName || session.user.email || ""} />
           <form
             action={async () => {

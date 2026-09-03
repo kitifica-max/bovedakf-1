@@ -75,6 +75,11 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
               </li>
             ))}
           </ol>
+          <p className="mt-3 text-xs text-ink-soft">
+            La passkey queda guardada en <strong>este dispositivo</strong>. En tu celular u otra
+            computadora vas a seguir entrando con contraseña (y el código 2FA si lo tenés activo)
+            hasta que crees una passkey ahí también.
+          </p>
           <button
             onClick={addPasskey}
             disabled={pending}
@@ -110,6 +115,10 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
           >
             {pending ? "Creando..." : "+ Agregar otra passkey"}
           </button>
+          <p className="mt-2 text-xs text-ink-soft">
+            Cada dispositivo necesita la suya. Si entrás desde el celular u otra computadora,
+            creá una passkey ahí también — salvo que tu sistema las sincronice por iCloud o Google.
+          </p>
         </>
       )}
 

@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       // Dashboard is private, and shared-credential links must never be
       // crawled or cached — they carry live secrets.
-      disallow: ["/dashboard", "/dashboard/", "/s/", "/api/"],
+      disallow: ["/dashboard", "/dashboard/", "/admin", "/s/", "/api/"],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
