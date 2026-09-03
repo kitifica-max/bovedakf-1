@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
@@ -47,7 +47,8 @@ function TallyCard({ title, rows, total }: { title: string; rows: [string, numbe
 
 export default async function AdminPage() {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) notFound();
+  if (!session?.user) redirect("/login?from=/admin");
+  if (!isAdmin(session.user.email)) notFound();
 
   const users = await db.user.findMany({
     orderBy: { createdAt: "desc" },
