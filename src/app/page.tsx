@@ -281,7 +281,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border-soft bg-paper p-6">
+            <div key={f.title} className="rounded-2xl border border-blue/30 bg-blue/[0.08] p-6 backdrop-blur-md">
               <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue-soft text-blue">
                 <f.Icon className="h-4 w-4" />
               </span>
