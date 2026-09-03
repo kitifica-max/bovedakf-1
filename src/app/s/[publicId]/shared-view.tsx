@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import { DownloadIcon } from "@/components/icons";
+import { DownloadIcon, EyeIcon, EyeOffIcon } from "@/components/icons";
+import { CopyButton } from "@/components/copy-button";
+import { KitificaCredit } from "@/components/kitifica-credit";
 
 type Payload = { service: string; username: string; secret: string; notes?: string };
 
@@ -32,6 +35,7 @@ async function decryptPayload(payloadB64: string, keyB64url: string): Promise<Pa
 
 export function SharedCredentialView() {
   const { publicId } = useParams<{ publicId: string }>();
+  const [secretVisible, setSecretVisible] = useState(false);
   const [state, setState] = useState<
     | { status: "loading" }
     | { status: "error"; message: string }
@@ -92,13 +96,43 @@ export function SharedCredentialView() {
               if (state.permission === "READ") e.preventDefault();
             }}
           >
-            <p><span className="text-ink-soft">Servicio:</span> {state.data.service}</p>
-            <p><span className="text-ink-soft">Usuario:</span> {state.data.username}</p>
-            <p>
-              <span className="text-ink-soft">Secreto:</span>{" "}
-              <code className="rounded bg-paper px-1.5 py-0.5 select-all">{state.data.secret}</code>
-            </p>
-            {state.data.notes && <p className="text-ink-soft">Notas: {state.data.notes}</p>}
+            <div className="flex items-center justify-between gap-2">
+              <p><span className="text-ink-soft">Servicio:</span> {state.data.service}</p>
+              {state.permission === "DOWNLOAD" && <CopyButton value={state.data.service} label="Copiar servicio" />}
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <p><span className="text-ink-soft">Usuario:</span> {state.data.username}</p>
+              {state.permission === "DOWNLOAD" && <CopyButton value={state.data.username} label="Copiar usuario" />}
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-1.5">
+                <span className="text-ink-soft">Secreto:</span>{" "}
+                <code className="rounded bg-paper px-1.5 py-0.5 select-all">
+                  {secretVisible ? state.data.secret : "•".repeat(Math.min(state.data.secret.length, 14))}
+                </code>
+              </p>
+              <span className="flex shrink-0 items-center gap-0.5">
+                <button
+                  type="button"
+                  aria-label={secretVisible ? "Ocultar secreto" : "Ver secreto"}
+                  className="inline-flex cursor-pointer items-center justify-center rounded-full p-1.5 text-ink-soft transition hover:bg-paper hover:text-ink"
+                  onClick={() => setSecretVisible((v) => !v)}
+                >
+                  {secretVisible ? (
+                    <EyeOffIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                  ) : (
+                    <EyeIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                  )}
+                </button>
+                {state.permission === "DOWNLOAD" && <CopyButton value={state.data.secret} label="Copiar secreto" />}
+              </span>
+            </div>
+            {state.data.notes && (
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-ink-soft">Notas: {state.data.notes}</p>
+                {state.permission === "DOWNLOAD" && <CopyButton value={state.data.notes} label="Copiar notas" />}
+              </div>
+            )}
 
             {state.permission === "DOWNLOAD" && (
               <button
@@ -124,6 +158,16 @@ export function SharedCredentialView() {
             )}
           </div>
         )}
+
+        <div className="mt-6 flex flex-col items-center gap-2 border-t border-border-soft pt-5 text-center">
+          <p className="text-xs text-ink-soft">
+            ¿Recibiste esto por chat o email antes?{" "}
+            <Link href="/" className="text-ink underline decoration-border-soft underline-offset-4 hover:decoration-ink">
+              Compartí credenciales seguras con Bóveda KF-1
+            </Link>
+          </p>
+          <KitificaCredit />
+        </div>
       </div>
     </main>
   );

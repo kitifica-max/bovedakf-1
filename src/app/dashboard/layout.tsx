@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { LogOutIcon } from "@/components/icons";
+import { KitificaCredit } from "@/components/kitifica-credit";
 
 export const metadata: Metadata = {
   title: "Mi bóveda",
@@ -33,6 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </header>
       <main className="flex-1 py-6">{children}</main>
+      <footer className="flex flex-col items-center gap-1 py-4 text-center">
+        <p className="text-xs text-ink-soft">© {new Date().getFullYear()} Bóveda KF-1</p>
+        <KitificaCredit />
+      </footer>
     </div>
   );
 }

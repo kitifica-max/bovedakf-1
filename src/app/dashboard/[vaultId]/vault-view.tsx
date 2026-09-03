@@ -10,6 +10,7 @@ import {
   revokeShareLinkAction,
 } from "../actions";
 import { EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldCheckIcon, Trash2Icon, XCircleIcon } from "@/components/icons";
+import { CopyButton } from "@/components/copy-button";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
@@ -147,18 +148,26 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
       </div>
 
       {revealed && (
-        <div className="mt-4 rounded-2xl bg-gray/60 p-3 text-sm">
-          <p>
-            <span className="text-ink-soft">Secreto:</span>{" "}
-            <code className="select-all rounded bg-paper px-1.5 py-0.5">{revealed.secret}</code>
-          </p>
-          {revealed.notes && <p className="mt-1 text-ink-soft">Notas: {revealed.notes}</p>}
+        <div className="mt-4 flex flex-col gap-1.5 rounded-2xl bg-gray/60 p-3 text-sm">
+          <div className="flex items-center justify-between gap-2">
+            <p>
+              <span className="text-ink-soft">Secreto:</span>{" "}
+              <code className="select-all rounded bg-paper px-1.5 py-0.5">{revealed.secret}</code>
+            </p>
+            <CopyButton value={revealed.secret} label="Copiar secreto" />
+          </div>
+          {revealed.notes && (
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-ink-soft">Notas: {revealed.notes}</p>
+              <CopyButton value={revealed.notes} label="Copiar notas" />
+            </div>
+          )}
         </div>
       )}
 
       {sharing && (
         <form
-          className="mt-4 flex flex-wrap items-center gap-2 border-t border-border-soft pt-4"
+          className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-4"
           noValidate
           onSubmit={async (e) => {
             e.preventDefault();
@@ -173,18 +182,20 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
             setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
           }}
         >
-          <label htmlFor={`${idPrefix}-permission`} className="sr-only">Permiso del link</label>
-          <select id={`${idPrefix}-permission`} name="permission" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
-            <option value="READ">Solo lectura</option>
-            <option value="DOWNLOAD">Lectura + descarga</option>
-          </select>
-          <label htmlFor={`${idPrefix}-expires`} className="sr-only">Expiración del link</label>
-          <select id={`${idPrefix}-expires`} name="expiresInHours" defaultValue="24" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
-            <option value="1">1 hora</option>
-            <option value="24">24 horas</option>
-            <option value="72">3 días</option>
-            <option value="168">7 días</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor={`${idPrefix}-permission`} className="sr-only">Permiso del link</label>
+            <select id={`${idPrefix}-permission`} name="permission" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
+              <option value="READ">Solo lectura</option>
+              <option value="DOWNLOAD">Lectura + descarga</option>
+            </select>
+            <label htmlFor={`${idPrefix}-expires`} className="sr-only">Expiración del link</label>
+            <select id={`${idPrefix}-expires`} name="expiresInHours" defaultValue="24" className={`${inputCls} w-auto cursor-pointer py-1.5`}>
+              <option value="1">1 hora</option>
+              <option value="24">24 horas</option>
+              <option value="72">3 días</option>
+              <option value="168">7 días</option>
+            </select>
+          </div>
           <button className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-soft px-4 py-1.5 text-sm font-medium text-ink-reverse transition hover:brightness-95">
             <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
             Generar link
@@ -202,14 +213,17 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
           <p className="mb-1.5 text-ink">
             Copia este link ahora — la clave de descifrado no se guarda, no podrás verla otra vez.
           </p>
-          <label htmlFor={`${idPrefix}-share-url`} className="sr-only">Link compartible</label>
-          <input
-            id={`${idPrefix}-share-url`}
-            readOnly
-            value={shareUrl}
-            className="w-full rounded-xl border border-border-soft bg-paper px-3 py-2 text-xs"
-            onFocus={(e) => e.currentTarget.select()}
-          />
+          <div className="flex items-center gap-1.5 rounded-xl border border-border-soft bg-paper pr-1.5">
+            <label htmlFor={`${idPrefix}-share-url`} className="sr-only">Link compartible</label>
+            <input
+              id={`${idPrefix}-share-url`}
+              readOnly
+              value={shareUrl}
+              className="w-full min-w-0 bg-transparent px-3 py-2 text-xs outline-none"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <CopyButton value={shareUrl} label="Copiar link" />
+          </div>
         </div>
       )}
 

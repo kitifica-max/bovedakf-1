@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KitificaCredit } from "./kitifica-credit";
 
 const columns = [
   {
@@ -49,8 +50,9 @@ export function SiteFooter() {
           </nav>
         ))}
       </div>
-      <div className="mt-8 border-t border-border-soft pt-6 text-xs text-ink-soft">
-        © {new Date().getFullYear()} Bóveda KF-1. Todos los derechos reservados.
+      <div className="mt-8 flex flex-col-reverse items-start gap-3 border-t border-border-soft pt-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} Bóveda KF-1. Todos los derechos reservados.</p>
+        <KitificaCredit />
       </div>
     </footer>
   );
