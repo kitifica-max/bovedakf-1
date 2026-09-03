@@ -143,7 +143,13 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
 
 export async function revokeShareLinkAction(vaultId: string, shareLinkId: string) {
   await requireVaultOwnership(vaultId);
-  await db.shareLink.update({ where: { id: shareLinkId }, data: { revokedAt: new Date() } });
+  // Scoped by vaultId too — an id alone isn't enough, or any authenticated
+  // owner of any vault could revoke another tenant's share link by id.
+  const { count } = await db.shareLink.updateMany({
+    where: { id: shareLinkId, credential: { vaultId } },
+    data: { revokedAt: new Date() },
+  });
+  if (count === 0) return;
   await db.auditLog.create({ data: { vaultId, shareLinkId, action: "link_revoked" } });
   revalidatePath(`/dashboard/${vaultId}`);
 }
