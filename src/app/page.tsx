@@ -27,10 +27,10 @@ const stats = [
 ];
 
 const securityBadges = [
-  { label: "AES-256", Icon: KeyRoundIcon },
-  { label: "GCM", Icon: ShieldCheckIcon },
-  { label: "E2E", Icon: ArrowLeftRightIcon },
-  { label: "2FA", Icon: FingerprintIcon },
+  { label: "AES-256", note: "El cifrado que usan bancos y gobiernos.", Icon: KeyRoundIcon },
+  { label: "GCM", note: "Avisa si alguien alteró el dato.", Icon: ShieldCheckIcon },
+  { label: "E2E", note: "La clave nunca llega a nuestro servidor.", Icon: ArrowLeftRightIcon },
+  { label: "2FA", note: "Una contraseña robada no alcanza.", Icon: FingerprintIcon },
 ];
 
 const problems = [
@@ -211,13 +211,14 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/70 to-paper/90" />
 
               <div className="relative grid grid-cols-2 gap-3">
-                {securityBadges.map(({ label, Icon }) => (
+                {securityBadges.map(({ label, note, Icon }) => (
                   <div
                     key={label}
-                    className="flex flex-col items-center gap-2 rounded-2xl border border-blue/40 bg-blue/10 px-5 py-4"
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/10 px-4 py-4 text-center"
                   >
                     <Icon aria-hidden="true" className="h-6 w-6 text-blue-soft" />
                     <span className="font-pixel text-sm text-blue-soft">{label}</span>
+                    <span className="text-[11px] leading-tight text-ink-soft">{note}</span>
                   </div>
                 ))}
               </div>
