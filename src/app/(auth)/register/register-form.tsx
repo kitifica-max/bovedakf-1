@@ -106,17 +106,17 @@ export function RegisterForm() {
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           </div>
           <div>
-            <label htmlFor="bottleneck" className="sr-only">Mayor cuello de botella digital (opcional)</label>
+            <label htmlFor="bottleneck" className="sr-only">Qué tarea digital te quita más tiempo (opcional)</label>
             <textarea
               id="bottleneck"
               name="bottleneck"
-              placeholder="¿Cuál es tu mayor cuello de botella digital? (opcional)"
+              placeholder="¿Qué tarea digital te quita más tiempo? (opcional)"
               maxLength={500}
               rows={2}
               className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
             <p className="mt-1.5 px-1 text-xs text-ink-soft">
-              Mantenemos esta herramienta gratuita construyendo web apps eficientes. Nos ayuda a saber qué simplificar después.
+              Contanos qué te gustaría simplificar. Esto nos ayuda a crear nuevas herramientas gratuitas.
             </p>
           </div>
           {error && (

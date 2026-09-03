@@ -70,6 +70,15 @@ export default async function AdminPage() {
   const answered = users.filter((u) => u.surveyAnswer).length;
   const seenSurvey = users.filter((u) => u.surveyAnswer || u.surveyDismissedAt).length;
 
+  // Radar: agrupá los cuellos de botella por rubro para ver patrones de demanda.
+  const byIndustry = new Map<string, typeof bottlenecks>();
+  for (const u of bottlenecks) {
+    const k = u.industry?.trim() || "Sin rubro";
+    if (!byIndustry.has(k)) byIndustry.set(k, []);
+    byIndustry.get(k)!.push(u);
+  }
+  const bottleneckGroups = [...byIndustry.entries()].sort((a, b) => b[1].length - a[1].length);
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex items-center justify-between gap-3 rounded-full bg-ink px-5 py-3 text-gray">
@@ -107,21 +116,31 @@ export default async function AdminPage() {
 
       <div className="rounded-2xl border border-border-soft bg-paper p-5">
         <p className="font-display text-lg font-semibold text-ink">
-          Cuellos de botella <span className="text-sm font-normal text-ink-soft">({bottlenecks.length})</span>
+          Qué tarea les quita más tiempo{" "}
+          <span className="text-sm font-normal text-ink-soft">({bottlenecks.length}) · por rubro</span>
         </p>
         {bottlenecks.length === 0 ? (
-          <p className="mt-3 text-sm text-ink-soft">Nadie escribió uno todavía.</p>
+          <p className="mt-3 text-sm text-ink-soft">Nadie escribió una todavía.</p>
         ) : (
-          <ul className="mt-3 flex flex-col gap-3 text-sm">
-            {bottlenecks.map((u) => (
-              <li key={u.email} className="border-t border-border-soft pt-3 first:border-0 first:pt-0">
-                <p className="text-ink">{u.bottleneck}</p>
-                <p className="mt-1 text-xs text-ink-soft">
-                  {u.companyName || u.email} · {u.industry ?? "sin rubro"} · {u.createdAt.toLocaleDateString()}
+          <div className="mt-3 flex flex-col gap-5">
+            {bottleneckGroups.map(([industry, rows]) => (
+              <div key={industry}>
+                <p className="text-xs font-semibold tracking-wide text-blue uppercase">
+                  {industry} · {rows.length}
                 </p>
-              </li>
+                <ul className="mt-2 flex flex-col gap-3 text-sm">
+                  {rows.map((u) => (
+                    <li key={u.email} className="border-t border-border-soft pt-3 first:border-0 first:pt-0">
+                      <p className="text-ink">{u.bottleneck}</p>
+                      <p className="mt-1 text-xs text-ink-soft">
+                        {u.companyName || u.email} · {u.createdAt.toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
 
