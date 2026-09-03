@@ -20,6 +20,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { HeroReveal } from "@/components/hero-reveal";
+import { Reveals } from "@/components/reveals";
 
 const stats = [
   { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
@@ -210,7 +211,7 @@ export default function HomePage() {
               </video>
               <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/70 to-paper/90" />
 
-              <div className="relative grid grid-cols-2 gap-3">
+              <div data-float className="relative grid grid-cols-2 gap-3">
                 {securityBadges.map(({ label, note, Icon }) => (
                   <div
                     key={label}
@@ -232,7 +233,7 @@ export default function HomePage() {
 
       {/* Problema */}
       <section aria-labelledby="problema-heading" className="w-full max-w-5xl">
-        <div className="mb-6 max-w-xl">
+        <div data-reveal className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">El problema</p>
           <h2 id="problema-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             No es la contraseña. Es dónde vive.
@@ -240,7 +241,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {problems.map((p) => (
-            <div key={p.title} className="rounded-2xl border border-border-soft bg-paper p-6">
+            <div key={p.title} data-reveal className="rounded-2xl border border-border-soft bg-paper p-6">
               <p.Icon aria-hidden="true" className="h-6 w-6 text-blue" />
               <h3 className="mt-4 font-display text-lg font-semibold text-ink">{p.title}</h3>
               <p className="mt-2 text-sm text-ink-soft">{p.body}</p>
@@ -251,7 +252,7 @@ export default function HomePage() {
 
       {/* Cómo funciona */}
       <section aria-labelledby="como-funciona-heading" className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-6 sm:p-10">
-        <div className="mb-8 max-w-xl">
+        <div data-reveal className="mb-8 max-w-xl">
           <p className="text-sm font-medium text-blue">Cómo funciona</p>
           <h2 id="como-funciona-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             Tres pasos, cero fricción
@@ -259,7 +260,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.n}>
+            <div key={s.n} data-reveal>
               <div className="flex items-center gap-2">
                 <s.Icon aria-hidden="true" className="h-5 w-5 text-blue" />
                 <p className="font-display text-sm font-semibold text-blue">{s.n}</p>
@@ -273,7 +274,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section aria-labelledby="features-heading" className="w-full max-w-5xl">
-        <div className="mb-6 max-w-xl">
+        <div data-reveal className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">Qué incluye</p>
           <h2 id="features-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
             Diseñado para que nadie tenga que confiar a ciegas
@@ -281,7 +282,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-blue/30 bg-blue/[0.08] p-6 backdrop-blur-md">
+            <div key={f.title} data-reveal className="rounded-2xl border border-blue/30 bg-blue/[0.08] p-6 backdrop-blur-md">
               <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue-soft text-blue">
                 <f.Icon className="h-4 w-4" />
               </span>
@@ -294,11 +295,11 @@ export default function HomePage() {
 
       {/* Mecanismo de seguridad */}
       <section aria-labelledby="seguridad-heading" className="glass w-full max-w-5xl rounded-2xl p-6 sm:p-10">
-        <p className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
-        <h2 id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] tracking-tight text-ink sm:text-2xl">
+        <p data-reveal className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
+        <h2 data-reveal id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] tracking-tight text-ink sm:text-2xl">
           La clave de cada link vive solo en la URL — nunca en nuestra base de datos
         </h2>
-        <p className="mt-3 max-w-2xl text-sm text-ink-soft">
+        <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
           Cuando generás un link, la clave de descifrado queda en el fragmento de la URL
           (todo lo que va después de <code className="rounded bg-paper px-1 py-0.5">#</code>).
           Los navegadores nunca envían esa parte al servidor. Nosotros guardamos el texto
@@ -309,12 +310,12 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section aria-labelledby="faq-heading" className="w-full max-w-5xl">
-        <h2 id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+        <h2 data-reveal id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
           Preguntas frecuentes
         </h2>
         <div className="flex flex-col gap-3">
           {faqs.map((f) => (
-            <details key={f.q} className="group rounded-2xl border border-border-soft bg-paper p-5 open:pb-5">
+            <details key={f.q} data-reveal className="group rounded-2xl border border-border-soft bg-paper p-5 open:pb-5">
               <summary className="cursor-pointer list-none font-display text-base font-semibold text-ink marker:hidden">
                 <span className="flex items-center justify-between gap-4">
                   {f.q}
@@ -329,13 +330,13 @@ export default function HomePage() {
 
       {/* CTA final */}
       <section className="w-full max-w-5xl rounded-2xl bg-ink p-8 text-center text-gray sm:p-14">
-        <h2 className="font-pixel text-2xl leading-[1.3] tracking-tight sm:text-3xl">
+        <h2 data-reveal className="font-pixel text-2xl leading-[1.3] tracking-tight sm:text-3xl">
           Dejá de reenviar contraseñas por chat
         </h2>
-        <p className="mx-auto mt-3 max-w-md text-gray/70">
+        <p data-reveal className="mx-auto mt-3 max-w-md text-gray/70">
           Creá tu bóveda en menos de un minuto. Sin tarjeta de crédito, hasta 20 credenciales gratis.
         </p>
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <div data-reveal className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/register"
             className="rounded-full bg-blue-soft px-6 py-3 text-sm font-medium text-ink-reverse transition hover:brightness-95"
@@ -346,6 +347,7 @@ export default function HomePage() {
       </section>
 
       <SiteFooter />
+      <Reveals />
     </main>
   );
 }
