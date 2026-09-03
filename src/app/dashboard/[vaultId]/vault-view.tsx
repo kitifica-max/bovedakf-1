@@ -310,10 +310,34 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
                     </span>
                   </span>
                   {status === "activo" && (
-                    <button className={dangerLinkBtnCls} onClick={() => revokeShareLinkAction(vaultId, l.id)}>
-                      <XCircleIcon aria-hidden="true" className="h-3.5 w-3.5" />
-                      Revocar
-                    </button>
+                    <span className="flex shrink-0 items-center gap-3">
+                      <button
+                        type="button"
+                        className={linkBtnCls}
+                        title="La clave del link original no se guarda — esto genera uno nuevo con los mismos permisos."
+                        onClick={async () => {
+                          const fd = new FormData();
+                          fd.set("credentialId", credential.id);
+                          fd.set("permission", l.permission);
+                          const hrs = Math.min(
+                            168,
+                            Math.max(1, Math.ceil((l.expiresAt.getTime() - Date.now()) / 3_600_000))
+                          );
+                          fd.set("expiresInHours", String(hrs));
+                          const result = await createShareLinkAction(vaultId, fd);
+                          if (typeof result !== "string") {
+                            setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                          }
+                        }}
+                      >
+                        <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                        Nuevo link
+                      </button>
+                      <button className={dangerLinkBtnCls} onClick={() => revokeShareLinkAction(vaultId, l.id)}>
+                        <XCircleIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                        Revocar
+                      </button>
+                    </span>
                   )}
                 </li>
               );
