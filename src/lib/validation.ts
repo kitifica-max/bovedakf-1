@@ -21,6 +21,16 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const emailSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  token: z.string().min(1),
+  password: z.string().min(10, "Mínimo 10 caracteres"),
+});
+
 export const totpCodeSchema = z.object({
   code: z.string().trim().min(6, "Código inválido").max(20),
 });

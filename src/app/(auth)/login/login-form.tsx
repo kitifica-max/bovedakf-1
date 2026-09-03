@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { signIn as passkeySignIn } from "next-auth/webauthn";
@@ -200,9 +201,10 @@ export function LoginForm() {
           </>
         )}
 
-        <a href="/register" className="mt-5 block text-center text-sm text-ink-soft underline">
-          Crear una bóveda nueva
-        </a>
+        <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
+          <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
+          <Link href="/register" className="underline">Crear una bóveda nueva</Link>
+        </div>
       </div>
   );
 }

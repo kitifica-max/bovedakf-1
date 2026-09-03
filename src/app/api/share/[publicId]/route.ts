@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp, maybePurgeOldAuditLogs } from "@/lib/audit";
+import { sendEmail, linkOpenedEmail } from "@/lib/email";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 // Carries a live (encrypted) secret — never let a proxy, CDN, or the browser
 // cache the response.
@@ -22,7 +25,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
 
   const link = await db.shareLink.findUnique({
     where: { publicId },
-    include: { credential: { select: { vaultId: true, service: true } } },
+    include: {
+      credential: {
+        select: {
+          vaultId: true,
+          service: true,
+          vault: { select: { owner: { select: { email: true } } } },
+        },
+      },
+    },
   });
 
   if (!link || link.revokedAt || link.expiresAt < new Date()) {
@@ -39,6 +50,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
     return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
   }
 
+  // First view? Tell the owner (once — later views are in the audit log only).
+  const priorView = await db.auditLog.findFirst({
+    where: { shareLinkId: link.id, action: "link_viewed" },
+    select: { id: true },
+  });
+
   await db.auditLog.create({
     data: {
       shareLinkId: link.id,
@@ -49,6 +66,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
       userAgent: req.headers.get("user-agent") ?? undefined,
     },
   });
+
+  if (!priorView) {
+    const ownerEmail = link.credential.vault.owner.email;
+    const { subject, html } = linkOpenedEmail(link.credential.service, APP_URL);
+    await sendEmail(ownerEmail, subject, html);
+  }
 
   await maybePurgeOldAuditLogs();
 

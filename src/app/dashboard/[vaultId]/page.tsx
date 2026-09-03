@@ -31,7 +31,7 @@ export default async function VaultPage({
     }),
     db.user.findUnique({
       where: { id: vault.ownerId },
-      select: { surveyDismissedAt: true, totpEnabled: true },
+      select: { surveyDismissedAt: true, totpEnabled: true, emailVerified: true },
     }),
     db.authenticator.findMany({
       where: { userId: vault.ownerId },
@@ -46,6 +46,7 @@ export default async function VaultPage({
       auditLogs={auditLogs}
       showSurvey={!owner?.surveyDismissedAt}
       totpEnabled={owner?.totpEnabled ?? false}
+      emailVerified={owner?.emailVerified != null}
       passkeys={passkeys}
     />
   );
