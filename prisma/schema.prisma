@@ -34,6 +34,8 @@ model User {
   passwordSalt String
   createdAt    DateTime @default(now())
   vaults       Vault[]
+  memberships  VaultMember[]
+  sentInvites  VaultInvite[]
   // Fields below exist only to satisfy @auth/prisma-adapter's expected User
   // shape (Passkey/WebAuthn login). Unused elsewhere in the app.
   name          String?
@@ -106,6 +108,8 @@ model Vault {
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   credentials Credential[]
+  members     VaultMember[]
+  invites     VaultInvite[]
   createdAt   DateTime     @default(now())
 }
 
@@ -126,6 +130,44 @@ model Credential {
 enum LinkPermission {
   READ
   DOWNLOAD
+}
+
+enum VaultRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+// Accepted membership. The vault owner also gets an OWNER row here (created
+// alongside the vault) so "which vaults can I open" is a single query.
+model VaultMember {
+  id        String    @id @default(cuid())
+  vaultId   String
+  vault     Vault     @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      VaultRole @default(VIEWER)
+  createdAt DateTime  @default(now())
+
+  @@unique([vaultId, userId])
+}
+
+// Pending invite. `token` goes in the /invite/<token> URL. Deleted-by-cascade
+// with the vault; kept after acceptance (acceptedAt set) for the audit trail.
+model VaultInvite {
+  id          String    @id @default(cuid())
+  vaultId     String
+  vault       Vault     @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  email       String
+  role        VaultRole @default(VIEWER)
+  token       String    @unique
+  invitedById String
+  invitedBy   User      @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([email])
 }
 
 model ShareLink {
@@ -152,6 +194,9 @@ model AuditLog {
   shareLink   ShareLink? @relation(fields: [shareLinkId], references: [id], onDelete: SetNull)
   vaultId     String?
   action      String
+  // Email of the signed-in team member who caused the event (create/revoke
+  // share link, view credential). Null for anonymous share-link recipients.
+  actorEmail  String?
   // Snapshot of the credential's service name at the time of the event —
   // not a live join, so the row still names the credential even after the
   // share link is revoked/expired or the credential itself is deleted.
