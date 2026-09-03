@@ -6,6 +6,7 @@ export const registerSchema = z.object({
   companyName: z.string().trim().min(1, "Nombre de empresa requerido").max(120),
   industry: z.string().trim().min(1, "Elegí un rubro").max(80),
   bottleneck: z.string().trim().max(500).optional().or(z.literal("")),
+  currentSolution: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
 export const updateCompanyNameSchema = z.object({
@@ -13,7 +14,7 @@ export const updateCompanyNameSchema = z.object({
 });
 
 export const dashboardSurveySchema = z.object({
-  answer: z.string().trim().min(1).max(120),
+  answer: z.string().trim().min(1).max(500),
 });
 
 export const loginSchema = z.object({

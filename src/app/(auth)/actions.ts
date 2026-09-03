@@ -30,6 +30,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
     companyName: formData.get("companyName"),
     industry: formData.get("industry"),
     bottleneck: formData.get("bottleneck"),
+    currentSolution: formData.get("currentSolution"),
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -37,7 +38,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
     return "Demasiados intentos. Esperá un minuto e intentá de nuevo.";
   }
 
-  const { email, password, companyName, industry, bottleneck } = parsed.data;
+  const { email, password, companyName, industry, bottleneck, currentSolution } = parsed.data;
 
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
@@ -55,6 +56,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
       companyName,
       industry,
       bottleneck: bottleneck || null,
+      currentSolution: currentSolution || null,
       passwordHash: hash,
       passwordSalt: salt,
     },

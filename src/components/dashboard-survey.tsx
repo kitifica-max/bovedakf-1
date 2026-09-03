@@ -4,27 +4,23 @@ import { useState } from "react";
 import { dismissSurveyAction, submitSurveyAnswerAction } from "@/app/dashboard/actions";
 import { XCircleIcon } from "@/components/icons";
 
-const OPTIONS = [
-  "Roles y permisos por equipo",
-  "Integración con Slack",
-  "Rotación automática de contraseñas",
-  "Autenticación de dos factores (2FA)",
-];
-
 export function DashboardSurvey() {
   const [visible, setVisible] = useState(true);
-  const [pending, setPending] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const [answered, setAnswered] = useState(false);
 
   if (!visible) return null;
 
-  async function choose(option: string) {
-    setPending(option);
-    const formData = new FormData();
-    formData.set("answer", option);
-    await submitSurveyAnswerAction(formData);
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const text = new FormData(e.currentTarget).get("answer");
+    if (typeof text !== "string" || !text.trim()) return;
+    setPending(true);
+    const fd = new FormData();
+    fd.set("answer", text.trim().slice(0, 500));
+    await submitSurveyAnswerAction(fd);
     setAnswered(true);
-    setTimeout(() => setVisible(false), 1400);
+    setTimeout(() => setVisible(false), 1600);
   }
 
   return (
@@ -44,26 +40,31 @@ export function DashboardSurvey() {
       {answered ? (
         <p className="pr-6 text-ink">Gracias — lo tenemos anotado.</p>
       ) : (
-        <>
-          <p className="pr-6 font-medium text-ink">¿Qué te gustaría que resolviéramos después?</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                disabled={pending !== null}
-                onClick={() => choose(option)}
-                className="cursor-pointer rounded-full border border-border-soft bg-paper px-3 py-1.5 text-xs text-ink-soft transition hover:border-blue hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {option}
-              </button>
-            ))}
+        <form onSubmit={submit}>
+          <label htmlFor="survey-answer" className="block pr-6 font-medium text-ink">
+            ¿Qué otra tarea de tu equipo te gustaría automatizar?
+          </label>
+          <textarea
+            id="survey-answer"
+            name="answer"
+            rows={2}
+            maxLength={500}
+            placeholder="Ej. dar seguimiento a prospectos, armar cotizaciones, cobrar…"
+            className="mt-2 w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-3 py-2 text-base sm:text-sm outline-none transition focus:border-blue"
+          />
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="text-xs text-ink-soft">
+              Con esto decidimos qué herramienta gratuita construir después.
+            </p>
+            <button
+              type="submit"
+              disabled={pending}
+              className="shrink-0 cursor-pointer rounded-full bg-ink px-4 py-1.5 text-xs font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {pending ? "..." : "Enviar"}
+            </button>
           </div>
-          <p className="mt-3 text-xs text-ink-soft">
-            Mantenemos esta herramienta gratuita construyendo web apps eficientes para nuestros clientes —
-            contanos qué proceso de tu empresa necesita simplificarse.
-          </p>
-        </>
+        </form>
       )}
     </div>
   );

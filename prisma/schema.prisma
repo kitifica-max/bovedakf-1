@@ -13,9 +13,12 @@ model User {
   email        String   @unique
   companyName  String?
   // Captured at signup — lightweight profiling, not required to use the product.
-  industry     String?
-  bottleneck   String?
+  // "Product radar": which task costs them time, and how they solve it today.
+  industry        String?
+  bottleneck      String?
+  currentSolution String?
   // In-app micro-survey shown once on the dashboard (answered or dismissed, whichever first).
+  // Free text: another team task they'd want automated.
   surveyAnswer      String?
   surveyDismissedAt DateTime?
   // TOTP 2FA. totpSecret is AES-256-GCM encrypted at rest (encryptAtRest),

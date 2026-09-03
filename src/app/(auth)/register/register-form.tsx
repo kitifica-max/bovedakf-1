@@ -105,7 +105,7 @@ export function RegisterForm() {
             </select>
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           </div>
-          <div>
+          <div className="flex flex-col gap-2">
             <label htmlFor="bottleneck" className="sr-only">Qué tarea digital te quita más tiempo (opcional)</label>
             <textarea
               id="bottleneck"
@@ -115,7 +115,16 @@ export function RegisterForm() {
               rows={2}
               className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
-            <p className="mt-1.5 px-1 text-xs text-ink-soft">
+            <label htmlFor="currentSolution" className="sr-only">Cómo lo resolvés hoy (opcional)</label>
+            <textarea
+              id="currentSolution"
+              name="currentSolution"
+              placeholder="¿Cómo lo resolvés hoy? (opcional)"
+              maxLength={500}
+              rows={2}
+              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+            />
+            <p className="mt-0.5 px-1 text-xs text-ink-soft">
               Contanos qué te gustaría simplificar. Esto nos ayuda a crear nuevas herramientas gratuitas.
             </p>
           </div>

@@ -46,6 +46,73 @@ function TallyCard({ title, rows, total }: { title: string; rows: [string, numbe
   );
 }
 
+type Row = {
+  email: string;
+  companyName: string | null;
+  industry: string | null;
+  bottleneck: string | null;
+  currentSolution: string | null;
+  surveyAnswer: string | null;
+  createdAt: Date;
+};
+
+// A free-text answer list grouped by industry and ordered by volume — the
+// point is spotting demand patterns ("17% de marketing menciona X").
+function RadarSection({
+  title,
+  users,
+  pick,
+  secondary,
+}: {
+  title: string;
+  users: Row[];
+  pick: (u: Row) => string | null;
+  secondary?: (u: Row) => string | null;
+}) {
+  const rows = users.filter((u) => pick(u)?.trim());
+  const groups = new Map<string, Row[]>();
+  for (const u of rows) {
+    const k = u.industry?.trim() || "Sin rubro";
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(u);
+  }
+  const sorted = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+
+  return (
+    <div className="rounded-2xl border border-border-soft bg-paper p-5">
+      <p className="font-display text-lg font-semibold text-ink">
+        {title} <span className="text-sm font-normal text-ink-soft">({rows.length}) · por rubro</span>
+      </p>
+      {rows.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-soft">Nadie escribió una todavía.</p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-5">
+          {sorted.map(([industry, gr]) => (
+            <div key={industry}>
+              <p className="text-xs font-semibold tracking-wide text-blue uppercase">
+                {industry} · {gr.length}
+              </p>
+              <ul className="mt-2 flex flex-col gap-3 text-sm">
+                {gr.map((u) => (
+                  <li key={u.email} className="border-t border-border-soft pt-3 first:border-0 first:pt-0">
+                    <p className="text-ink">{pick(u)}</p>
+                    {secondary?.(u)?.trim() ? (
+                      <p className="mt-0.5 text-xs text-ink-soft">Hoy lo resuelve con: {secondary(u)}</p>
+                    ) : null}
+                    <p className="mt-1 text-xs text-ink-soft">
+                      {u.companyName || u.email} · {u.createdAt.toLocaleDateString()}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default async function AdminPage() {
   const session = await auth();
   if (!session?.user) redirect("/login?from=/admin");
@@ -58,6 +125,7 @@ export default async function AdminPage() {
       companyName: true,
       industry: true,
       bottleneck: true,
+      currentSolution: true,
       surveyAnswer: true,
       surveyDismissedAt: true,
       createdAt: true,
@@ -65,19 +133,8 @@ export default async function AdminPage() {
   });
 
   const industries = tally(users.map((u) => u.industry));
-  const answers = tally(users.map((u) => u.surveyAnswer));
-  const bottlenecks = users.filter((u) => u.bottleneck?.trim());
   const answered = users.filter((u) => u.surveyAnswer).length;
   const seenSurvey = users.filter((u) => u.surveyAnswer || u.surveyDismissedAt).length;
-
-  // Radar: agrupá los cuellos de botella por rubro para ver patrones de demanda.
-  const byIndustry = new Map<string, typeof bottlenecks>();
-  for (const u of bottlenecks) {
-    const k = u.industry?.trim() || "Sin rubro";
-    if (!byIndustry.has(k)) byIndustry.set(k, []);
-    byIndustry.get(k)!.push(u);
-  }
-  const bottleneckGroups = [...byIndustry.entries()].sort((a, b) => b[1].length - a[1].length);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
@@ -105,44 +162,20 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <TallyCard title="Rubro de la empresa" rows={industries} total={users.length || 1} />
-        <TallyCard
-          title="¿Qué resolver después?"
-          rows={answers}
-          total={answered || 1}
-        />
-      </div>
+      <TallyCard title="Rubro de la empresa" rows={industries} total={users.length || 1} />
 
-      <div className="rounded-2xl border border-border-soft bg-paper p-5">
-        <p className="font-display text-lg font-semibold text-ink">
-          Qué tarea les quita más tiempo{" "}
-          <span className="text-sm font-normal text-ink-soft">({bottlenecks.length}) · por rubro</span>
-        </p>
-        {bottlenecks.length === 0 ? (
-          <p className="mt-3 text-sm text-ink-soft">Nadie escribió una todavía.</p>
-        ) : (
-          <div className="mt-3 flex flex-col gap-5">
-            {bottleneckGroups.map(([industry, rows]) => (
-              <div key={industry}>
-                <p className="text-xs font-semibold tracking-wide text-blue uppercase">
-                  {industry} · {rows.length}
-                </p>
-                <ul className="mt-2 flex flex-col gap-3 text-sm">
-                  {rows.map((u) => (
-                    <li key={u.email} className="border-t border-border-soft pt-3 first:border-0 first:pt-0">
-                      <p className="text-ink">{u.bottleneck}</p>
-                      <p className="mt-1 text-xs text-ink-soft">
-                        {u.companyName || u.email} · {u.createdAt.toLocaleDateString()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <RadarSection
+        title="Qué tarea les quita más tiempo"
+        users={users}
+        pick={(u) => u.bottleneck}
+        secondary={(u) => u.currentSolution}
+      />
+
+      <RadarSection
+        title="Otra tarea que automatizarían"
+        users={users}
+        pick={(u) => u.surveyAnswer}
+      />
 
       <div className="rounded-2xl border border-border-soft bg-paper p-5">
         <p className="font-display text-lg font-semibold text-ink">
