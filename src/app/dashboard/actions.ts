@@ -6,7 +6,7 @@ import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { inviteEmail, sendEmail } from "@/lib/email";
-import { inviteSchema } from "@/lib/team-validation";
+import { inviteSchema, ROLE_LABEL } from "@/lib/team-validation";
 import {
   decryptAtRest,
   encryptAtRest,
@@ -288,12 +288,6 @@ export async function removePasskeyAction(credentialID: string) {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
-export const ROLE_LABEL: Record<"OWNER" | "EDITOR" | "VIEWER", string> = {
-  OWNER: "Dueño",
-  EDITOR: "Editor",
-  VIEWER: "Lector",
-};
 
 export async function inviteMemberAction(vaultId: string, formData: FormData): Promise<string | null> {
   const { userId, email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
