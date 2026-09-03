@@ -23,7 +23,7 @@ export default async function VaultPage({
 
   if (!vault || vault.ownerId !== session?.user.id) notFound();
 
-  const [auditLogs, owner] = await Promise.all([
+  const [auditLogs, owner, passkeys] = await Promise.all([
     db.auditLog.findMany({
       where: { vaultId },
       orderBy: { createdAt: "desc" },
@@ -33,6 +33,11 @@ export default async function VaultPage({
       where: { id: vault.ownerId },
       select: { surveyDismissedAt: true, totpEnabled: true },
     }),
+    db.authenticator.findMany({
+      where: { userId: vault.ownerId },
+      orderBy: { createdAt: "desc" },
+      select: { credentialID: true, credentialDeviceType: true, createdAt: true },
+    }),
   ]);
 
   return (
@@ -41,6 +46,7 @@ export default async function VaultPage({
       auditLogs={auditLogs}
       showSurvey={!owner?.surveyDismissedAt}
       totpEnabled={owner?.totpEnabled ?? false}
+      passkeys={passkeys}
     />
   );
 }

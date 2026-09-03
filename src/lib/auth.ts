@@ -1,5 +1,7 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
+import Passkey from "next-auth/providers/passkey";
 import { db } from "@/lib/db";
 import { decryptAtRest, verifyPassword } from "@/lib/crypto";
 import { matchBackupCode, verifyTotp, type BackupCode } from "@/lib/totp";
@@ -9,10 +11,16 @@ class TotpRequiredSignin extends CredentialsSignin {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Only used to back the Passkey/WebAuthn provider (register + list
+  // credentials). Sessions stay JWT — the adapter's session/verification
+  // token methods are never called.
+  adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   trustHost: true,
+  experimental: { enableWebAuthn: true },
   providers: [
+    Passkey,
     Credentials({
       credentials: { email: {}, password: {}, totpCode: {} },
       authorize: async (creds) => {

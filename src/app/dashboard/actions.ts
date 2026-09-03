@@ -249,3 +249,21 @@ export async function disableTotpAction(formData: FormData) {
   revalidatePath("/dashboard", "layout");
   return null;
 }
+
+// ── Passkeys (WebAuthn) ──────────────────────────────────────────────────
+// Registration/authentication ceremonies are handled by NextAuth's Passkey
+// provider (see src/lib/auth.ts) — this is just list/remove for the
+// settings panel.
+
+export async function removePasskeyAction(credentialID: string) {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const { count } = await db.authenticator.deleteMany({
+    where: { credentialID, userId: session.user.id },
+  });
+  if (count === 0) return "Passkey no encontrada.";
+
+  revalidatePath("/dashboard", "layout");
+  return null;
+}

@@ -4,6 +4,7 @@ import { auth, signOut } from "@/lib/auth";
 import { LogOutIcon } from "@/components/icons";
 import { KitificaCredit } from "@/components/kitifica-credit";
 import { CompanyNameEditor } from "@/components/company-name-editor";
+import { IdleSessionGuard } from "@/components/idle-session-guard";
 
 export const metadata: Metadata = {
   title: "Mi bóveda",
@@ -16,6 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen flex-col p-4 sm:p-6">
+      <IdleSessionGuard />
       <header className="mx-auto flex w-full max-w-3xl items-center justify-between rounded-full bg-ink px-5 py-3 text-gray">
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />

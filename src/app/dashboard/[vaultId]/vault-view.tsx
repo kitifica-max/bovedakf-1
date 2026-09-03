@@ -13,6 +13,7 @@ import { ChevronDownIcon, EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldChec
 import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
+import { PasskeySettings } from "@/components/passkey-settings";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
@@ -29,11 +30,13 @@ export function VaultView({
   auditLogs,
   showSurvey,
   totpEnabled,
+  passkeys,
 }: {
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
   showSurvey: boolean;
   totpEnabled: boolean;
+  passkeys: { credentialID: string; credentialDeviceType: string; createdAt: Date }[];
 }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -55,6 +58,7 @@ export function VaultView({
           </p>
         )}
       </ul>
+      <PasskeySettings initialPasskeys={passkeys} />
       <TwoFactorSettings initialEnabled={totpEnabled} />
       <AuditLogTable logs={auditLogs} />
     </div>

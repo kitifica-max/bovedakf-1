@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { signIn as passkeySignIn } from "next-auth/webauthn";
 import { checkPasswordAction } from "../actions";
+import { FingerprintIcon } from "@/components/icons";
 
 export function LoginForm() {
   const router = useRouter();
@@ -11,6 +13,23 @@ export function LoginForm() {
   const [pending, setPending] = useState(false);
   const [step, setStep] = useState<"password" | "totp">("password");
   const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
+
+  async function onPasskeyLogin() {
+    setPending(true);
+    setError(null);
+    try {
+      const result = await passkeySignIn("passkey", { redirect: false });
+      if (result?.error) {
+        setPending(false);
+        setError("No se pudo verificar la passkey.");
+        return;
+      }
+      router.push("/dashboard");
+    } catch {
+      setPending(false);
+      setError("Tu navegador no soporta passkeys, o cancelaste la solicitud.");
+    }
+  }
 
   async function onSubmitPassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -152,6 +171,22 @@ export function LoginForm() {
             {pending ? "Entrando..." : "Entrar"}
           </button>
         </form>
+
+        <div className="mt-4 flex items-center gap-3 text-xs text-ink-soft">
+          <span className="h-px flex-1 bg-border-soft" />
+          o
+          <span className="h-px flex-1 bg-border-soft" />
+        </div>
+        <button
+          type="button"
+          onClick={onPasskeyLogin}
+          disabled={pending}
+          className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-border-soft px-4 py-3 text-sm font-medium text-ink transition hover:bg-paper disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <FingerprintIcon aria-hidden="true" className="h-4 w-4" />
+          Entrar con Passkey
+        </button>
+
         <a href="/register" className="mt-5 block text-center text-sm text-ink-soft underline">
           Crear una bóveda nueva
         </a>
