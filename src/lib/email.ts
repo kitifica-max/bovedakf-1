@@ -62,8 +62,8 @@ function shell(opts: {
       <!--[if mso]><table role="presentation" width="480" align="center" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;">
         <tr><td style="padding:0 4px 20px;">
-          <span style="font-family:'Arial Black','Arial Bold',Arial,Helvetica,sans-serif;font-weight:800;font-size:18px;letter-spacing:1px;color:#edf0f4;">BÓVEDA</span>
-          <span style="font-family:'Arial Black','Arial Bold',Arial,Helvetica,sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;color:#ffffff;background:#1d5f8f;padding:3px 8px;border-radius:6px;margin-left:6px;">KF-1</span>
+          <img src="${APP_URL}/logo-email.png" width="150" height="21" alt="Bóveda KF-1"
+               style="display:block;border:0;outline:none;text-decoration:none;width:150px;height:21px;font-family:'Arial Black',Arial,Helvetica,sans-serif;font-weight:800;font-size:16px;color:#edf0f4;">
         </td></tr>
         <tr><td style="background:#212631;border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:32px;">
           <h1 style="margin:0 0 16px;font-family:'Archivo',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#edf0f4;">${esc(heading)}</h1>
