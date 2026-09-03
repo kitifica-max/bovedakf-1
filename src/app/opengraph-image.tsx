@@ -4,6 +4,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const alt = "Bóveda KF-1 — comparte credenciales sin dejarlas en el chat";
 
 export default function OpengraphImage() {
   const logoSvg = readFileSync(join(process.cwd(), "public/logo-on-dark.svg"), "utf-8");
@@ -17,31 +18,48 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "flex-start",
           justifyContent: "center",
-          padding: 90,
+          padding: "76px 88px",
           background: "#0a1f33",
           backgroundImage:
-            "radial-gradient(720px circle at 88% 12%, rgba(29,95,143,0.45), transparent 60%)",
+            "radial-gradient(760px circle at 86% 14%, rgba(29,95,143,0.5), transparent 60%)",
           fontFamily: "sans-serif",
         }}
       >
-        <img src={logoDataUri} width={520} height={74} alt="" />
-        <div style={{ display: "flex", fontSize: 34, color: "#e0e4eb", marginTop: 36, maxWidth: 920, lineHeight: 1.4 }}>
-          Credenciales de equipo encriptadas, compartidas con links que expiran solos.
+        <img src={logoDataUri} width={360} height={51} alt="" />
+
+        <div
+          style={{
+            display: "flex",
+            fontSize: 62,
+            fontWeight: 700,
+            color: "#f2f5f8",
+            marginTop: 40,
+            maxWidth: 1010,
+            lineHeight: 1.14,
+            letterSpacing: -1,
+          }}
+        >
+          ¿Todavía compartes contraseñas por chat?
         </div>
+
+        <div style={{ display: "flex", fontSize: 33, color: "#9fbdd2", marginTop: 26 }}>
+          Credenciales cifradas. Links que expiran.
+        </div>
+
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 12,
-            marginTop: 48,
-            fontSize: 24,
-            color: "#7fa8c2",
+            gap: 14,
+            marginTop: 42,
+            fontSize: 22,
+            color: "#6f97b0",
+            letterSpacing: 1,
           }}
         >
-          <div style={{ display: "flex", width: 10, height: 10, borderRadius: 999, background: "#7fa8c2" }} />
-          Encriptación AES-256-GCM · Zero-knowledge
+          <div style={{ display: "flex", width: 9, height: 9, borderRadius: 999, background: "#6f97b0" }} />
+          E2E · Expiración · Auditoría
         </div>
       </div>
     ),

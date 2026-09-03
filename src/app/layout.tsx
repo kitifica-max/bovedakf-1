@@ -32,6 +32,11 @@ const title = "Bóveda KF-1 — Gestor de credenciales compartidas seguro";
 const description =
   "Guarda credenciales de equipo encriptadas y compártelas con links que expiran solos. Auditoría completa de accesos, sin spreadsheets ni contraseñas por chat.";
 
+// Social preview leads with the problem, not the product description.
+const ogTitle = "Bóveda KF-1 — Comparte credenciales sin dejarlas en el chat";
+const ogDescription =
+  "Guarda accesos de equipo y compártelos con links que expiran solos. Cifrado E2E y auditoría completa de accesos.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: title, template: "%s · Bóveda KF-1" },
@@ -67,13 +72,13 @@ export const metadata: Metadata = {
     locale: "es_ES",
     url: siteUrl,
     siteName: "Bóveda KF-1",
-    title,
-    description,
+    title: ogTitle,
+    description: ogDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title,
-    description,
+    title: ogTitle,
+    description: ogDescription,
   },
 };
 
