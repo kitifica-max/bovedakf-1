@@ -149,7 +149,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   });
 
   await db.auditLog.create({
-    data: { vaultId, action: "link_created", shareLinkId: created.id },
+    data: { vaultId, action: "link_created", shareLinkId: created.id, credentialService: credential.service },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
@@ -166,7 +166,13 @@ export async function revokeShareLinkAction(vaultId: string, shareLinkId: string
     data: { revokedAt: new Date() },
   });
   if (count === 0) return;
-  await db.auditLog.create({ data: { vaultId, shareLinkId, action: "link_revoked" } });
+  const link = await db.shareLink.findUnique({
+    where: { id: shareLinkId },
+    select: { credential: { select: { service: true } } },
+  });
+  await db.auditLog.create({
+    data: { vaultId, shareLinkId, action: "link_revoked", credentialService: link?.credential.service },
+  });
   revalidatePath(`/dashboard/${vaultId}`);
 }
 

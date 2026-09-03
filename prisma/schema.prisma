@@ -149,6 +149,10 @@ model AuditLog {
   shareLink   ShareLink? @relation(fields: [shareLinkId], references: [id], onDelete: SetNull)
   vaultId     String?
   action      String
+  // Snapshot of the credential's service name at the time of the event —
+  // not a live join, so the row still names the credential even after the
+  // share link is revoked/expired or the credential itself is deleted.
+  credentialService String?
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime   @default(now())

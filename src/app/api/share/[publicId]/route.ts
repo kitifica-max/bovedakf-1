@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
 
   const link = await db.shareLink.findUnique({
     where: { publicId },
-    include: { credential: { select: { vaultId: true } } },
+    include: { credential: { select: { vaultId: true, service: true } } },
   });
 
   if (!link || link.revokedAt || link.expiresAt < new Date()) {
@@ -22,6 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
         shareLinkId: link?.id,
         vaultId: link?.credential.vaultId,
         action: link ? "link_denied_expired_or_revoked" : "link_denied_not_found",
+        credentialService: link?.credential.service,
         ipAddress: ip,
         userAgent: req.headers.get("user-agent") ?? undefined,
       },
@@ -34,6 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
       shareLinkId: link.id,
       vaultId: link.credential.vaultId,
       action: "link_viewed",
+      credentialService: link.credential.service,
       ipAddress: ip,
       userAgent: req.headers.get("user-agent") ?? undefined,
     },

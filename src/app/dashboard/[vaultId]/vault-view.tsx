@@ -321,6 +321,14 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
   );
 }
 
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  link_created: "Link creado",
+  link_viewed: "Link visto",
+  link_revoked: "Link revocado",
+  link_denied_expired_or_revoked: "Acceso denegado (expirado o revocado)",
+  link_denied_not_found: "Acceso denegado (link inexistente)",
+};
+
 function AuditLogTable({ logs }: { logs: AuditLog[] }) {
   return (
     <div className="rounded-2xl border border-border-soft bg-paper p-5">
@@ -331,21 +339,28 @@ function AuditLogTable({ logs }: { logs: AuditLog[] }) {
           <thead>
             <tr className="border-b border-border-soft text-ink-soft">
               <th scope="col" className="py-1.5 pr-4 font-medium">Cuándo</th>
+              <th scope="col" className="py-1.5 pr-4 font-medium">Credencial</th>
               <th scope="col" className="py-1.5 pr-4 font-medium">Acción</th>
               <th scope="col" className="py-1.5 pr-4 font-medium">IP</th>
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => (
-              <tr key={log.id} className="border-b border-border-soft last:border-0">
-                <td className="py-1.5 pr-4 text-ink-soft">{log.createdAt.toLocaleString()}</td>
-                <td className="py-1.5 pr-4">{log.action}</td>
-                <td className="py-1.5 pr-4 text-ink-soft">{log.ipAddress ?? "—"}</td>
-              </tr>
-            ))}
+            {logs.map((log) => {
+              const denied = log.action.startsWith("link_denied");
+              return (
+                <tr key={log.id} className="border-b border-border-soft last:border-0">
+                  <td className="py-1.5 pr-4 text-ink-soft">{log.createdAt.toLocaleString()}</td>
+                  <td className="py-1.5 pr-4 font-medium text-ink">{log.credentialService ?? "—"}</td>
+                  <td className={`py-1.5 pr-4 ${denied ? "text-danger" : ""}`}>
+                    {AUDIT_ACTION_LABELS[log.action] ?? log.action}
+                  </td>
+                  <td className="py-1.5 pr-4 text-ink-soft">{log.ipAddress ?? "—"}</td>
+                </tr>
+              );
+            })}
             {logs.length === 0 && (
               <tr>
-                <td className="py-2 text-ink-soft" colSpan={3}>
+                <td className="py-2 text-ink-soft" colSpan={4}>
                   Sin actividad todavía.
                 </td>
               </tr>
