@@ -154,3 +154,18 @@ export function linkOpenedEmail(service: string, appUrl: string) {
     }),
   };
 }
+
+export function inviteEmail(link: string, vaultName: string, inviterName: string, roleLabel: string) {
+  return {
+    subject: `${inviterName} te invitó a una bóveda en KF-1`,
+    html: shell({
+      preview: `Te sumaron a "${vaultName}" como ${roleLabel}.`,
+      heading: "Te invitaron a una bóveda",
+      bodyHtml: `<p style='margin:0 0 12px;'><strong>${esc(inviterName)}</strong> te sumó a la bóveda <strong>${esc(
+        vaultName
+      )}</strong> como <strong>${esc(roleLabel)}</strong>. Aceptá para ver las credenciales compartidas del equipo.</p>`,
+      cta: { label: "Aceptar invitación", href: link },
+      footnote: "Si no esperabas esto, ignorá el mensaje. El enlace vence en 7 días.",
+    }),
+  };
+}
