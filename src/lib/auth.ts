@@ -20,7 +20,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   experimental: { enableWebAuthn: true },
   providers: [
-    Passkey,
+    Passkey({
+      // Netlify's Next.js runtime hands @auth/core a Request whose own URL
+      // doesn't reflect the public host (it resolves to the deploy's
+      // internal *.netlify.app permalink even behind a custom domain),
+      // which would make the passkey's relying-party ID mismatch the page
+      // origin and fail every ceremony. x-forwarded-host carries the real,
+      // browser-visible host correctly, so read it directly instead of
+      // trusting the framework's own URL detection for this one thing.
+      getRelayingParty(_options, request) {
+        const headers = (request.headers ?? {}) as Record<string, string>;
+        const host = headers["x-forwarded-host"] ?? headers["host"] ?? "localhost:3000";
+        const proto = headers["x-forwarded-proto"] ?? "https";
+        return { id: host.split(":")[0], name: "Bóveda KF-1", origin: `${proto}://${host}` };
+      },
+    }),
     Credentials({
       credentials: { email: {}, password: {}, totpCode: {} },
       authorize: async (creds) => {
