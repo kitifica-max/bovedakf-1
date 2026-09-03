@@ -210,20 +210,15 @@ export default function HomePage() {
               </video>
               <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/70 to-paper/90" />
 
-              <div className="relative grid h-28 w-28 place-items-center rounded-full bg-blue-soft/10 ring-1 ring-blue/30">
-                <div className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-blue-soft/20 ring-1 ring-blue/40">
-                  <LockIcon aria-hidden="true" className="h-8 w-8 text-blue-soft" />
-                </div>
-              </div>
-              <div className="relative flex flex-wrap items-center justify-center gap-2">
+              <div className="relative grid grid-cols-2 gap-3">
                 {securityBadges.map(({ label, Icon }) => (
-                  <span
+                  <div
                     key={label}
-                    className="font-pixel flex items-center gap-1.5 rounded-full border border-blue/40 bg-blue/10 px-2.5 py-1 text-[10px] text-blue-soft"
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-blue/40 bg-blue/10 px-5 py-4"
                   >
-                    <Icon aria-hidden="true" className="h-3 w-3" />
-                    {label}
-                  </span>
+                    <Icon aria-hidden="true" className="h-6 w-6 text-blue-soft" />
+                    <span className="font-pixel text-sm text-blue-soft">{label}</span>
+                  </div>
                 ))}
               </div>
               <p className="relative max-w-[15rem] text-sm text-ink-soft">
