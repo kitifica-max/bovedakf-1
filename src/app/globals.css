@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark-first neutral scale. */
+  --color-gray: #0a0e15;
+  --color-gray-deep: #373f4e;
+  --color-paper: #212631;
+  --color-ink: #ffffff;
+  --color-ink-soft: #e0e4eb;
+  --color-ink-reverse: #0a0e15;
+  /* Accent — kept as-is, unchanged from the light theme. */
+  --color-blue: #1d5f8f;
+  --color-blue-soft: #cfe6ee;
+  --color-danger: #f87171;
+  --color-border: rgba(255, 255, 255, 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-gray: var(--color-gray);
+  --color-gray-deep: var(--color-gray-deep);
+  --color-paper: var(--color-paper);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-reverse: var(--color-ink-reverse);
+  --color-blue: var(--color-blue);
+  --color-blue-soft: var(--color-blue-soft);
+  --color-danger: var(--color-danger);
+  --color-border-soft: var(--color-border);
+  --font-display: var(--font-archivo);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-gray);
+  color: var(--color-ink);
+  font-family: var(--font-sans), ui-sans-serif, sans-serif;
+  position: relative;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Ambient glow, fixed behind everything — gives the glass cards something
+   to actually catch light from, instead of blurring flat gray. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(640px circle at 12% 8%, rgb(29 95 143 / 0.28), transparent 60%),
+    radial-gradient(520px circle at 88% 65%, rgb(29 95 143 / 0.16), transparent 60%);
+  pointer-events: none;
+}
+
+/* Glassmorphism — used sparingly, on a handful of cards, not the whole site. */
+.glass {
+  background: rgb(33 38 49 / 0.55);
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgb(255 255 255 / 0.14);
+}
+
+/* Technical facts (ciphers, hashes, keys) read as monospace — a small,
+   deliberate signal of precision that fits a security product. */
+code,
+kbd {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+::selection {
+  background: var(--color-blue-soft);
+  color: var(--color-ink-reverse);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "Bóveda KF-1",
+  "short_name": "Bóveda KF-1",
+  "description": "Gestor de credenciales compartidas seguro para equipos",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111827",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
