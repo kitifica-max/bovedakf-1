@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { InstallPrompt } from "@/components/install-prompt";
 
 const bodySans = IBM_Plex_Sans({
   variable: "--font-body-sans",
@@ -90,10 +90,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
-        {/* Kitifica "App Directa" install prompt — detects the device and
-            suggests installing this PWA. Suppressed automatically once
-            already installed (see public/kap/kitifica-install-popup.js). */}
-        <Script src="/kap/kitifica-install-popup.js" strategy="afterInteractive" />
+        {/* Kitifica "App Directa" install prompt — marketing pages only; the
+            overlay has no dismiss control, so it must never cover auth, the
+            dashboard, the shared-link viewer, or an email-link landing. */}
+        <InstallPrompt />
       </body>
     </html>
   );
