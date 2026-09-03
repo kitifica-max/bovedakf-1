@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { emailIsVerified } from "@/lib/email-verify";
 import { VaultView } from "./vault-view";
 
 export default async function VaultPage({
@@ -31,7 +32,7 @@ export default async function VaultPage({
     }),
     db.user.findUnique({
       where: { id: vault.ownerId },
-      select: { surveyDismissedAt: true, totpEnabled: true, emailVerified: true },
+      select: { email: true, surveyDismissedAt: true, totpEnabled: true, emailVerified: true },
     }),
     db.authenticator.findMany({
       where: { userId: vault.ownerId },
@@ -46,7 +47,7 @@ export default async function VaultPage({
       auditLogs={auditLogs}
       showSurvey={!owner?.surveyDismissedAt}
       totpEnabled={owner?.totpEnabled ?? false}
-      emailVerified={owner?.emailVerified != null}
+      emailVerified={owner ? emailIsVerified(owner) : true}
       passkeys={passkeys}
     />
   );

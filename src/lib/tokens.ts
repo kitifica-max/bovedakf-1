@@ -26,13 +26,21 @@ export async function createToken(kind: Kind, email: string): Promise<string> {
   return token;
 }
 
-// Returns true and deletes the token on success; false if missing/expired.
+// Returns whether the token is valid.
+// - "reset": strictly single-use — deleted on any match (valid or expired).
+// - "verify": stays usable within its TTL. Email clients and security
+//   scanners prefetch links, which would burn a single-use token before
+//   the user ever clicks; a reusable-until-expiry token also makes repeat
+//   clicks idempotent. Only cleaned up once expired.
 export async function consumeToken(kind: Kind, email: string, token: string): Promise<boolean> {
   const identifier = idFor(kind, email);
   const row = await db.verificationToken.findUnique({
     where: { identifier_token: { identifier, token } },
   });
   if (!row) return false;
-  await db.verificationToken.deleteMany({ where: { identifier } });
-  return row.expires > new Date();
+  const valid = row.expires > new Date();
+  if (kind === "reset" || !valid) {
+    await db.verificationToken.deleteMany({ where: { identifier } });
+  }
+  return valid;
 }

@@ -12,6 +12,15 @@ export async function GET(req: NextRequest) {
 
   const ok = email && token && (await consumeToken("verify", email, token));
   if (!ok) {
+    // Idempotent: if this address is already verified (double-click, or a
+    // prefetch beat the token's TTL), treat it as success anyway.
+    if (email) {
+      const already = await db.user.findFirst({
+        where: { email: email.toLowerCase(), emailVerified: { not: null } },
+        select: { id: true },
+      });
+      if (already) return NextResponse.redirect(`${APP_URL}/login?verify=ok`);
+    }
     return NextResponse.redirect(`${APP_URL}/login?verify=invalid`);
   }
 
