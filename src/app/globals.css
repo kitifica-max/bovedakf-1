@@ -28,7 +28,7 @@
   --color-border-soft: var(--color-border);
   --font-display: var(--font-archivo);
   --font-pixel: var(--font-silkscreen);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body-sans);
   --font-mono: var(--font-geist-mono);
 }
 

@@ -19,7 +19,7 @@ type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
 
 const inputCls =
-  "w-full rounded-2xl border border-border-soft bg-gray/40 px-3 py-2 text-sm outline-none transition focus:border-ink";
+  "w-full rounded-2xl border border-border-soft bg-gray/40 px-3 py-2 text-base sm:text-sm outline-none transition focus:border-ink";
 const linkBtnCls =
   "flex cursor-pointer items-center gap-1 text-ink-soft underline decoration-border-soft underline-offset-4 transition hover:text-ink";
 const dangerLinkBtnCls =

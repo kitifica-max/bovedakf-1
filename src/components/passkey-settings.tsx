@@ -69,6 +69,13 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
         <p role="alert" className="mt-3 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       )}
 
+      <p className="mt-3 border-t border-border-soft pt-3 text-xs text-ink-soft">
+        Al tocar &quot;Agregar passkey&quot; tu navegador te va a pedir tu huella, cara o PIN —
+        no una app de autenticación. Si te aparece un código QR, es para usar una passkey
+        que ya tenés guardada en tu celular: escaneala con la cámara (no con un lector de
+        códigos ni una app de 2FA).
+      </p>
+
       {passkeys.length > 0 && (
         <ul className="mt-4 flex flex-col gap-1.5 border-t border-border-soft pt-4 text-sm">
           {passkeys.map((p) => (

@@ -61,7 +61,7 @@ export function RegisterForm() {
               placeholder="Nombre de la empresa"
               required
               maxLength={120}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
           <div>
@@ -73,7 +73,7 @@ export function RegisterForm() {
               autoComplete="email"
               placeholder="email@empresa.com"
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
           <div>
@@ -86,7 +86,7 @@ export function RegisterForm() {
               placeholder="Contraseña (mín. 10 caracteres)"
               required
               minLength={10}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
           <div className="relative">
@@ -96,7 +96,7 @@ export function RegisterForm() {
               name="industry"
               required
               defaultValue=""
-              className="w-full cursor-pointer appearance-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 pr-10 text-sm outline-none transition focus:border-ink"
+              className="w-full cursor-pointer appearance-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 pr-10 text-base sm:text-sm outline-none transition focus:border-ink"
             >
               <option value="" disabled>¿En qué rubro opera tu empresa?</option>
               {INDUSTRIES.map((i) => (
@@ -113,7 +113,7 @@ export function RegisterForm() {
               placeholder="¿Cuál es tu mayor cuello de botella digital? (opcional)"
               maxLength={500}
               rows={2}
-              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
             <p className="mt-1.5 px-1 text-xs text-ink-soft">
               Mantenemos esta herramienta gratuita construyendo web apps eficientes. Nos ayuda a saber qué simplificar después.

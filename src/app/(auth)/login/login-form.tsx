@@ -146,7 +146,7 @@ export function LoginForm() {
               autoComplete="email"
               placeholder="email@empresa.com"
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
           <div>
@@ -158,7 +158,7 @@ export function LoginForm() {
               autoComplete="current-password"
               placeholder="Contraseña"
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-sm outline-none transition focus:border-ink"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
           {error && (
@@ -186,6 +186,9 @@ export function LoginForm() {
           <FingerprintIcon aria-hidden="true" className="h-4 w-4" />
           Entrar con Passkey
         </button>
+        <p className="mt-2 text-center text-xs text-ink-soft">
+          Sin escribir nada — tu navegador te va a pedir tu huella, cara o PIN del dispositivo.
+        </p>
 
         <a href="/register" className="mt-5 block text-center text-sm text-ink-soft underline">
           Crear una bóveda nueva

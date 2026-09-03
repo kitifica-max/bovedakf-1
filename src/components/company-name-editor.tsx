@@ -38,7 +38,7 @@ export function CompanyNameEditor({ initialName }: { initialName: string }) {
           maxLength={120}
           autoFocus
           disabled={pending}
-          className="w-40 rounded-full border border-gray/25 bg-transparent px-3 py-1 text-sm text-gray outline-none focus:border-gray/60 sm:w-52"
+          className="w-40 rounded-full border border-gray/25 bg-transparent px-3 py-1 text-base text-gray outline-none focus:border-gray/60 sm:w-52 sm:text-sm"
           onKeyDown={(e) => {
             if (e.key === "Escape") setEditing(false);
           }}

@@ -1,15 +1,19 @@
 import Link from "next/link";
 import {
   ActivityIcon,
+  ArrowLeftRightIcon,
   ChevronDownIcon,
   ClockIcon,
+  FingerprintIcon,
   KeyRoundIcon,
   ListChecksIcon,
   LockIcon,
+  LogOutIcon,
   SaveIcon,
   SearchXIcon,
   Share2Icon,
   ShieldAlertIcon,
+  ShieldCheckIcon,
   ShieldOffIcon,
   ShuffleIcon,
 } from "@/components/icons";
@@ -20,6 +24,13 @@ import { HeroReveal } from "@/components/hero-reveal";
 const stats = [
   { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
   { label: "Rango de expiración configurable por link", value: "1h–7d", Icon: ClockIcon },
+];
+
+const securityBadges = [
+  { label: "AES-256", Icon: KeyRoundIcon },
+  { label: "GCM", Icon: ShieldCheckIcon },
+  { label: "E2E", Icon: ArrowLeftRightIcon },
+  { label: "2FA", Icon: FingerprintIcon },
 ];
 
 const problems = [
@@ -82,6 +93,16 @@ const features = [
     body: "¿Algo se filtró? Un click y el link muere, aunque todavía no haya expirado.",
     Icon: ShieldOffIcon,
   },
+  {
+    title: "Passkeys y 2FA",
+    body: "Entrá con Face ID, Touch ID o Windows Hello, o con un código de 6 dígitos. Vos elegís.",
+    Icon: FingerprintIcon,
+  },
+  {
+    title: "Sesión que se cuida sola",
+    body: "2 minutos sin actividad y te preguntamos si seguís ahí, antes de cerrar la sesión.",
+    Icon: LogOutIcon,
+  },
 ];
 
 const faqs = [
@@ -104,6 +125,10 @@ const faqs = [
   {
     q: "¿Es gratis?",
     a: "Sí, hasta 20 credenciales por bóveda, sin tarjeta de crédito.",
+  },
+  {
+    q: "¿Tienen doble factor de autenticación?",
+    a: "Sí. Podés activar 2FA con app de autenticación (TOTP) o entrar directo con una passkey — Face ID, Touch ID o Windows Hello, sin contraseña. Además, si te quedás inactivo 2 minutos, te avisamos antes de cerrar la sesión sola.",
   },
 ];
 
@@ -191,12 +216,13 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="relative flex flex-wrap items-center justify-center gap-2">
-                {["AES-256", "GCM", "E2E"].map((tag) => (
+                {securityBadges.map(({ label, Icon }) => (
                   <span
-                    key={tag}
-                    className="font-pixel rounded-full border border-blue/40 bg-blue/10 px-2.5 py-1 text-[10px] text-blue-soft"
+                    key={label}
+                    className="font-pixel flex items-center gap-1.5 rounded-full border border-blue/40 bg-blue/10 px-2.5 py-1 text-[10px] text-blue-soft"
                   >
-                    {tag}
+                    <Icon aria-hidden="true" className="h-3 w-3" />
+                    {label}
                   </span>
                 ))}
               </div>
