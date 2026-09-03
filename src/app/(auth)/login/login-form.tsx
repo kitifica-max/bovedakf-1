@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import { signIn as passkeySignIn } from "next-auth/webauthn";
 import { checkPasswordAction } from "../actions";
 import { FingerprintIcon } from "@/components/icons";
+import { VerifyResult } from "@/components/verify-result";
 
 export function LoginForm() {
   const router = useRouter();
@@ -146,6 +147,9 @@ export function LoginForm() {
       <div className="glass w-full max-w-sm rounded-2xl p-8">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Entrar</h1>
         <p className="mt-1 text-sm text-ink-soft">Accede a tu bóveda de credenciales.</p>
+        <div className="mt-4 empty:hidden">
+          <VerifyResult />
+        </div>
         <form onSubmit={onSubmitPassword} className="mt-6 flex flex-col gap-3" noValidate>
           <div>
             <label htmlFor="email" className="sr-only">Email</label>

@@ -13,6 +13,7 @@ import { ChevronDownIcon, EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldChec
 import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
 import { VerifyBanner } from "@/components/verify-banner";
+import { VerifyResult } from "@/components/verify-result";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
 import { PasskeySettings } from "@/components/passkey-settings";
 
@@ -49,6 +50,7 @@ export function VaultView({
         </span>
         <h1 className="font-pixel text-xl leading-[1.3] tracking-tight text-ink">{vault.name}</h1>
       </div>
+      <VerifyResult />
       {!emailVerified && <VerifyBanner />}
       {showSurvey && <DashboardSurvey />}
       <AddCredentialForm vaultId={vault.id} />

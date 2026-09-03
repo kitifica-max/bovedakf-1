@@ -19,5 +19,8 @@ export async function GET(req: NextRequest) {
     where: { email: email.toLowerCase(), emailVerified: null },
     data: { emailVerified: new Date() },
   });
-  return NextResponse.redirect(`${APP_URL}/dashboard?verify=ok`);
+  // Land on /login — the verify link is usually opened without an active
+  // session (different device/tab). The message shows there for everyone;
+  // a logged-in user's dashboard banner is already gone.
+  return NextResponse.redirect(`${APP_URL}/login?verify=ok`);
 }
