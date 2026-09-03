@@ -11,6 +11,7 @@
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone === true) return;
   if (localStorage.getItem('kap-installed') === '1') return;
+  try { if (sessionStorage.getItem('kap-dismissed') === '1') return; } catch (e) {}
 
   // ── Detección de dispositivo ─────────────────────────────────────────────
   var ua = navigator.userAgent;
@@ -90,7 +91,7 @@
     'display:flex;align-items:flex-end;justify-content:center}',
     '@media(min-width:480px){#kap-overlay{align-items:center;padding:20px}}',
 
-    '#kap-card{background:var(--kap-surface-2);color:var(--kap-text);',
+    '#kap-card{position:relative;background:var(--kap-surface-2);color:var(--kap-text);',
     'width:100%;max-width:440px;border-radius:20px 20px 0 0;',
     'box-shadow:var(--kap-shadow);',
     'font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;',
@@ -103,6 +104,11 @@
     '.kap-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:center;',
     'gap:10px;flex-shrink:0}',
     '.kap-header svg{height:28px;width:auto}',
+    '.kap-close{position:absolute;top:12px;right:14px;width:32px;height:32px;border:none;',
+    'background:none;cursor:pointer;font-size:22px;line-height:1;color:var(--kap-muted);',
+    'border-radius:8px;display:flex;align-items:center;justify-content:center;',
+    'font-family:inherit;transition:color .15s,background .15s}',
+    '.kap-close:hover{color:var(--kap-text);background:var(--kap-surface)}',
     '.kap-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:0 24px 24px}',
 
     /* Step 1 */
@@ -181,7 +187,8 @@
   var html = [
     '<div id="kap-overlay" role="dialog" aria-modal="true" aria-labelledby="kap-title">',
     '<div id="kap-card">',
-    '<div class="kap-header">' + logoKitifica + '</div>',
+    '<div class="kap-header">' + logoKitifica +
+    '<button class="kap-close" id="kap-close" type="button" aria-label="Cerrar">&#215;</button></div>',
 
     /* Step 1 */
     '<div class="kap-body" id="kap-step-1">',
@@ -246,7 +253,22 @@
 
   setDevice(initDev);
 
+  // Dismiss: X button, click outside the card, or Escape. Stays closed for
+  // the rest of the browser session so it doesn't nag on every visit.
+  document.getElementById('kap-close').addEventListener('click', kapDismiss);
+  document.getElementById('kap-overlay').addEventListener('click', function (e) {
+    if (e.target === document.getElementById('kap-overlay')) kapDismiss();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.key === 'Esc') kapDismiss();
+  });
+
   // ── Funciones ─────────────────────────────────────────────────────────────
+  function kapDismiss() {
+    try { sessionStorage.setItem('kap-dismissed', '1'); } catch (e) {}
+    kapClose();
+  }
+
   function setDevice(key) {
     var d = DEVS[key];
     document.querySelectorAll('.kap-tab').forEach(function (b) {

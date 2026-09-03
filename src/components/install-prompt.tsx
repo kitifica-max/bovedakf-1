@@ -3,16 +3,13 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 
-// The Kitifica "App Directa" popup is a full-screen overlay with no dismiss
-// control (public/kap/kitifica-install-popup.js). Only load it where a user
-// can't get trapped: the marketing pages. Never on auth, the dashboard, the
-// shared-link viewer, or the pages an email verify/reset link lands on —
-// otherwise the wall blocks sign-in.
-const BLOCKED = ["/login", "/register", "/reset", "/verify", "/dashboard", "/admin", "/s"];
+// The Kitifica "App Directa" popup only makes sense at the moment of intent
+// to use the app — i.e. the login page. It's kept off the landing (which is
+// for evaluating the pitch) and off every in-app / email-link route.
+const ALLOWED = ["/login"];
 
 export function InstallPrompt() {
   const pathname = usePathname();
-  const blocked = BLOCKED.some((p) => pathname === p || pathname.startsWith(p + "/"));
-  if (blocked) return null;
+  if (!ALLOWED.includes(pathname)) return null;
   return <Script src="/kap/kitifica-install-popup.js" strategy="afterInteractive" />;
 }
