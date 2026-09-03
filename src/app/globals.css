@@ -5,7 +5,7 @@
   --color-gray: #0a0e15;
   --color-gray-deep: #373f4e;
   --color-paper: #212631;
-  --color-ink: #ffffff;
+  --color-ink: #edf0f4;
   --color-ink-soft: #e0e4eb;
   --color-ink-reverse: #0a0e15;
   /* Accent — kept as-is, unchanged from the light theme. */
@@ -27,6 +27,7 @@
   --color-danger: var(--color-danger);
   --color-border-soft: var(--color-border);
   --font-display: var(--font-archivo);
+  --font-pixel: var(--font-silkscreen);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

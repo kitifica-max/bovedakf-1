@@ -43,12 +43,12 @@ const sections = [
   {
     h: "Tus derechos",
     p: [
-      "Podés pedirnos acceso, corrección o eliminación de tus datos en cualquier momento escribiendo a kitifica@gmail.com. Como el producto está en etapa temprana, la eliminación de cuenta hoy se procesa manualmente, no de forma automática.",
+      "Podés pedirnos acceso, corrección o eliminación de tus datos en cualquier momento escribiendo a hola@kitifica.com. Como el producto está en etapa temprana, la eliminación de cuenta hoy se procesa manualmente, no de forma automática.",
     ],
   },
   {
     h: "Contacto",
-    p: ["Preguntas sobre esta política: kitifica@gmail.com."],
+    p: ["Preguntas sobre esta política: hola@kitifica.com."],
   },
 ];
 

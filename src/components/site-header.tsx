@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function SiteHeader() {
   return (
-    <nav aria-label="Principal" className="flex items-center justify-between bg-ink px-5 py-3 text-gray">
+    <nav aria-label="Principal" className="flex items-center justify-between rounded-full bg-ink px-5 py-3 text-gray">
       <Link href="/" className="flex items-center">
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />

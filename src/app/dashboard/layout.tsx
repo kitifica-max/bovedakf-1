@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen flex-col p-4 sm:p-6">
-      <header className="flex items-center justify-between bg-ink px-5 py-3 text-gray">
+      <header className="flex items-center justify-between rounded-full bg-ink px-5 py-3 text-gray">
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />
         <div className="flex items-center gap-4 text-sm">

@@ -136,7 +136,7 @@ export default function HomePage() {
               <span data-reveal className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-blue-soft px-3 py-1 text-xs font-medium text-ink-reverse">
                 <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Encriptado extremo a extremo en cada link
               </span>
-              <h1 data-reveal className="font-display text-4xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-5xl">
+              <h1 data-reveal className="font-pixel text-3xl leading-[1.3] tracking-tight text-ink sm:text-4xl">
                 Comparte credenciales sin dejar rastro en el chat
               </h1>
               <p data-reveal className="mt-5 max-w-md text-ink-soft">
@@ -275,7 +275,7 @@ export default function HomePage() {
 
       {/* CTA final */}
       <section className="w-full max-w-5xl rounded-2xl bg-ink p-8 text-center text-gray sm:p-14">
-        <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h2 className="font-pixel text-2xl leading-[1.3] tracking-tight sm:text-3xl">
           Dejá de reenviar contraseñas por chat
         </h2>
         <p className="mx-auto mt-3 max-w-md text-gray/70">

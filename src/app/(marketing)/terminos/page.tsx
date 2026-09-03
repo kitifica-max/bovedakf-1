@@ -65,7 +65,7 @@ const sections = [
   },
   {
     h: "10. Contacto",
-    p: ["Dudas sobre estos términos: kitifica@gmail.com."],
+    p: ["Dudas sobre estos términos: hola@kitifica.com."],
   },
 ];
 

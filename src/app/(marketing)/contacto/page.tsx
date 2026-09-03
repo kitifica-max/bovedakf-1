@@ -17,18 +17,18 @@ export default function ContactPage() {
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <a
-          href="mailto:kitifica@gmail.com?subject=B%C3%B3veda%20KF-1%20-%20Consulta"
+          href="mailto:hola@kitifica.com?subject=B%C3%B3veda%20KF-1%20-%20Consulta"
           className="rounded-2xl border border-border-soft bg-gray/40 p-6 transition hover:bg-gray/60"
         >
           <p className="font-display text-lg font-semibold text-ink">Soporte y consultas generales</p>
-          <p className="mt-1 text-sm text-ink-soft">kitifica@gmail.com</p>
+          <p className="mt-1 text-sm text-ink-soft">hola@kitifica.com</p>
         </a>
         <a
-          href="mailto:kitifica@gmail.com?subject=B%C3%B3veda%20KF-1%20-%20Reporte%20de%20seguridad"
+          href="mailto:hola@kitifica.com?subject=B%C3%B3veda%20KF-1%20-%20Reporte%20de%20seguridad"
           className="rounded-2xl border border-border-soft bg-gray/40 p-6 transition hover:bg-gray/60"
         >
           <p className="font-display text-lg font-semibold text-ink">Reportar una vulnerabilidad</p>
-          <p className="mt-1 text-sm text-ink-soft">kitifica@gmail.com</p>
+          <p className="mt-1 text-sm text-ink-soft">hola@kitifica.com</p>
         </a>
       </div>
 
