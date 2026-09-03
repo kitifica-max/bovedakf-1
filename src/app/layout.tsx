@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   description,
   applicationName: "Bóveda KF-1",
   manifest: "/manifest.json",
-  icons: { icon: "/icon.svg" },
+  icons: { icon: "/favicon.svg" },
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {

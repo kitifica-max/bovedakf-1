@@ -170,13 +170,27 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div data-reveal className="glass flex flex-col items-center justify-center gap-6 rounded-2xl p-8 text-center sm:p-10">
-              <div className="grid h-28 w-28 place-items-center rounded-full bg-blue-soft/10 ring-1 ring-blue/30">
+            <div data-reveal className="glass relative flex flex-col items-center justify-center gap-6 overflow-hidden rounded-2xl p-8 text-center sm:p-10">
+              <video
+                aria-hidden="true"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 h-full w-full object-cover opacity-40"
+              >
+                <source src="/anim-bits-hero-1.mp4" type="video/mp4" />
+                <source src="/anim-bits-hero-1.webm" type="video/webm" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/70 to-paper/90" />
+
+              <div className="relative grid h-28 w-28 place-items-center rounded-full bg-blue-soft/10 ring-1 ring-blue/30">
                 <div className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-full bg-blue-soft/20 ring-1 ring-blue/40">
                   <LockIcon aria-hidden="true" className="h-8 w-8 text-blue-soft" />
                 </div>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="relative flex flex-wrap items-center justify-center gap-2">
                 {["AES-256", "GCM", "E2E"].map((tag) => (
                   <span
                     key={tag}
@@ -186,7 +200,7 @@ export default function HomePage() {
                   </span>
                 ))}
               </div>
-              <p className="max-w-[15rem] text-sm text-ink-soft">
+              <p className="relative max-w-[15rem] text-sm text-ink-soft">
                 Cifrado en tu navegador antes de tocar nuestra base de datos.
               </p>
             </div>
