@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { anonymizeIp, maybePurgeOldAuditLogs } from "@/lib/audit";
 
 // Carries a live (encrypted) secret — never let a proxy, CDN, or the browser
 // cache the response.
@@ -8,9 +9,10 @@ const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, privat
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
-  const ip = clientIp(req.headers);
+  const rawIp = clientIp(req.headers);
+  const ip = anonymizeIp(rawIp); // what we persist; rate limit still uses rawIp
 
-  const { success } = rateLimit(`share:${ip}`);
+  const { success } = rateLimit(`share:${rawIp}`);
   if (!success) {
     return NextResponse.json(
       { error: "Demasiadas solicitudes, intenta más tarde." },
@@ -47,6 +49,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
       userAgent: req.headers.get("user-agent") ?? undefined,
     },
   });
+
+  await maybePurgeOldAuditLogs();
 
   return NextResponse.json(
     {

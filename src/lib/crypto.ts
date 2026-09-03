@@ -21,6 +21,15 @@ export function verifyPassword(password: string, hash: string, salt: string) {
   return timingSafeEqual(candidate, stored);
 }
 
+// Decoy hash so "email not found" costs the same scrypt work as a real
+// login attempt — removes the timing side-channel for account enumeration.
+const DECOY_SALT = "00000000000000000000000000000000";
+const DECOY_HASH = scryptSync("decoy", DECOY_SALT, SCRYPT_KEYLEN).toString("hex");
+
+export function burnPasswordCompare(password: string) {
+  verifyPassword(password, DECOY_HASH, DECOY_SALT);
+}
+
 // AES-256-GCM, output = base64(iv[12] + authTag[16] + ciphertext).
 function aesEncrypt(plaintext: string, key: Buffer) {
   const iv = randomBytes(12);

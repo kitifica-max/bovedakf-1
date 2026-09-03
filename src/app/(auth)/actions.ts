@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { hashPassword, verifyPassword } from "@/lib/crypto";
+import { hashPassword, verifyPassword, burnPasswordCompare } from "@/lib/crypto";
 import { loginSchema, registerSchema } from "@/lib/validation";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -61,7 +61,10 @@ export async function checkPasswordAction(
   if (!rateLimit(`login:${clientIp(await headers())}`, 10).success) return { ok: false };
 
   const user = await db.user.findUnique({ where: { email: parsed.data.email } });
-  if (!user) return { ok: false };
+  if (!user) {
+    burnPasswordCompare(parsed.data.password); // constant-time: no user-enumeration via latency
+    return { ok: false };
+  }
 
   const valid = verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt);
   if (!valid) return { ok: false };

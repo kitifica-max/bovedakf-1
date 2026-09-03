@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import Passkey from "next-auth/providers/passkey";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { decryptAtRest, verifyPassword } from "@/lib/crypto";
+import { decryptAtRest, verifyPassword, burnPasswordCompare } from "@/lib/crypto";
 import { matchBackupCode, verifyTotp, type BackupCode } from "@/lib/totp";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
@@ -56,7 +56,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const user = await db.user.findUnique({ where: { email } });
-        if (!user) return null;
+        if (!user) {
+          burnPasswordCompare(password); // constant-time: no user-enumeration via latency
+          return null;
+        }
 
         const valid = verifyPassword(password, user.passwordHash, user.passwordSalt);
         if (!valid) return null;
