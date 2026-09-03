@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -71,8 +72,14 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
-      <header className="rounded-full bg-ink px-5 py-3 text-gray">
+      <header className="flex items-center justify-between gap-3 rounded-full bg-ink px-5 py-3 text-gray">
         <p className="font-display text-lg font-semibold">Respuestas de usuarios</p>
+        <Link
+          href="/dashboard"
+          className="shrink-0 rounded-full border border-gray/25 px-3 py-1.5 text-sm transition hover:bg-gray/10"
+        >
+          ← Volver a la bóveda
+        </Link>
       </header>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
