@@ -214,7 +214,7 @@ export default function HomePage() {
                 {securityBadges.map(({ label, note, Icon }) => (
                   <div
                     key={label}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/10 px-4 py-4 text-center"
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/15 px-4 py-4 text-center backdrop-blur-lg"
                   >
                     <Icon aria-hidden="true" className="h-6 w-6 text-blue-soft" />
                     <span className="font-pixel text-sm text-blue-soft">{label}</span>
