@@ -32,7 +32,7 @@ export function VerifyBanner() {
       >
         <XCircleIcon aria-hidden="true" className="h-4 w-4" />
       </button>
-      <p className="font-medium text-ink">Confirmá tu correo</p>
+      <p className="t-h3 text-ink">Confirmá tu correo</p>
       <p className="mt-1 text-ink-soft">
         Te enviamos un enlace al registrarte. Sirve para recuperar el acceso si perdés la contraseña.
         No bloquea nada mientras tanto.

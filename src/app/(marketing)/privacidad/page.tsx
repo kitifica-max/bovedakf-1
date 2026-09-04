@@ -55,13 +55,13 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Privacidad</h1>
+      <h1 className="t-display text-ink">Privacidad</h1>
       <p className="mt-2 text-sm text-ink-soft">Última actualización: 26 de agosto de 2026.</p>
 
       <div className="mt-8 flex flex-col gap-6">
         {sections.map((s) => (
           <section key={s.h}>
-            <h2 className="font-display text-lg font-semibold text-ink">{s.h}</h2>
+            <h2 className="t-h2 text-ink">{s.h}</h2>
             <ul className="mt-2 flex flex-col gap-1.5">
               {s.p.map((para, i) => (
                 <li key={i} className="text-sm text-ink-soft">

@@ -18,7 +18,7 @@ export function SiteHeader() {
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
         <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-5 w-auto sm:h-6" />
       </Link>
-      <div className="flex shrink-0 items-center gap-1.5 text-xs sm:gap-3 sm:text-sm">
+      <div className="flex shrink-0 items-center gap-2 text-xs sm:gap-3 sm:text-sm">
         {LINKS.map((l) => (
           <Link
             key={l.href}
