@@ -47,7 +47,7 @@ export default function ConnectPage() {
             <pre className="mt-3 overflow-x-auto rounded-xl bg-gray px-4 py-3 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
 import json, os, sys
 if sys.platform == 'win32':
-    path = os.path.expandvars(r'%APPDATA%\\\\Claude\\\\claude_desktop_config.json')
+    path = os.path.expandvars(r'%APPDATA%\\Claude\\claude_desktop_config.json')
 else:
     path = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
 os.makedirs(os.path.dirname(path), exist_ok=True)
