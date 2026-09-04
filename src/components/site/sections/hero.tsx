@@ -1,4 +1,3 @@
-import { SiteHeader } from "@/components/site-header";
 import { HeroReveal } from "@/components/hero-reveal";
 import { CTAButton } from "@/components/site/cta-button";
 import { Illustration } from "@/components/site/illustration";
@@ -8,10 +7,9 @@ import { stats } from "@/content/landing";
 
 export function HeroSection() {
   return (
-    <div className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-4 shadow-[0_1px_0_rgba(22,19,14,0.04)] sm:p-6">
-      <SiteHeader />
+    <div className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-6 shadow-[0_1px_0_rgba(22,19,14,0.04)] sm:p-10">
       <HeroReveal>
-        <div data-hero className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-center">
+        <div data-hero className="grid grid-cols-1 gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-center">
           <div className="flex flex-col">
             <span
               data-reveal
