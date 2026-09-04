@@ -35,7 +35,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
-  if (!rateLimit(`register:${clientIp(await headers())}`, 8).success) {
+  if (!(await rateLimit(`register:${clientIp(await headers())}`, 8)).success) {
     return "Demasiados intentos. Esperá un minuto e intentá de nuevo.";
   }
 
@@ -88,7 +88,7 @@ export async function resendVerificationAction(): Promise<string | null> {
   const email = session?.user?.email;
   if (!email) return "No autenticado";
 
-  if (!rateLimit(`resend-verify:${email}`, 3).success) {
+  if (!(await rateLimit(`resend-verify:${email}`, 3)).success) {
     return "Ya enviamos uno hace poco. Revisá tu correo (y el spam).";
   }
   const user = await db.user.findUnique({ where: { email }, select: { emailVerified: true } });
@@ -105,7 +105,7 @@ export async function requestPasswordResetAction(_prev: string | null, formData:
   if (!parsed.success) return "Revisá el correo ingresado.";
 
   const { email } = parsed.data;
-  if (rateLimit(`reset-req:${clientIp(await headers())}`, 5).success) {
+  if ((await rateLimit(`reset-req:${clientIp(await headers())}`, 5)).success) {
     const user = await db.user.findUnique({ where: { email }, select: { id: true } });
     if (user) {
       const token = await createToken("reset", email);
@@ -126,7 +126,7 @@ export async function resetPasswordAction(_prev: string | null, formData: FormDa
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { email, token, password } = parsed.data;
-  if (!rateLimit(`reset-do:${clientIp(await headers())}`, 10).success) {
+  if (!(await rateLimit(`reset-do:${clientIp(await headers())}`, 10)).success) {
     return "Demasiados intentos. Esperá un minuto.";
   }
   if (!(await consumeToken("reset", email, token))) {
@@ -157,7 +157,7 @@ export async function checkPasswordAction(
   if (!parsed.success) return { ok: false };
 
   // Throttle online password guessing / credential stuffing per IP.
-  if (!rateLimit(`login:${clientIp(await headers())}`, 10).success) return { ok: false };
+  if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return { ok: false };
 
   const user = await db.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) {
