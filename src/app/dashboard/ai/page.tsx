@@ -97,7 +97,7 @@ export default async function AiDashboardPage() {
             </summary>
             <div className="mt-3 rounded-xl bg-gray/60 p-4">
               <p className="text-xs text-ink-soft">
-                Copiá y pegá este comando en tu terminal. Usa Python (viene con macOS) para configurar automáticamente:
+                Copiá y pegá este comando en tu terminal. Detecta tu sistema operativo automáticamente:
               </p>
               <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
 import json, os, sys
