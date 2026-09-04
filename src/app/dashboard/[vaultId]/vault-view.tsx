@@ -17,6 +17,7 @@ import { VerifyResult } from "@/components/verify-result";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
 import { PasskeySettings } from "@/components/passkey-settings";
 import { VaultMembers } from "@/components/vault-members";
+import { AiAccessPanel } from "@/components/ai-access-panel";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 
@@ -66,7 +67,7 @@ export function VaultView({
       {canEdit && <AddCredentialForm vaultId={vault.id} />}
       <ul className="flex flex-col gap-3">
         {vault.credentials.map((c) => (
-          <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} />
+          <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} role={role} />
         ))}
         {vault.credentials.length === 0 && (
           <p className="rounded-3xl border border-dashed border-border-soft p-6 text-center text-sm text-ink-soft">
@@ -139,10 +140,12 @@ function CredentialRow({
   vaultId,
   credential,
   canEdit,
+  role,
 }: {
   vaultId: string;
   credential: CredentialWithLinks;
   canEdit: boolean;
+  role: Role;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [revealed, setRevealed] = useState<{ secret: string; notes: string } | null>(null);
@@ -368,6 +371,14 @@ function CredentialRow({
           </ul>
         </div>
       )}
+
+      {role === "OWNER" && (
+        <AiAccessPanel
+          credentialId={credential.id}
+          credentialService={credential.service}
+          initialAiAccessible={credential.aiAccessible}
+        />
+      )}
       </>
       )}
     </li>
@@ -381,6 +392,9 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   link_denied_expired_or_revoked: "Acceso denegado (expirado o revocado)",
   link_denied_not_found: "Acceso denegado (link inexistente)",
   credential_viewed: "Credencial vista",
+  ai_access_enabled: "Acceso AI habilitado",
+  ai_access_disabled: "Acceso AI deshabilitado",
+  ai_credential_accessed: "Credencial accedida por AI",
   member_invited: "Miembro invitado",
   invite_revoked: "Invitación cancelada",
   member_joined: "Miembro se unió",

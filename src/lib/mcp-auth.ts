@@ -1,12 +1,10 @@
 // MCP OAuth token generation and validation.
 // Uses the same AUTH_SECRET as NextAuth for JWT signing, keeping a single
-// secret hierarchy. Tokens are short-lived (15 min) and single-use for
-// credential reads.
+// secret hierarchy. Tokens are short-lived (2 hours) and scoped to a vault.
 
 import { randomBytes, createHmac, timingSafeEqual } from "node:crypto";
-import { db } from "@/lib/db";
 
-const TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 const ISSUER = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 // ── JWT-like token (HMAC-SHA256 signed, no JWS library needed) ──────────
@@ -86,7 +84,6 @@ export function validateToken(token: string): McpTokenPayload | null {
   if (!secret) return null;
   const payload = verifyToken(token, secret);
   if (!payload) return null;
-  // Type guard
   if (typeof payload.sub !== "string" || typeof payload.jti !== "string") return null;
   return payload as unknown as McpTokenPayload;
 }

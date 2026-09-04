@@ -7,8 +7,6 @@ export type McpClient = {
   name: string;
   description: string;
   allowedRedirectUris: string[];
-  // Scopes this client is allowed to request. The MCP server will reject
-  // tokens with scopes outside this list.
   allowedScopes: string[];
 };
 
@@ -23,7 +21,6 @@ const CLIENTS: Record<string, McpClient> = {
     ],
     allowedScopes: [
       "credentials:list",
-      "credentials:request",
       "credentials:read",
     ],
   },
@@ -37,7 +34,6 @@ const CLIENTS: Record<string, McpClient> = {
     ],
     allowedScopes: [
       "credentials:list",
-      "credentials:request",
       "credentials:read",
     ],
   },
@@ -55,10 +51,8 @@ export function validateScopes(client: McpClient, scopes: string[]): boolean {
   return scopes.every((s) => client.allowedScopes.includes(s));
 }
 
-// All valid scope values across all clients.
 export const ALL_SCOPES = [
   "credentials:list",
-  "credentials:request",
   "credentials:read",
 ] as const;
 
