@@ -1,3 +1,4 @@
+import { SiteHeader } from "@/components/site-header";
 import { HeroSection } from "@/components/site/sections/hero";
 import { ProblemaSection } from "@/components/site/sections/problema";
 import { ComoFuncionaSection } from "@/components/site/sections/como-funciona";
@@ -22,8 +23,10 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col items-center gap-16 p-4 pb-16 sm:gap-24 sm:p-8">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <SiteHeader />
+      <main className="flex flex-col items-center gap-16 px-4 pb-16 pt-6 sm:gap-24 sm:px-8">
       <HeroSection />
       <ProblemaSection />
       <ComoFuncionaSection />
@@ -34,6 +37,7 @@ export default function HomePage() {
       <CtaFinalSection />
       <SiteFooter />
       <Reveals />
-    </main>
+      </main>
+    </>
   );
 }
