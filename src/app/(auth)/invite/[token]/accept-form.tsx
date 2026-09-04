@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptInviteAction } from "@/app/dashboard/actions";
+import { CTAButton } from "@/components/site/cta-button";
 
 export function AcceptForm({ token }: { token: string }) {
   const router = useRouter();
@@ -26,13 +27,9 @@ export function AcceptForm({ token }: { token: string }) {
       {error && (
         <p role="alert" className="mb-2 rounded-xl bg-danger/10 px-3 py-2 text-danger">{error}</p>
       )}
-      <button
-        onClick={accept}
-        disabled={pending}
-        className="w-full cursor-pointer rounded-full bg-ink px-4 py-3 font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <CTAButton type="button" onClick={accept} disabled={pending} className="mt-2 w-full">
         {pending ? "Uniéndote..." : "Aceptar y entrar"}
-      </button>
+      </CTAButton>
     </div>
   );
 }
