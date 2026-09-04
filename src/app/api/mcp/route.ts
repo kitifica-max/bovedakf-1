@@ -5,15 +5,16 @@
 //   tools/list       → lists credentials with aiAccessible=true in a vault
 //   tools/call        → routes to individual tool handlers
 //
-// The agent receives decrypted credentials directly (the agent IS an
-// authenticated user with a scoped session). No temporary links or
-// re-encryption — just standard decryptAtRest.
+// The agent NEVER receives the secret in plaintext. It receives a secure
+// link (same pattern as share links) that the user can open in their
+// browser to view the credential. The decryption key lives only in the
+// URL fragment — it never touches the server or the LLM context.
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
-import { decryptAtRest } from "@/lib/crypto";
+import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
 import { validateToken, hasScope, type McpTokenPayload } from "@/lib/mcp-auth";
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
@@ -34,7 +35,7 @@ const TOOLS = [
   {
     name: "list_credentials",
     description:
-      "List credentials in a vault that are available for AI access. Returns service names and IDs only.",
+      "List credentials in a vault that are available for AI access. Returns service names and IDs only — never secrets.",
     inputSchema: {
       type: "object",
       properties: {
@@ -46,12 +47,12 @@ const TOOLS = [
   {
     name: "get_credential",
     description:
-      "Get a credential's details including the decrypted secret. Only works for credentials with AI access enabled.",
+      "Get a secure link to view a credential. The link expires in 15 minutes. The secret is never included in the response — the user must open the link in their browser.",
     inputSchema: {
       type: "object",
       properties: {
         vaultId: { type: "string", description: "The vault ID" },
-        credentialId: { type: "string", description: "The credential ID to retrieve" },
+        credentialId: { type: "string", description: "The credential ID to get a link for" },
       },
       required: ["vaultId", "credentialId"],
     },
@@ -81,31 +82,58 @@ async function handleGetCredential(token: McpTokenPayload, vaultId: string, cred
 
   const credential = await db.credential.findFirst({
     where: { id: credentialId, vaultId, aiAccessible: true },
+    select: { id: true, service: true, username: true, encryptedData: true },
   });
 
   if (!credential) {
     return { error: "Credential not found or AI access not enabled" };
   }
 
-  const decrypted = JSON.parse(decryptAtRest(credential.encryptedData));
+  // Decrypt and re-encrypt with a one-time key (same pattern as share links)
+  const plaintext = JSON.stringify({
+    service: credential.service,
+    username: credential.username,
+    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+  });
+
+  const linkKey = generateLinkKey();
+  const publicId = generatePublicId();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  await db.shareLink.create({
+    data: {
+      publicId,
+      credentialId,
+      permission: "READ",
+      payload: encryptForLink(plaintext, linkKey),
+      expiresAt,
+    },
+  });
 
   // Audit log
   await db.auditLog.create({
     data: {
       vaultId,
-      action: "ai_credential_accessed",
+      action: "ai_link_created",
+      shareLinkId: (await db.shareLink.findFirst({ where: { publicId }, select: { id: true } }))?.id,
       credentialService: credential.service,
       agentName: token.client_id,
       actorEmail: token.email,
     },
   });
 
+  // Return secure link — the key is in the fragment, never in the JSON body
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const url = `${baseUrl}/s/${publicId}#k=${linkKey.toString("base64url")}`;
+
   return {
-    id: credential.id,
-    service: credential.service,
-    username: credential.username,
-    secret: decrypted.secret,
-    notes: decrypted.notes || undefined,
+    url,
+    expiresAt: expiresAt.toISOString(),
+    credential: {
+      service: credential.service,
+      username: credential.username,
+    },
+    note: "Share this link with the user. The secret is only visible when they open it in their browser.",
   };
 }
 

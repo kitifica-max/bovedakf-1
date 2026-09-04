@@ -404,6 +404,7 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   ai_access_enabled: "Acceso AI habilitado",
   ai_access_disabled: "Acceso AI deshabilitado",
   ai_credential_accessed: "Credencial accedida por AI",
+  ai_link_created: "Link AI generado",
   member_invited: "Miembro invitado",
   invite_revoked: "Invitación cancelada",
   member_joined: "Miembro se unió",

@@ -136,8 +136,10 @@ export default function ConnectPage() {
               Seguridad
             </h3>
             <ul className="flex flex-col gap-1.5 text-xs leading-relaxed text-ink-soft">
-              <li>• El agente solo ve credenciales que vos marcaste como &quot;Acceso AI&quot;</li>
-              <li>• Las sesiones expiran en 2 horas</li>
+              <li>• El agente NUNCA recibe contraseñas en texto plano</li>
+              <li>• Solo recibe links temporales que el usuario abre en su navegador</li>
+              <li>• Los links expiran en 15 minutos</li>
+              <li>• La sesión del agente dura 2 horas</li>
               <li>• Cada acceso queda registrado en el log de auditoría</li>
               <li>• Podes revocar el acceso en cualquier momento desde el dashboard</li>
             </ul>
