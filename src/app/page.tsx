@@ -14,6 +14,8 @@ import { Reveals } from "@/components/reveals";
 import { HeroSection } from "@/components/site/sections/hero";
 import { ProblemaSection } from "@/components/site/sections/problema";
 import { ComoFuncionaSection } from "@/components/site/sections/como-funciona";
+import { ParaEquiposSection } from "@/components/site/sections/para-equipos";
+import { SeguridadSection } from "@/components/site/sections/seguridad";
 
 const features: { title: string; body: string; Icon: typeof ClockIcon; wide?: boolean }[] = [
   {
@@ -114,46 +116,7 @@ export default function HomePage() {
       <ComoFuncionaSection />
 
       {/* Para equipos */}
-      <section
-        aria-labelledby="equipos-heading"
-        className="w-full max-w-5xl rounded-2xl border border-blue/30 bg-blue/[0.06] p-6 backdrop-blur-md sm:p-10"
-      >
-        <div data-reveal className="mb-8 max-w-xl">
-          <p className="text-sm font-medium text-blue">Para equipos</p>
-          <h2 id="equipos-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
-            Sumá a tu equipo por correo, en segundos
-          </h2>
-          <p className="mt-3 text-sm text-ink-soft">
-            Sin asientos que pagar, sin panel de IT. Invitás, la persona crea su cuenta y entra
-            con el rol que le diste.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {[
-            {
-              n: "01",
-              title: "Invitás por correo",
-              body: "Escribís el mail y elegís rol: Editor o Lector. Le llega una invitación al instante.",
-            },
-            {
-              n: "02",
-              title: "Crea su contraseña",
-              body: "Abre el link, elige una clave y listo. La organización ya está definida — no llena ningún formulario.",
-            },
-            {
-              n: "03",
-              title: "Entra con su rol",
-              body: "El Lector ve y copia; el Editor además agrega y comparte. Cada acción queda firmada con su nombre en la auditoría.",
-            },
-          ].map((s) => (
-            <div key={s.n} data-reveal>
-              <p className="font-display text-sm font-semibold text-blue">{s.n}</p>
-              <h3 className="mt-2 font-display text-lg font-semibold text-ink">{s.title}</h3>
-              <p className="mt-2 text-sm text-ink-soft">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ParaEquiposSection />
 
       {/* Features */}
       <section aria-labelledby="features-heading" className="w-full max-w-5xl">
@@ -183,23 +146,7 @@ export default function HomePage() {
       </section>
 
       {/* Mecanismo de seguridad */}
-      <section aria-labelledby="seguridad-heading" className="glass w-full max-w-5xl rounded-2xl p-6 sm:p-10">
-        <p data-reveal className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
-        <h2 data-reveal id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] text-ink sm:text-2xl">
-          Ni nosotros podemos abrir lo que compartís
-        </h2>
-        <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
-          Pensá cada link como una llave que le das a una sola persona. Nosotros guardamos la
-          credencial cerrada — la llave para abrirla no la tenemos, así que no podemos leer lo
-          que compartís, y nadie que entre a nuestros servidores tampoco: encontraría texto
-          ilegible.
-        </p>
-        <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
-          La persona que recibe el link lo abre en su propio dispositivo. Y esa llave caduca
-          sola —a las horas o días que elijas deja de servir— y podés cortarla antes con un
-          click. El control siempre es tuyo.
-        </p>
-      </section>
+      <SeguridadSection />
 
       {/* FAQ */}
       <section aria-labelledby="faq-heading" className="w-full max-w-5xl">
