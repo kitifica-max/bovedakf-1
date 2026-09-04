@@ -119,7 +119,7 @@ const faqs = [
   },
   {
     q: "¿Ustedes pueden ver mis contraseñas?",
-    a: "Las credenciales guardadas se encriptan en el servidor. Pero la clave de cada link compartido vive únicamente en la URL que reciben tus compañeros — nunca la guardamos, así que no podemos descifrar ese link nosotros mismos.",
+    a: "No. Las credenciales se guardan cerradas con llave. Nosotros guardamos solo la versión cerrada; la llave para abrir cada link la tiene únicamente la persona a la que se lo mandás. Ni nosotros ni nadie que entre a nuestra base de datos puede leer lo que hay adentro.",
   },
   {
     q: "¿Qué pasa si alguien reenvía el link a otra persona?",
@@ -356,14 +356,18 @@ export default function HomePage() {
       <section aria-labelledby="seguridad-heading" className="glass w-full max-w-5xl rounded-2xl p-6 sm:p-10">
         <p data-reveal className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
         <h2 data-reveal id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] text-ink sm:text-2xl">
-          La clave de cada link vive solo en la URL — nunca en nuestra base de datos
+          Ni nosotros podemos abrir lo que compartís
         </h2>
         <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
-          Cuando generás un link, la clave de descifrado queda en el fragmento de la URL
-          (todo lo que va después de <code className="rounded bg-paper px-1 py-0.5">#</code>).
-          Los navegadores nunca envían esa parte al servidor. Nosotros guardamos el texto
-          cifrado; quien recibe el link lo descifra en su propio navegador. No es una promesa
-          de confianza — es cómo funciona el protocolo.
+          Pensá cada link como una llave que le das a una sola persona. Nosotros guardamos la
+          credencial cerrada — la llave para abrirla no la tenemos, así que no podemos leer lo
+          que compartís, y nadie que entre a nuestros servidores tampoco: encontraría texto
+          ilegible.
+        </p>
+        <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
+          La persona que recibe el link lo abre en su propio dispositivo. Y esa llave caduca
+          sola —a las horas o días que elijas deja de servir— y podés cortarla antes con un
+          click. El control siempre es tuyo.
         </p>
       </section>
 
