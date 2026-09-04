@@ -15,7 +15,7 @@ export function HeroSection() {
           <div className="flex flex-col">
             <span
               data-reveal
-              className="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-blue-soft px-3 py-1 text-xs font-medium text-ink-reverse"
+              className="mb-5 inline-flex w-fit items-center gap-2 text-xs font-medium text-blue"
             >
               <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Encriptado extremo a extremo en cada link
             </span>
@@ -31,7 +31,7 @@ export function HeroSection() {
               <CTAButton href="/register">Crear mi bóveda →</CTAButton>
               <CTAButton href="/login" variant="secondary">Ya tengo cuenta</CTAButton>
             </div>
-            <div data-reveal className="mt-8 flex flex-wrap items-center gap-6 border-t border-border-soft pt-5">
+            <div data-reveal className="mt-8 grid grid-cols-1 gap-5 border-t border-border-soft pt-5 sm:grid-cols-2 sm:gap-6">
               {stats.map((s) => (
                 <div key={s.label} className="flex items-center gap-2.5">
                   <s.Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-blue" />
@@ -44,9 +44,7 @@ export function HeroSection() {
             </div>
           </div>
           <Illustration>
-            <div className="glass rounded-2xl p-6 sm:p-8">
-              <KeyFlowIllustration />
-            </div>
+            <KeyFlowIllustration />
           </Illustration>
         </div>
       </HeroReveal>
