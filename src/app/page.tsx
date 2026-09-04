@@ -1,11 +1,9 @@
 import Link from "next/link";
 import {
   ActivityIcon,
-  ArrowLeftRightIcon,
   ChevronDownIcon,
   ClockIcon,
   FingerprintIcon,
-  KeyRoundIcon,
   ListChecksIcon,
   LockIcon,
   LogOutIcon,
@@ -13,26 +11,12 @@ import {
   SearchXIcon,
   Share2Icon,
   ShieldAlertIcon,
-  ShieldCheckIcon,
   ShieldOffIcon,
   ShuffleIcon,
 } from "@/components/icons";
-import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { HeroReveal } from "@/components/hero-reveal";
 import { Reveals } from "@/components/reveals";
-
-const stats = [
-  { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
-  { label: "Rango de expiración configurable por link", value: "1h–7d", Icon: ClockIcon },
-];
-
-const securityBadges = [
-  { label: "AES-256", note: "El cifrado que usan bancos y gobiernos.", Icon: KeyRoundIcon },
-  { label: "GCM", note: "Garantiza que el dato no fue alterado.", Icon: ShieldCheckIcon },
-  { label: "E2E", note: "Ni nosotros podemos leer lo que compartís.", Icon: ArrowLeftRightIcon },
-  { label: "2FA", note: "Doble verificación al iniciar sesión.", Icon: FingerprintIcon },
-];
+import { HeroSection } from "@/components/site/sections/hero";
 
 const problems = [
   {
@@ -163,84 +147,7 @@ export default function HomePage() {
       />
 
       {/* Hero */}
-      <div className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-4 shadow-[0_1px_0_rgba(22,19,14,0.04)] sm:p-6">
-        <SiteHeader />
-
-        <HeroReveal>
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
-            <div className="flex flex-col justify-center rounded-2xl border border-border-soft bg-gray/60 p-6 sm:p-10">
-              <span data-reveal className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-blue-soft px-3 py-1 text-xs font-medium text-ink-reverse">
-                <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Encriptado extremo a extremo en cada link
-              </span>
-              <h1 data-reveal className="font-pixel text-3xl leading-[1.3] tracking-tight text-ink sm:text-4xl">
-                Comparte credenciales sin dejar rastro en el chat
-              </h1>
-              <p data-reveal className="mt-5 max-w-md text-ink-soft">
-                Invitá a tu equipo por correo, guarda accesos con links que se autodestruyen en
-                horas o días, y mira exactamente quién entró a qué y cuándo. Sin spreadsheets,
-                sin plaintext.
-              </p>
-              <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/register"
-                  className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 active:scale-[0.98]"
-                >
-                  Crear mi bóveda →
-                </Link>
-                <Link
-                  href="/login"
-                  className="rounded-full border border-border-soft px-6 py-3 text-sm font-medium text-ink transition hover:bg-paper active:scale-[0.98]"
-                >
-                  Ya tengo cuenta
-                </Link>
-              </div>
-              <div data-reveal className="mt-8 flex flex-wrap items-center gap-6 border-t border-border-soft pt-5">
-                {stats.map((s) => (
-                  <div key={s.label} className="flex items-center gap-2.5">
-                    <s.Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-blue" />
-                    <div>
-                      <p className="font-display text-lg leading-none font-semibold text-ink">{s.value}</p>
-                      <p className="mt-1 text-xs text-ink-soft">{s.label}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div data-reveal className="glass relative flex flex-col items-center justify-center gap-6 overflow-hidden rounded-2xl p-8 text-center sm:p-10">
-              <video
-                aria-hidden="true"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                className="absolute inset-0 h-full w-full object-cover opacity-40"
-              >
-                <source src="/anim-bits-hero-1.mp4" type="video/mp4" />
-                <source src="/anim-bits-hero-1.webm" type="video/webm" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/70 to-paper/90" />
-
-              <div data-float className="relative grid grid-cols-2 gap-3">
-                {securityBadges.map(({ label, note, Icon }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/25 px-4 py-4 text-center backdrop-blur-lg"
-                  >
-                    <Icon aria-hidden="true" className="h-6 w-6 text-blue-soft" />
-                    <span className="font-pixel text-sm text-blue-soft">{label}</span>
-                    <span className="text-[11px] leading-tight text-ink-soft">{note}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="relative max-w-[15rem] text-sm text-ink-soft">
-                Cifrado en tu navegador antes de tocar nuestra base de datos.
-              </p>
-            </div>
-          </div>
-        </HeroReveal>
-      </div>
+      <HeroSection />
 
       {/* Problema */}
       <section aria-labelledby="problema-heading" className="w-full max-w-5xl">
