@@ -8,6 +8,7 @@ export default function ConsentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const clientId = searchParams.get("client_id") ?? "agente de IA";
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,13 +72,14 @@ export default function ConsentPage() {
           Autorizar acceso
         </h1>
         <p className="mt-2 text-sm text-ink-soft">
-          Un agente de IA está solicitando acceso temporal a una credencial de tu bóveda.
+          <strong>{clientId}</strong> está solicitando acceso a las credenciales
+          de tu bóveda que tengas habilitadas para AI.
         </p>
 
         <div className="mt-5 rounded-2xl bg-gray/60 p-4 text-sm">
           <p className="text-ink-soft">
-            El agente podrá acceder a credenciales específicas que tengas habilitadas
-            para acceso AI. No tendrá acceso a toda tu bóveda.
+            El agente podrá leer credenciales marcadas como &quot;Acceso AI&quot;.
+            La sesión expira en 2 horas.
           </p>
         </div>
 
