@@ -33,7 +33,7 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
         <div>
           <h3 className="text-sm font-medium text-ink">Acceso AI (MCP)</h3>
           <p className="mt-0.5 text-xs text-ink-soft">
-            Permite que agentes de IA accedan a esta credencial
+            Permite que agentes de IA generen links temporales para esta credencial
           </p>
         </div>
         <button
@@ -59,7 +59,8 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
       {aiAccessible && (
         <div className="mt-3 rounded-xl bg-gray/40 px-3 py-2">
           <p className="text-xs text-ink-soft">
-            Los agentes de IA con una sesión activa pueden leer esta credencial.
+            El agente puede generar un link temporal de 15 min para que veas esta credencial.
+            La contraseña nunca se expone al modelo.
           </p>
         </div>
       )}
