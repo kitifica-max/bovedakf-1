@@ -42,23 +42,21 @@ export default function ConnectPage() {
           <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
             <h3 className="font-display text-lg font-semibold text-ink">Claude Desktop (escritorio)</h3>
             <p className="mt-2 text-sm text-ink-soft">
-              Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong>.
-              Se abre Finder con el archivo <code className="rounded bg-gray px-1.5 py-0.5 font-mono text-xs">claude_desktop_config.json</code>.
+              Copiá y pegá este comando en tu terminal. Usa Python (viene con macOS) para configurar automáticamente:
             </p>
-            <p className="mt-2 text-sm text-ink-soft">
-              Abrí ese archivo con un editor de texto (TextEdit, VS Code, etc.) y reemplazá el contenido con:
-            </p>
-            <pre className="mt-3 overflow-x-auto rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
-{`{
-  "mcpServers": {
-    "kf1": {
-      "url": "${BASE_URL}/api/mcp"
-    }
-  }
-}`}
-            </pre>
+            <pre className="mt-3 overflow-x-auto rounded-xl bg-gray px-4 py-3 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
+import json, os
+path = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
+os.makedirs(os.path.dirname(path), exist_ok=True)
+try:
+    with open(path) as f: config = json.load(f)
+except: config = {}
+config.setdefault('mcpServers', {})['kf1'] = {'url': '${BASE_URL}/api/mcp'}
+with open(path, 'w') as f: json.dump(config, f, indent=2)
+print('KF-1 instalado. Reiniciá Claude Desktop.')
+"`}</pre>
             <p className="mt-3 text-xs text-ink-soft">
-              Guardá el archivo y reiniciá Claude Desktop. Al primer uso, te pedirá autorizar.
+              Reiniciá Claude Desktop después de ejecutarlo.
             </p>
           </div>
 

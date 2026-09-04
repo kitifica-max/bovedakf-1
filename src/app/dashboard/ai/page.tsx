@@ -97,21 +97,21 @@ export default async function AiDashboardPage() {
             </summary>
             <div className="mt-3 rounded-xl bg-gray/60 p-4">
               <p className="text-xs text-ink-soft">
-                Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong>.
-                Se abre Finder con el archivo <code className="rounded bg-gray px-1.5 py-0.5 font-mono">claude_desktop_config.json</code>.
-                Abrilo con un editor de texto y reemplazá el contenido con:
+                Copiá y pegá este comando en tu terminal. Usa Python (viene con macOS) para configurar automáticamente:
               </p>
-              <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
-{`{
-  "mcpServers": {
-    "kf1": {
-      "url": "${BASE_URL}/api/mcp"
-    }
-  }
-}`}
-              </pre>
+              <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
+import json, os
+path = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
+os.makedirs(os.path.dirname(path), exist_ok=True)
+try:
+    with open(path) as f: config = json.load(f)
+except: config = {}
+config.setdefault('mcpServers', {})['kf1'] = {'url': '${BASE_URL}/api/mcp'}
+with open(path, 'w') as f: json.dump(config, f, indent=2)
+print('KF-1 instalado. Reiniciá Claude Desktop.')
+"`}</pre>
               <p className="mt-2 text-xs text-ink-soft">
-                Guardá y reiniciá Claude Desktop.
+                Reiniciá Claude Desktop después de ejecutarlo.
               </p>
             </div>
           </details>
