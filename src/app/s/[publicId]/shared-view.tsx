@@ -63,7 +63,12 @@ export function SharedCredentialView() {
         const data = await decryptPayload(body.payload, key);
         setState({ status: "ready", data, permission: body.permission });
       })
-      .catch((err: Error) => setState({ status: "error", message: err.message }));
+      .catch(() =>
+        setState({
+          status: "error",
+          message: "No se pudo descifrar el contenido. Verifica que el enlace esté completo.",
+        })
+      );
   }, [publicId]);
 
   return (
