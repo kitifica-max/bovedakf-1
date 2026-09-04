@@ -20,6 +20,10 @@ const INDUSTRIES = [
 
 export function RegisterForm() {
   const router = useRouter();
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const nextUrl = params?.get("next");
+  const dest = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
+  const prefillEmail = params?.get("email") ?? "";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -41,7 +45,7 @@ export function RegisterForm() {
       password: formData.get("password"),
       redirect: false,
     });
-    router.push("/dashboard");
+    router.push(dest);
   }
 
   return (
@@ -72,6 +76,7 @@ export function RegisterForm() {
               type="email"
               autoComplete="email"
               placeholder="email@empresa.com"
+              defaultValue={prefillEmail}
               required
               className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />

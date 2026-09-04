@@ -16,6 +16,9 @@ import { VerifyBanner } from "@/components/verify-banner";
 import { VerifyResult } from "@/components/verify-result";
 import { TwoFactorSettings } from "@/components/two-factor-settings";
 import { PasskeySettings } from "@/components/passkey-settings";
+import { VaultMembers } from "@/components/vault-members";
+
+type Role = "OWNER" | "EDITOR" | "VIEWER";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
@@ -34,6 +37,9 @@ export function VaultView({
   totpEnabled,
   emailVerified,
   passkeys,
+  role,
+  members,
+  invites,
 }: {
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
@@ -41,7 +47,11 @@ export function VaultView({
   totpEnabled: boolean;
   emailVerified: boolean;
   passkeys: { credentialID: string; credentialDeviceType: string; createdAt: Date }[];
+  role: Role;
+  members: { id: string; email: string; role: Role }[];
+  invites: { id: string; email: string; role: Role }[];
 }) {
+  const canEdit = role === "OWNER" || role === "EDITOR";
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div className="flex items-center gap-3">
@@ -53,10 +63,10 @@ export function VaultView({
       <VerifyResult />
       {!emailVerified && <VerifyBanner />}
       {showSurvey && <DashboardSurvey />}
-      <AddCredentialForm vaultId={vault.id} />
+      {canEdit && <AddCredentialForm vaultId={vault.id} />}
       <ul className="flex flex-col gap-3">
         {vault.credentials.map((c) => (
-          <CredentialRow key={c.id} vaultId={vault.id} credential={c} />
+          <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} />
         ))}
         {vault.credentials.length === 0 && (
           <p className="rounded-3xl border border-dashed border-border-soft p-6 text-center text-sm text-ink-soft">
@@ -66,6 +76,7 @@ export function VaultView({
       </ul>
       <PasskeySettings initialPasskeys={passkeys} />
       <TwoFactorSettings initialEnabled={totpEnabled} />
+      {role === "OWNER" && <VaultMembers vaultId={vault.id} members={members} invites={invites} />}
       <AuditLogTable logs={auditLogs} />
     </div>
   );
@@ -124,7 +135,15 @@ function AddCredentialForm({ vaultId }: { vaultId: string }) {
   );
 }
 
-function CredentialRow({ vaultId, credential }: { vaultId: string; credential: CredentialWithLinks }) {
+function CredentialRow({
+  vaultId,
+  credential,
+  canEdit,
+}: {
+  vaultId: string;
+  credential: CredentialWithLinks;
+  canEdit: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [revealed, setRevealed] = useState<{ secret: string; notes: string } | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -178,17 +197,21 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
             {revealed ? <EyeOffIcon aria-hidden="true" className="h-3.5 w-3.5" /> : <EyeIcon aria-hidden="true" className="h-3.5 w-3.5" />}
             {revealed ? "Ocultar" : "Ver"}
           </button>
-          <button className={linkBtnCls} aria-expanded={sharing} onClick={() => setSharing((s) => !s)}>
-            <Share2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-            Compartir
-          </button>
-          <button
-            className={dangerLinkBtnCls}
-            onClick={() => deleteCredentialAction(vaultId, credential.id)}
-          >
-            <Trash2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-            Eliminar
-          </button>
+          {canEdit && (
+            <>
+              <button className={linkBtnCls} aria-expanded={sharing} onClick={() => setSharing((s) => !s)}>
+                <Share2Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                Compartir
+              </button>
+              <button
+                className={dangerLinkBtnCls}
+                onClick={() => deleteCredentialAction(vaultId, credential.id)}
+              >
+                <Trash2Icon aria-hidden="true" className="h-3.5 w-3.5" />
+                Eliminar
+              </button>
+            </>
+          )}
       </div>
 
       {revealed && (
@@ -209,7 +232,7 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
         </div>
       )}
 
-      {sharing && (
+      {canEdit && sharing && (
         <form
           className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-4"
           noValidate
@@ -309,7 +332,7 @@ function CredentialRow({ vaultId, credential }: { vaultId: string; credential: C
                       {l.expiresAt.toLocaleString()}
                     </span>
                   </span>
-                  {status === "activo" && (
+                  {canEdit && status === "activo" && (
                     <span className="flex shrink-0 items-center gap-3">
                       <button
                         type="button"
@@ -357,6 +380,12 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   link_revoked: "Link revocado",
   link_denied_expired_or_revoked: "Acceso denegado (expirado o revocado)",
   link_denied_not_found: "Acceso denegado (link inexistente)",
+  credential_viewed: "Credencial vista",
+  member_invited: "Miembro invitado",
+  invite_revoked: "Invitación cancelada",
+  member_joined: "Miembro se unió",
+  member_role_changed: "Rol de miembro cambiado",
+  member_removed: "Miembro quitado",
 };
 
 function AuditLogTable({ logs }: { logs: AuditLog[] }) {
@@ -371,6 +400,7 @@ function AuditLogTable({ logs }: { logs: AuditLog[] }) {
               <th scope="col" className="py-1.5 pr-4 font-medium">Cuándo</th>
               <th scope="col" className="py-1.5 pr-4 font-medium">Credencial</th>
               <th scope="col" className="py-1.5 pr-4 font-medium">Acción</th>
+              <th scope="col" className="py-1.5 pr-4 font-medium">Quién</th>
               <th scope="col" className="py-1.5 pr-4 font-medium">IP</th>
             </tr>
           </thead>
@@ -384,13 +414,14 @@ function AuditLogTable({ logs }: { logs: AuditLog[] }) {
                   <td className={`py-1.5 pr-4 ${denied ? "text-danger" : ""}`}>
                     {AUDIT_ACTION_LABELS[log.action] ?? log.action}
                   </td>
+                  <td className="py-1.5 pr-4 text-ink-soft">{log.actorEmail ?? "—"}</td>
                   <td className="py-1.5 pr-4 text-ink-soft">{log.ipAddress ?? "—"}</td>
                 </tr>
               );
             })}
             {logs.length === 0 && (
               <tr>
-                <td className="py-2 text-ink-soft" colSpan={4}>
+                <td className="py-2 text-ink-soft" colSpan={5}>
                   Sin actividad todavía.
                 </td>
               </tr>

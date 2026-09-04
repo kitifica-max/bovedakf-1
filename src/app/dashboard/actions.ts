@@ -1,9 +1,12 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { inviteEmail, sendEmail } from "@/lib/email";
+import { inviteSchema, memberRoleSchema, ROLE_LABEL } from "@/lib/team-validation";
 import {
   decryptAtRest,
   encryptAtRest,
@@ -27,14 +30,7 @@ import {
   totpCodeSchema,
   updateCompanyNameSchema,
 } from "@/lib/validation";
-
-async function requireVaultOwnership(vaultId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("No autenticado");
-  const vault = await db.vault.findUnique({ where: { id: vaultId } });
-  if (!vault || vault.ownerId !== session.user.id) throw new Error("Bóveda no encontrada");
-  return session.user.id;
-}
+import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
 
 export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
@@ -88,7 +84,7 @@ export async function createCredentialAction(formData: FormData) {
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { vaultId, service, username, secret, notes } = parsed.data;
-  await requireVaultOwnership(vaultId);
+  await requireVaultAccess(vaultId, "EDITOR");
 
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
@@ -100,9 +96,17 @@ export async function createCredentialAction(formData: FormData) {
 }
 
 export async function revealCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultOwnership(vaultId);
+  const { email } = await requireVaultAccess(vaultId, "VIEWER");
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
   if (!credential) throw new Error("Credencial no encontrada");
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: "credential_viewed",
+      credentialService: credential.service,
+      actorEmail: email,
+    },
+  });
   return JSON.parse(decryptAtRest(credential.encryptedData)) as {
     secret: string;
     notes: string;
@@ -110,7 +114,7 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
 }
 
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultOwnership(vaultId);
+  await requireVaultAccess(vaultId, "EDITOR");
   await db.credential.deleteMany({ where: { id: credentialId, vaultId } });
   revalidatePath(`/dashboard/${vaultId}`);
 }
@@ -123,7 +127,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
-  await requireVaultOwnership(vaultId);
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
   const { credentialId, permission, expiresInHours } = parsed.data;
 
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -149,7 +153,13 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   });
 
   await db.auditLog.create({
-    data: { vaultId, action: "link_created", shareLinkId: created.id, credentialService: credential.service },
+    data: {
+      vaultId,
+      action: "link_created",
+      shareLinkId: created.id,
+      credentialService: credential.service,
+      actorEmail,
+    },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
@@ -158,7 +168,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
 }
 
 export async function revokeShareLinkAction(vaultId: string, shareLinkId: string) {
-  await requireVaultOwnership(vaultId);
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
   // Scoped by vaultId too — an id alone isn't enough, or any authenticated
   // owner of any vault could revoke another tenant's share link by id.
   const { count } = await db.shareLink.updateMany({
@@ -171,7 +181,7 @@ export async function revokeShareLinkAction(vaultId: string, shareLinkId: string
     select: { credential: { select: { service: true } } },
   });
   await db.auditLog.create({
-    data: { vaultId, shareLinkId, action: "link_revoked", credentialService: link?.credential.service },
+    data: { vaultId, shareLinkId, action: "link_revoked", credentialService: link?.credential.service, actorEmail },
   });
   revalidatePath(`/dashboard/${vaultId}`);
 }
@@ -272,4 +282,139 @@ export async function removePasskeyAction(credentialID: string) {
 
   revalidatePath("/dashboard", "layout");
   return null;
+}
+
+// ── Team: invites & members ────────────────────────────────────────────
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export async function inviteMemberAction(vaultId: string, formData: FormData): Promise<string | null> {
+  const { userId, email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
+  const parsed = inviteSchema.safeParse({ email: formData.get("email"), role: formData.get("role") });
+  if (!parsed.success) return parsed.error.issues[0].message;
+  const { email, role } = parsed.data;
+
+  if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
+
+  // Case-insensitive: emails may be stored with mixed case from older signups.
+  const already = await db.vaultMember.findFirst({
+    where: { vaultId, user: { email: { equals: email, mode: "insensitive" } } },
+    select: { id: true },
+  });
+  if (already) return "Esa persona ya es parte de la bóveda.";
+
+  const token = randomBytes(32).toString("hex");
+  // One live invite per (vault, email): replace any prior unaccepted one.
+  await db.vaultInvite.deleteMany({ where: { vaultId, email, acceptedAt: null } });
+  const created = await db.vaultInvite.create({
+    data: {
+      vaultId,
+      email,
+      role,
+      token,
+      invitedById: userId,
+      expiresAt: new Date(Date.now() + INVITE_TTL_MS),
+    },
+  });
+
+  const [vault, session] = await Promise.all([
+    db.vault.findUnique({ where: { id: vaultId }, select: { name: true } }),
+    auth(),
+  ]);
+  const inviterName = session?.user?.companyName || actorEmail;
+  const link = `${APP_URL}/invite/${token}`;
+  const { subject, html } = inviteEmail(link, vault?.name ?? "una bóveda", inviterName, ROLE_LABEL[role]);
+  const sent = await sendEmail(email, subject, html);
+  if (!sent.ok) {
+    // No resend UI yet — don't leave a "pending" invite whose email never went out.
+    await db.vaultInvite.delete({ where: { id: created.id } });
+    return "No se pudo enviar la invitación. Revisá el correo e intentá de nuevo.";
+  }
+
+  await db.auditLog.create({
+    data: { vaultId, action: "member_invited", actorEmail, credentialService: email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+export async function revokeInviteAction(vaultId: string, inviteId: string): Promise<void> {
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
+  const invite = await db.vaultInvite.findFirst({
+    where: { id: inviteId, vaultId, acceptedAt: null },
+    select: { email: true },
+  });
+  if (!invite) return;
+  await db.vaultInvite.delete({ where: { id: inviteId } });
+  await db.auditLog.create({
+    data: { vaultId, action: "invite_revoked", actorEmail, credentialService: invite.email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+}
+
+export async function changeMemberRoleAction(
+  vaultId: string,
+  memberId: string,
+  role: "EDITOR" | "VIEWER"
+): Promise<string | null> {
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
+  // Server action — validate the role at runtime, not just at the type level.
+  const parsed = memberRoleSchema.safeParse({ role });
+  if (!parsed.success) return "Rol inválido.";
+
+  const member = await db.vaultMember.findFirst({
+    where: { id: memberId, vaultId },
+    include: { user: { select: { email: true } } },
+  });
+  if (!member) return "Miembro no encontrado.";
+  if (member.role === "OWNER") return "No podés cambiar el rol del dueño.";
+
+  await db.vaultMember.update({ where: { id: memberId }, data: { role: parsed.data.role } });
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: "member_role_changed",
+      actorEmail,
+      credentialService: `${member.user.email} → ${ROLE_LABEL[parsed.data.role]}`,
+    },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+export async function removeMemberAction(vaultId: string, memberId: string): Promise<void> {
+  const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
+  const member = await db.vaultMember.findFirst({
+    where: { id: memberId, vaultId, role: { not: "OWNER" } },
+    include: { user: { select: { email: true } } },
+  });
+  if (!member) return;
+  await db.vaultMember.delete({ where: { id: memberId } });
+  await db.auditLog.create({
+    data: { vaultId, action: "member_removed", actorEmail, credentialService: member.user.email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+}
+
+export async function acceptInviteAction(
+  token: string
+): Promise<{ ok: true; vaultId: string } | { ok: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id || !session.user.email) return { ok: false, error: "No autenticado" };
+
+  const invite = await db.vaultInvite.findUnique({ where: { token } });
+  if (!invite || invite.acceptedAt) return { ok: false, error: "Invitación inválida o ya usada." };
+  if (invite.expiresAt < new Date()) return { ok: false, error: "La invitación venció." };
+  if (invite.email.toLowerCase() !== session.user.email.toLowerCase()) {
+    return { ok: false, error: `Esta invitación es para ${invite.email}.` };
+  }
+
+  await applyMembership(invite.vaultId, session.user.id, invite.role);
+  await db.vaultInvite.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
+  await db.auditLog.create({
+    data: { vaultId: invite.vaultId, action: "member_joined", actorEmail: session.user.email },
+  });
+  revalidatePath(`/dashboard/${invite.vaultId}`);
+  return { ok: true, vaultId: invite.vaultId };
 }
