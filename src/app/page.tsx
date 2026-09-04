@@ -1,61 +1,19 @@
 import Link from "next/link";
 import {
-  ActivityIcon,
   ChevronDownIcon,
   ClockIcon,
   FingerprintIcon,
   ListChecksIcon,
   LockIcon,
   LogOutIcon,
-  SaveIcon,
-  SearchXIcon,
   Share2Icon,
-  ShieldAlertIcon,
   ShieldOffIcon,
-  ShuffleIcon,
 } from "@/components/icons";
 import { SiteFooter } from "@/components/site-footer";
 import { Reveals } from "@/components/reveals";
 import { HeroSection } from "@/components/site/sections/hero";
-
-const problems = [
-  {
-    title: "Contraseñas dispersas",
-    body: "Un poco en el email, un poco en Slack, un poco en un Notion que nadie actualiza. Nadie sabe cuál es la versión real.",
-    Icon: ShuffleIcon,
-  },
-  {
-    title: "Cero auditoría",
-    body: "Cuando algo sale mal, no hay forma de saber quién entró a qué credencial, ni cuándo.",
-    Icon: SearchXIcon,
-  },
-  {
-    title: "Texto plano para siempre",
-    body: "Un mensaje de Slack con una contraseña adentro no se borra solo. Vive ahí, sin cifrar, indefinidamente.",
-    Icon: ShieldAlertIcon,
-  },
-];
-
-const steps = [
-  {
-    n: "01",
-    title: "Guarda",
-    body: "Añades la credencial y se encripta al instante con AES-256-GCM antes de tocar la base de datos.",
-    Icon: SaveIcon,
-  },
-  {
-    n: "02",
-    title: "Comparte",
-    body: "Generas un link con expiración (1h a 7 días) y permiso de lectura o descarga.",
-    Icon: Share2Icon,
-  },
-  {
-    n: "03",
-    title: "Audita",
-    body: "Ves exactamente quién entró, cuándo y desde qué IP — el link se puede revocar con un click.",
-    Icon: ActivityIcon,
-  },
-];
+import { ProblemaSection } from "@/components/site/sections/problema";
+import { ComoFuncionaSection } from "@/components/site/sections/como-funciona";
 
 const features: { title: string; body: string; Icon: typeof ClockIcon; wide?: boolean }[] = [
   {
@@ -150,45 +108,10 @@ export default function HomePage() {
       <HeroSection />
 
       {/* Problema */}
-      <section aria-labelledby="problema-heading" className="w-full max-w-5xl">
-        <div data-reveal className="mb-6 max-w-xl">
-          <p className="text-sm font-medium text-blue">El problema</p>
-          <h2 id="problema-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
-            No es la contraseña. Es dónde vive.
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {problems.map((p) => (
-            <div key={p.title} data-reveal className="rounded-2xl border border-border-soft bg-paper p-6">
-              <p.Icon aria-hidden="true" className="h-6 w-6 text-blue" />
-              <h3 className="mt-4 font-display text-lg font-semibold text-ink">{p.title}</h3>
-              <p className="mt-2 text-sm text-ink-soft">{p.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ProblemaSection />
 
       {/* Cómo funciona */}
-      <section aria-labelledby="como-funciona-heading" className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-6 sm:p-10">
-        <div data-reveal className="mb-8 max-w-xl">
-          <p className="text-sm font-medium text-blue">Cómo funciona</p>
-          <h2 id="como-funciona-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
-            Tres pasos, cero fricción
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {steps.map((s) => (
-            <div key={s.n} data-reveal>
-              <div className="flex items-center gap-2">
-                <s.Icon aria-hidden="true" className="h-5 w-5 text-blue" />
-                <p className="font-display text-sm font-semibold text-blue">{s.n}</p>
-              </div>
-              <h3 className="mt-2 font-display text-xl font-semibold text-ink">{s.title}</h3>
-              <p className="mt-2 text-sm text-ink-soft">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ComoFuncionaSection />
 
       {/* Para equipos */}
       <section
