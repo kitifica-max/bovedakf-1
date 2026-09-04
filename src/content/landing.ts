@@ -39,24 +39,33 @@ export const problems: { title: string; body: string; Icon: IconType }[] = [
   },
 ];
 
-export const steps: { n: string; title: string; body: string; Illustration: IllustrationType }[] = [
+export const steps: {
+  n: string;
+  title: string;
+  body: string;
+  Illustration: IllustrationType;
+  loop: "step-save" | "step-share" | "step-audit";
+}[] = [
   {
     n: "01",
     title: "Guarda",
     body: "Añades la credencial y se encripta al instante con AES-256-GCM antes de tocar la base de datos.",
     Illustration: StepSaveIllustration,
+    loop: "step-save",
   },
   {
     n: "02",
     title: "Comparte",
     body: "Generas un link con expiración (1h a 7 días) y permiso de lectura o descarga.",
     Illustration: StepShareIllustration,
+    loop: "step-share",
   },
   {
     n: "03",
     title: "Audita",
     body: "Ves exactamente quién entró, cuándo y desde qué IP — el link se puede revocar con un click.",
     Illustration: StepAuditIllustration,
+    loop: "step-audit",
   },
 ];
 

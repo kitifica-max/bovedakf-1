@@ -2,6 +2,7 @@ import { Section } from "@/components/site/section";
 import { SectionHead, slug } from "@/components/site/section-head";
 import { Illustration } from "@/components/site/illustration";
 import { CTAButton } from "@/components/site/cta-button";
+import { IllustrationLoop } from "@/components/illustrations/illustration-loop";
 import { RolesIllustration } from "@/components/illustrations/roles";
 import { teamSteps } from "@/content/landing";
 
@@ -12,11 +13,12 @@ export function ParaEquiposSection() {
         kicker="Para equipos"
         title="Sumá a tu equipo por correo, en segundos"
         lead="Sin asientos que pagar, sin panel de IT. Invitás, la persona crea su cuenta y entra con el rol que le diste."
+        center
       />
       <Illustration>
-        <div className="mb-8 max-w-xl">
+        <IllustrationLoop name="roles" className="mx-auto mb-8 max-w-xl [&>svg]:h-auto [&>svg]:w-full">
           <RolesIllustration />
-        </div>
+        </IllustrationLoop>
       </Illustration>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {teamSteps.map((s) => (
