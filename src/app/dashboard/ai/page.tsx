@@ -30,6 +30,12 @@ export default async function AiDashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-soft transition hover:text-ink w-fit"
+      >
+        <span aria-hidden="true">&larr;</span> Volver al dashboard
+      </Link>
       <div className="flex items-center gap-3">
         <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue text-paper">
           <ShieldCheckIcon className="h-4 w-4" />
@@ -102,7 +108,7 @@ export default async function AiDashboardPage() {
               <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
 import json, os, sys
 if sys.platform == 'win32':
-    path = os.path.expandvars(r'%APPDATA%\\\\Claude\\\\claude_desktop_config.json')
+    path = os.path.expandvars(r'%APPDATA%\\Claude\\claude_desktop_config.json')
 else:
     path = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
 os.makedirs(os.path.dirname(path), exist_ok=True)
