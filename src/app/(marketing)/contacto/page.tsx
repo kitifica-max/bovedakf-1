@@ -25,7 +25,7 @@ const channels = [
 export default function ContactPage() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Contacto</h1>
+      <h1 className="t-display text-ink">Contacto</h1>
       <p className="mt-3 text-ink-soft">
         ¿Preguntas sobre seguridad, un bug, o algo comercial? Escribinos directamente — leemos
         todo, respondemos en persona.
@@ -45,7 +45,7 @@ export default function ContactPage() {
               <Icon className="h-4 w-4" />
             </span>
             <span>
-              <span className="block font-display text-lg font-semibold text-ink">{title}</span>
+              <span className="block t-h3 text-ink">{title}</span>
               <span className="mt-1 block text-sm text-ink-soft">{email}</span>
             </span>
           </a>

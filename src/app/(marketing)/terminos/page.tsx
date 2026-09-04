@@ -72,7 +72,7 @@ const sections = [
 export default function TermsPage() {
   return (
     <div>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
+      <h1 className="t-display text-ink">
         Términos y condiciones
       </h1>
       <p className="mt-2 text-sm text-ink-soft">Última actualización: 26 de agosto de 2026.</p>
@@ -84,7 +84,7 @@ export default function TermsPage() {
       <div className="mt-8 flex flex-col gap-6">
         {sections.map((s) => (
           <section key={s.h}>
-            <h2 className="font-display text-lg font-semibold text-ink">{s.h}</h2>
+            <h2 className="t-h2 text-ink">{s.h}</h2>
             {s.p.map((para, i) => (
               <p key={i} className="mt-2 text-sm text-ink-soft">
                 {para}
