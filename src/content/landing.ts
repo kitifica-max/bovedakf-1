@@ -108,7 +108,7 @@ export const faqs: { q: string; a: string }[] = [
   },
   {
     q: "¿Ustedes pueden ver mis contraseñas?",
-    a: "No. Las credenciales se guardan cerradas con llave. Nosotros guardamos solo la versión cerrada; la llave para abrir cada link la tiene únicamente la persona a la que se lo mandás. Ni nosotros ni nadie que entre a nuestra base de datos puede leer lo que hay adentro.",
+    a: "Los links que compartís: la llave para abrirlos viaja dentro del link y nunca se guarda en nuestros servidores, así que solo quien recibe el link puede verlo — nosotros no. Las credenciales que guardás en tu bóveda van cifradas con AES-256-GCM; la llave para descifrarlas vive en el servidor, separada de la base de datos, nunca junto a los datos. Si alguien se roba la base, se lleva texto ilegible.",
   },
   {
     q: "¿Qué pasa si alguien reenvía el link a otra persona?",

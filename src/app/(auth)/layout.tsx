@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <main className="flex w-full max-w-5xl flex-1 items-center justify-center gap-16">
         <div className="hidden max-w-xs flex-col gap-7 lg:flex">
           <h2 className="t-h2 text-ink">
-            Tu bóveda, cifrada de punta a punta
+            Tu bóveda, cifrada y bajo tu control
           </h2>
           <SecuritySpec compact groups={AUTH_SPEC} />
         </div>
