@@ -11,13 +11,18 @@ export function SectionHead({
   kicker,
   title,
   lead,
+  center = false,
 }: {
   kicker: string;
   title: string;
   lead?: string;
+  center?: boolean;
 }) {
   return (
-    <div data-reveal className="mb-10 max-w-2xl sm:mb-14">
+    <div
+      data-reveal
+      className={`mb-10 max-w-2xl sm:mb-14 ${center ? "mx-auto text-center" : ""}`}
+    >
       <p className="t-kicker">{kicker}</p>
       <h2 id={slug(title)} className="t-h2 mt-2 text-ink">
         {title}

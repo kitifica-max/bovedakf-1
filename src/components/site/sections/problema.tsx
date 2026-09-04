@@ -7,9 +7,9 @@ import { problems } from "@/content/landing";
 export function ProblemaSection() {
   return (
     <Section aria-labelledby={slug("No es la contraseña. Es dónde vive.")}>
-      <SectionHead kicker="El problema" title="No es la contraseña. Es dónde vive." />
+      <SectionHead kicker="El problema" title="No es la contraseña. Es dónde vive." center />
       <Illustration>
-        <div className="mb-8 max-w-xl">
+        <div className="mx-auto mb-8 max-w-xl">
           <ScatteredSecretsIllustration />
         </div>
       </Illustration>
