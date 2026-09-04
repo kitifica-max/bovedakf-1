@@ -17,6 +17,19 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   poweredByHeader: false,
+  async rewrites() {
+    // mcp-remote discovers OAuth via RFC 8414 — serve our metadata at the standard path.
+    return [
+      {
+        source: "/.well-known/oauth-authorization-server",
+        destination: "/api/auth/oauth/metadata",
+      },
+      {
+        source: "/.well-known/oauth-protected-resource",
+        destination: "/api/auth/oauth/protected-resource",
+      },
+    ];
+  },
   async headers() {
     // Dev mode needs eval() (React Refresh) and a WS connection for HMR —
     // apply the strict CSP only to the deployed build.
