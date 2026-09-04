@@ -11,6 +11,7 @@ type Common = {
   variant?: "primary" | "secondary";
   className?: string;
   children: React.ReactNode;
+  onClick?: () => void;
 };
 
 export function CTAButton(
@@ -29,6 +30,7 @@ export function CTAButton(
     <button
       type={props.type}
       disabled={props.disabled}
+      onClick={"onClick" in props ? props.onClick : undefined}
       className={`${cls} cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
