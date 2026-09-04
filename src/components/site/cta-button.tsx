@@ -5,10 +5,11 @@ const BASE =
 const VARIANT = {
   primary: "bg-ink text-gray hover:bg-ink/90",
   secondary: "border border-border-soft text-ink hover:bg-paper",
+  dark: "bg-ink-reverse text-ink hover:bg-ink-reverse/90",
 } as const;
 
 type Common = {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "dark";
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
