@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { SiteHeader } from "@/components/site-header";
 import { HeroSection } from "@/components/site/sections/hero";
 import { ProblemaSection } from "@/components/site/sections/problema";
@@ -21,10 +22,15 @@ const jsonLd = {
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
       <main className="flex flex-col items-center gap-16 px-4 pb-16 pt-6 sm:gap-24 sm:px-8">
       <HeroSection />
