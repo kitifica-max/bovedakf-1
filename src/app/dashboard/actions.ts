@@ -6,7 +6,7 @@ import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { inviteEmail, sendEmail } from "@/lib/email";
-import { inviteSchema, memberRoleSchema, ROLE_LABEL } from "@/lib/team-validation";
+import { inviteSchema, inviteSignupSchema, memberRoleSchema, ROLE_LABEL } from "@/lib/team-validation";
 import {
   decryptAtRest,
   encryptAtRest,
@@ -395,6 +395,44 @@ export async function removeMemberAction(vaultId: string, memberId: string): Pro
     data: { vaultId, action: "member_removed", actorEmail, credentialService: member.user.email },
   });
   revalidatePath(`/dashboard/${vaultId}`);
+}
+
+// New-user path for an invite link: no org form, just a password. The email
+// is fixed by the invite; clicking a link mailed to that address is proof of
+// inbox control, so the account starts verified. No personal vault is
+// created — the invitee joins the inviting org only.
+export async function acceptInviteAsNewUserAction(
+  token: string,
+  formData: FormData
+): Promise<{ ok: true; email: string; vaultId: string } | { ok: false; error: string }> {
+  const parsed = inviteSignupSchema.safeParse({ password: formData.get("password") });
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
+
+  const invite = await db.vaultInvite.findUnique({ where: { token } });
+  if (!invite || invite.acceptedAt) return { ok: false, error: "Invitación inválida o ya usada." };
+  if (invite.expiresAt < new Date()) return { ok: false, error: "La invitación venció." };
+
+  const email = invite.email.toLowerCase();
+  if (await db.user.findUnique({ where: { email }, select: { id: true } })) {
+    return { ok: false, error: "Ya tenés una cuenta con ese correo. Entrá para aceptar." };
+  }
+
+  const { hash, salt } = hashPassword(parsed.data.password);
+  let user;
+  try {
+    user = await db.user.create({
+      data: { email, passwordHash: hash, passwordSalt: salt, emailVerified: new Date() },
+    });
+  } catch {
+    return { ok: false, error: "Ya tenés una cuenta con ese correo. Entrá para aceptar." };
+  }
+
+  await applyMembership(invite.vaultId, user.id, invite.role);
+  await db.vaultInvite.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
+  await db.auditLog.create({
+    data: { vaultId: invite.vaultId, action: "member_joined", actorEmail: email },
+  });
+  return { ok: true, email, vaultId: invite.vaultId };
 }
 
 export async function acceptInviteAction(
