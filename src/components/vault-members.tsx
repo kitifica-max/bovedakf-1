@@ -37,6 +37,17 @@ export function VaultMembers({
     else form.reset();
   }
 
+  async function changeRole(memberId: string, role: "EDITOR" | "VIEWER") {
+    setError(null);
+    const result = await changeMemberRoleAction(vaultId, memberId, role);
+    if (result) setError(result);
+  }
+
+  async function remove(memberId: string) {
+    setError(null);
+    await removeMemberAction(vaultId, memberId);
+  }
+
   return (
     <div className="rounded-2xl border border-border-soft bg-paper p-5">
       <p className="font-display text-lg font-semibold text-ink">Equipo</p>
@@ -54,9 +65,7 @@ export function VaultMembers({
               <span className="flex items-center gap-2">
                 <select
                   defaultValue={m.role}
-                  onChange={(e) =>
-                    changeMemberRoleAction(vaultId, m.id, e.target.value as "EDITOR" | "VIEWER")
-                  }
+                  onChange={(e) => changeRole(m.id, e.target.value as "EDITOR" | "VIEWER")}
                   className="cursor-pointer rounded-xl border border-border-soft bg-gray/40 px-2 py-1 text-xs outline-none"
                 >
                   <option value="EDITOR">{ROLE_LABEL.EDITOR}</option>
@@ -65,7 +74,7 @@ export function VaultMembers({
                 <button
                   type="button"
                   aria-label={`Quitar a ${m.email}`}
-                  onClick={() => removeMemberAction(vaultId, m.id)}
+                  onClick={() => remove(m.id)}
                   className="cursor-pointer text-danger transition hover:text-danger/80"
                 >
                   <Trash2Icon aria-hidden="true" className="h-3.5 w-3.5" />
