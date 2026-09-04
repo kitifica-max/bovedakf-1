@@ -32,9 +32,9 @@ export function AiAgentSection() {
         <div className="flex-1 rounded-2xl border border-blue/25 bg-blue/[0.07] p-6">
           <h3 className="t-h3 text-ink">Seguridad</h3>
           <ul className="mt-3 flex flex-col gap-2 text-sm text-ink-soft">
-            <li>• El agente solo ve lo que vos autorizás</li>
-            <li>• Sesiones temporales, no acceso permanente</li>
-            <li>• Cada consulta quedó registrada en auditoría</li>
+            <li>• El agente NUNCA recibe contraseñas en texto plano</li>
+            <li>• Solo recibe links temporales para abrir en el navegador</li>
+            <li>• Links expiran en 15 minutos</li>
             <li>• Revocá el acceso en cualquier momento</li>
           </ul>
         </div>
