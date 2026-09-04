@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -87,7 +88,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Reading headers() opts the whole tree into dynamic rendering and is what
+  // lets Next.js stamp its own inline hydration/RSC scripts with the nonce
+  // middleware.ts minted for this request — required for the strict,
+  // 'unsafe-inline'-free script-src in that middleware's CSP.
+  await headers();
   return (
     <html
       lang="es"
