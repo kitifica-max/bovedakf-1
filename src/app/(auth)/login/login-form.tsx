@@ -8,6 +8,7 @@ import { signIn as passkeySignIn } from "next-auth/webauthn";
 import { checkPasswordAction } from "../actions";
 import { FingerprintIcon } from "@/components/icons";
 import { VerifyResult } from "@/components/verify-result";
+import { CTAButton } from "@/components/site/cta-button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -102,7 +103,7 @@ export function LoginForm() {
   if (step === "totp") {
     return (
       <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Verificación</h1>
+        <h1 className="t-display text-ink">Verificación</h1>
         <p className="mt-1 text-sm text-ink-soft">
           Ingresá el código de tu app de autenticación, o un código de respaldo.
         </p>
@@ -125,12 +126,9 @@ export function LoginForm() {
           {error && (
             <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
           )}
-          <button
-            disabled={pending}
-            className="mt-2 cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
             {pending ? "Verificando..." : "Verificar"}
-          </button>
+          </CTAButton>
           <button
             type="button"
             onClick={() => {
@@ -148,7 +146,7 @@ export function LoginForm() {
 
   return (
       <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Entrar</h1>
+        <h1 className="t-display text-ink">Entrar</h1>
         <p className="mt-1 text-sm text-ink-soft">Accede a tu bóveda de credenciales.</p>
         <div className="mt-4 empty:hidden">
           <VerifyResult />
@@ -181,12 +179,9 @@ export function LoginForm() {
           {error && (
             <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
           )}
-          <button
-            disabled={pending}
-            className="mt-2 cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
             {pending ? "Entrando..." : "Entrar"}
-          </button>
+          </CTAButton>
         </form>
 
         {hasPasskey && (
