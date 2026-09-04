@@ -25,22 +25,6 @@ export function HeroReveal({ children }: { children: React.ReactNode }) {
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.08 }
       );
-
-      // Once settled, a barely-there drift on the badge cluster so the hero
-      // panel keeps breathing next to the looping video.
-      const float = el.querySelector<HTMLElement>("[data-float]");
-      if (float) {
-        // Slow enough (~9s/cycle) to sit outside the ~0.2 Hz band that reads
-        // as distracting/vestibular; small amplitude so it's a breath, not a bob.
-        gsap.to(float, {
-          y: -4,
-          duration: 4.5,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          delay: 1,
-        });
-      }
     });
 
     return () => {

@@ -9,10 +9,9 @@ export function SeguridadSection() {
       <SectionHead kicker="Seguridad" title="Ni nosotros podemos abrir lo que compartís" />
       <div className="max-w-2xl">
         <p data-reveal className="text-sm leading-relaxed text-ink-soft">
-          Pensá cada link como una llave que le das a una sola persona. Nosotros guardamos la
-          credencial cerrada — la llave para abrirla no la tenemos, así que no podemos leer lo
-          que compartís, y nadie que entre a nuestros servidores tampoco: encontraría texto
-          ilegible.
+          Pensá cada link como una llave que le das a una sola persona. Esa llave viaja dentro
+          del link y nunca se guarda en nuestros servidores: sin ella, lo que compartís es
+          texto ilegible — ni nosotros ni nadie que entre a nuestros servidores puede abrirlo.
         </p>
         <p data-reveal className="mt-3 text-sm leading-relaxed text-ink-soft">
           La persona que recibe el link lo abre en su propio dispositivo. Y esa llave caduca
