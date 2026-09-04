@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { acceptInviteAsNewUserAction } from "@/app/dashboard/actions";
+import { CTAButton } from "@/components/site/cta-button";
 
 const inputCls =
   "w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink";
@@ -72,12 +73,9 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
       {error && (
         <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
       )}
-      <button
-        disabled={pending}
-        className="mt-2 cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
         {pending ? "Creando..." : "Crear cuenta y unirme"}
-      </button>
+      </CTAButton>
     </form>
   );
 }

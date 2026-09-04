@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resetPasswordAction } from "../../actions";
+import { CTAButton } from "@/components/site/cta-button";
 
 const inputCls =
   "w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink";
@@ -39,7 +39,7 @@ export function ResetForm({ token, email }: { token: string; email: string }) {
 
   return (
     <div className="glass w-full max-w-sm rounded-2xl p-8">
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">Contraseña nueva</h1>
+      <h1 className="t-display text-ink">Contraseña nueva</h1>
 
       {done ? (
         <p className="mt-4 rounded-2xl bg-blue/10 px-4 py-3 text-sm text-ink-soft">
@@ -74,19 +74,16 @@ export function ResetForm({ token, email }: { token: string; email: string }) {
             {error && (
               <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
             )}
-            <button
-              disabled={pending}
-              className="mt-2 cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
               {pending ? "Guardando..." : "Guardar contraseña"}
-            </button>
+            </CTAButton>
           </form>
         </>
       )}
 
-      <Link href="/login" className="mt-5 block text-center text-sm text-ink-soft underline">
+      <CTAButton href="/login" variant="secondary" className="mt-5 w-full">
         Volver a entrar
-      </Link>
+      </CTAButton>
     </div>
   );
 }
