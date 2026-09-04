@@ -42,7 +42,11 @@ export default function ConnectPage() {
           <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
             <h3 className="font-display text-lg font-semibold text-ink">Claude Desktop (escritorio)</h3>
             <p className="mt-2 text-sm text-ink-soft">
-              Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong> y agregá:
+              Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong>.
+              Se abre Finder con el archivo <code className="rounded bg-gray px-1.5 py-0.5 font-mono text-xs">claude_desktop_config.json</code>.
+            </p>
+            <p className="mt-2 text-sm text-ink-soft">
+              Abrí ese archivo con un editor de texto (TextEdit, VS Code, etc.) y reemplazá el contenido con:
             </p>
             <pre className="mt-3 overflow-x-auto rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
 {`{
@@ -54,7 +58,7 @@ export default function ConnectPage() {
 }`}
             </pre>
             <p className="mt-3 text-xs text-ink-soft">
-              Reiniciá Claude Desktop. Al primer uso, te pedirá autorizar.
+              Guardá el archivo y reiniciá Claude Desktop. Al primer uso, te pedirá autorizar.
             </p>
           </div>
 

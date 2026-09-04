@@ -96,10 +96,12 @@ export default async function AiDashboardPage() {
               Claude Desktop (escritorio)
             </summary>
             <div className="mt-3 rounded-xl bg-gray/60 p-4">
-              <p className="mb-2 text-xs text-ink-soft">
-                Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong> y agregá:
+              <p className="text-xs text-ink-soft">
+                Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong>.
+                Se abre Finder con el archivo <code className="rounded bg-gray px-1.5 py-0.5 font-mono">claude_desktop_config.json</code>.
+                Abrilo con un editor de texto y reemplazá el contenido con:
               </p>
-              <pre className="overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
+              <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
 {`{
   "mcpServers": {
     "kf1": {
@@ -108,6 +110,9 @@ export default async function AiDashboardPage() {
   }
 }`}
               </pre>
+              <p className="mt-2 text-xs text-ink-soft">
+                Guardá y reiniciá Claude Desktop.
+              </p>
             </div>
           </details>
 
