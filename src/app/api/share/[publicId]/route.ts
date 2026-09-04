@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
   const rawIp = clientIp(req.headers);
   const ip = anonymizeIp(rawIp); // what we persist; rate limit still uses rawIp
 
-  const { success } = rateLimit(`share:${rawIp}`);
+  const { success } = await rateLimit(`share:${rawIp}`);
   if (!success) {
     return NextResponse.json(
       { error: "Demasiadas solicitudes, intenta más tarde." },
