@@ -7,6 +7,7 @@ import { hashPassword, verifyPassword, burnPasswordCompare } from "@/lib/crypto"
 import { loginSchema, registerSchema, emailSchema, resetPasswordSchema } from "@/lib/validation";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { createToken, consumeToken } from "@/lib/tokens";
+import { applyMembership } from "@/lib/vault-access";
 import {
   sendEmail,
   verificationEmail,
@@ -62,6 +63,19 @@ export async function registerAction(_prev: string | null, formData: FormData) {
     },
   });
   await db.vault.create({ data: { name: "Mi bóveda", ownerId: user.id } });
+
+  // Accept any invites already waiting for this address.
+  const pendingInvites = await db.vaultInvite.findMany({
+    where: { email: email.toLowerCase(), acceptedAt: null, expiresAt: { gt: new Date() } },
+  });
+  for (const inv of pendingInvites) {
+    await applyMembership(inv.vaultId, user.id, inv.role);
+    await db.vaultInvite.update({ where: { id: inv.id }, data: { acceptedAt: new Date() } });
+    await db.auditLog.create({
+      data: { vaultId: inv.vaultId, action: "member_joined", actorEmail: email.toLowerCase() },
+    });
+  }
+
   await sendVerification(email);
 
   return null;
