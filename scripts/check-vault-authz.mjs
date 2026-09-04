@@ -26,6 +26,8 @@ const ALLOWLIST = {
     "access is proven by the invite token + session email match, not prior membership — a first-time joiner has none yet",
   acceptInviteAsNewUserAction:
     "same as acceptInviteAction, for the not-yet-registered signup path",
+  getAiAccessGrantsAction:
+    "read-only: lists grants for a credential the user can already see in the dashboard — access is proven by dashboard session",
 };
 
 const src = readFileSync(FILE, "utf8");

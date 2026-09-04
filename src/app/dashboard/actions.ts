@@ -456,3 +456,197 @@ export async function acceptInviteAction(
   revalidatePath(`/dashboard/${invite.vaultId}`);
   return { ok: true, vaultId: invite.vaultId };
 }
+
+// ── AI Access (MCP) ──────────────────────────────────────────────────
+
+export async function toggleAiAccessAction(
+  credentialId: string,
+  enabled: boolean
+): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const credential = await db.credential.findUnique({
+    where: { id: credentialId },
+    select: { vaultId: true, service: true },
+  });
+  if (!credential) return "Credencial no encontrada";
+
+  await requireVaultAccess(credential.vaultId, "OWNER");
+
+  const existing = await db.aIAccessPolicy.findUnique({ where: { credentialId } });
+
+  if (existing) {
+    await db.aIAccessPolicy.update({
+      where: { credentialId },
+      data: { enabled },
+    });
+  } else {
+    await db.aIAccessPolicy.create({
+      data: {
+        credentialId,
+        enabled,
+        maxDurationMin: 30,
+        createdByUserId: session.user.id,
+      },
+    });
+  }
+
+  await db.auditLog.create({
+    data: {
+      vaultId: credential.vaultId,
+      action: enabled ? "ai_policy_created" : "ai_policy_disabled",
+      actorEmail: session.user.email ?? "",
+      credentialService: credential.service,
+    },
+  });
+
+  revalidatePath(`/dashboard/${credential.vaultId}`);
+  return null;
+}
+
+export async function updateAiAccessDurationAction(
+  credentialId: string,
+  maxDurationMin: number
+): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const credential = await db.credential.findUnique({
+    where: { id: credentialId },
+    select: { vaultId: true },
+  });
+  if (!credential) return "Credencial no encontrada";
+
+  await requireVaultAccess(credential.vaultId, "OWNER");
+
+  if (maxDurationMin < 1 || maxDurationMin > 240) {
+    return "Duración debe ser entre 1 y 240 minutos";
+  }
+
+  await db.aIAccessPolicy.update({
+    where: { credentialId },
+    data: { maxDurationMin },
+  });
+
+  revalidatePath(`/dashboard/${credential.vaultId}`);
+  return null;
+}
+
+export async function revokeAiAccessGrantAction(
+  grantId: string
+): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const grant = await db.aIAccessGrant.findUnique({
+    where: { id: grantId },
+    select: {
+      vaultId: true,
+      credential: { select: { service: true } },
+      revokedAt: true,
+    },
+  });
+  if (!grant) return "Acceso no encontrado";
+  if (grant.revokedAt) return "Ya fue revocado";
+
+  await requireVaultAccess(grant.vaultId, "OWNER");
+
+  await db.aIAccessGrant.update({
+    where: { id: grantId },
+    data: { revokedAt: new Date(), revokedByUserId: session.user.id },
+  });
+
+  await db.auditLog.create({
+    data: {
+      vaultId: grant.vaultId,
+      aiGrantId: grantId,
+      action: "ai_access_revoked",
+      actorEmail: session.user.email ?? "",
+      credentialService: grant.credential.service,
+    },
+  });
+
+  revalidatePath(`/dashboard/${grant.vaultId}`);
+  return null;
+}
+
+export async function getAiAccessGrantsAction(credentialId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const credential = await db.credential.findUnique({
+    where: { id: credentialId },
+    select: { vaultId: true },
+  });
+  if (!credential) return [];
+
+  const grants = await db.aIAccessGrant.findMany({
+    where: { credentialId },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
+  return grants;
+}
+
+export async function requestAiAccessLinkAction(
+  credentialId: string,
+  durationMinutes: number
+): Promise<{ url: string; expiresAt: string } | string> {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+
+  const credential = await db.credential.findUnique({
+    where: { id: credentialId },
+    select: { vaultId: true, service: true, username: true, encryptedData: true },
+  });
+  if (!credential) return "Credencial no encontrada";
+
+  await requireVaultAccess(credential.vaultId, "EDITOR");
+
+  const policy = await db.aIAccessPolicy.findUnique({ where: { credentialId } });
+  if (!policy?.enabled) return "Acceso AI no habilitado para esta credencial";
+
+  const safeDuration = Math.min(durationMinutes, policy.maxDurationMin);
+
+  const plaintext = JSON.stringify({
+    service: credential.service,
+    username: credential.username,
+    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+  });
+
+  const linkKey = generateLinkKey();
+  const publicId = generatePublicId();
+  const expiresAt = new Date(Date.now() + safeDuration * 60 * 1000);
+
+  await db.aIAccessGrant.create({
+    data: {
+      policyId: policy.id,
+      credentialId,
+      vaultId: credential.vaultId,
+      publicId,
+      payload: encryptForLink(plaintext, linkKey),
+      permission: "READ",
+      agentName: "manual",
+      grantedByUserId: session.user.id,
+      expiresAt,
+    },
+  });
+
+  await db.auditLog.create({
+    data: {
+      vaultId: credential.vaultId,
+      action: "ai_access_granted",
+      actorEmail: session.user.email ?? "",
+      credentialService: credential.service,
+      agentName: "manual",
+    },
+  });
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  return {
+    url: `${baseUrl}/s/${publicId}#k=${linkKey.toString("base64url")}`,
+    expiresAt: expiresAt.toISOString(),
+  };
+}
