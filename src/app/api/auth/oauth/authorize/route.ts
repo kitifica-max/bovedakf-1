@@ -62,11 +62,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Verify user has access to the vault
-  const { getVaultRole } = await import("@/lib/vault-access");
-  const role = await getVaultRole(vaultId, session.user.id);
-  if (!role) {
-    return NextResponse.json({ error: "You do not have access to this vault" }, { status: 403 });
+  // Resolve vault: use provided vault_id or auto-select the user's first vault
+  let resolvedVaultId = vaultId;
+  if (!resolvedVaultId) {
+    const firstVault = await db.vault.findFirst({
+      where: { ownerId: session.user.id },
+      select: { id: true },
+      orderBy: { createdAt: "asc" },
+    });
+    if (!firstVault) {
+      return NextResponse.json({ error: "No vault found for this account" }, { status: 403 });
+    }
+    resolvedVaultId = firstVault.id;
+  } else {
+    const { getVaultRole } = await import("@/lib/vault-access");
+    const role = await getVaultRole(resolvedVaultId, session.user.id);
+    if (!role) {
+      return NextResponse.json({ error: "You do not have access to this vault" }, { status: 403 });
+    }
   }
 
   // Store authorization params in a short-lived cookie for the consent screen
@@ -76,7 +89,7 @@ export async function GET(req: NextRequest) {
     scope,
     state,
     codeChallenge,
-    vaultId,
+    vaultId: resolvedVaultId,
     userId: session.user.id,
     email: session.user.email,
   };
@@ -98,6 +111,6 @@ export async function GET(req: NextRequest) {
   const consentUrl = new URL("/dashboard/ai-access/consent", BASE_URL);
   consentUrl.searchParams.set("token", consentToken);
   consentUrl.searchParams.set("client_id", clientId);
-  consentUrl.searchParams.set("vault_id", vaultId);
+  consentUrl.searchParams.set("vault_id", resolvedVaultId);
   return NextResponse.redirect(consentUrl);
 }
