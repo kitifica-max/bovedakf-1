@@ -44,7 +44,13 @@ export function getClient(clientId: string): McpClient | null {
 }
 
 export function validateRedirectUri(client: McpClient, redirectUri: string): boolean {
-  return client.allowedRedirectUris.includes(redirectUri);
+  if (client.allowedRedirectUris.includes(redirectUri)) return true;
+  // mcp-remote uses a dynamic port derived from the server URL — allow any localhost port
+  try {
+    const { hostname, pathname } = new URL(redirectUri);
+    if ((hostname === "localhost" || hostname === "127.0.0.1") && pathname === "/callback") return true;
+  } catch { /* fall through */ }
+  return false;
 }
 
 export function validateScopes(client: McpClient, scopes: string[]): boolean {
