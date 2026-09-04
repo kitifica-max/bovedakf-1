@@ -73,7 +73,13 @@ const steps = [
   },
 ];
 
-const features = [
+const features: { title: string; body: string; Icon: typeof ClockIcon; wide?: boolean }[] = [
+  {
+    title: "Tu equipo, con roles",
+    body: "Invitá por correo con rol de Editor (agrega y comparte) o Lector (solo ve). Cada persona crea su propia cuenta y cada acción queda firmada en la auditoría con su nombre.",
+    Icon: Share2Icon,
+    wide: true,
+  },
   {
     title: "Expiración automática",
     body: "El link deja de funcionar solo. No depende de que te acuerdes de revocarlo.",
@@ -108,6 +114,10 @@ const features = [
 
 const faqs = [
   {
+    q: "¿Cómo agrego a mi equipo?",
+    a: "Desde el panel de tu bóveda, en “Equipo”, invitás por correo y elegís el rol: Editor (agrega, edita y comparte credenciales) o Lector (solo ve y copia). La persona recibe un link, crea su contraseña y ya queda dentro de tu organización. Podés cambiar roles o quitar a alguien cuando quieras, y cada acción queda registrada con su nombre.",
+  },
+  {
     q: "¿Ustedes pueden ver mis contraseñas?",
     a: "Las credenciales guardadas se encriptan en el servidor. Pero la clave de cada link compartido vive únicamente en la URL que reciben tus compañeros — nunca la guardamos, así que no podemos descifrar ese link nosotros mismos.",
   },
@@ -140,7 +150,7 @@ const jsonLd = {
   applicationCategory: "SecurityApplication",
   operatingSystem: "Web",
   description:
-    "Gestor de credenciales compartidas seguro para equipos: encriptación en cada link, expiración configurable y auditoría completa de accesos.",
+    "Gestor de credenciales compartidas seguro para equipos: invitá a tu equipo por correo con rol de Editor o Lector, encriptación en cada link, expiración configurable y auditoría completa de accesos.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
@@ -166,19 +176,20 @@ export default function HomePage() {
                 Comparte credenciales sin dejar rastro en el chat
               </h1>
               <p data-reveal className="mt-5 max-w-md text-ink-soft">
-                Guarda accesos de equipo, genera links que se autodestruyen en horas o días, y
-                mira exactamente quién entró a qué y cuándo. Sin spreadsheets, sin plaintext.
+                Invitá a tu equipo por correo, guarda accesos con links que se autodestruyen en
+                horas o días, y mira exactamente quién entró a qué y cuándo. Sin spreadsheets,
+                sin plaintext.
               </p>
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
                 <Link
                   href="/register"
-                  className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-gray transition hover:bg-ink/90"
+                  className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 active:scale-[0.98]"
                 >
                   Crear mi bóveda →
                 </Link>
                 <Link
                   href="/login"
-                  className="rounded-full border border-border-soft px-6 py-3 text-sm font-medium text-ink transition hover:bg-paper"
+                  className="rounded-full border border-border-soft px-6 py-3 text-sm font-medium text-ink transition hover:bg-paper active:scale-[0.98]"
                 >
                   Ya tengo cuenta
                 </Link>
@@ -272,6 +283,48 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Para equipos */}
+      <section
+        aria-labelledby="equipos-heading"
+        className="w-full max-w-5xl rounded-2xl border border-blue/30 bg-blue/[0.06] p-6 backdrop-blur-md sm:p-10"
+      >
+        <div data-reveal className="mb-8 max-w-xl">
+          <p className="text-sm font-medium text-blue">Para equipos</p>
+          <h2 id="equipos-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+            Sumá a tu equipo por correo, en segundos
+          </h2>
+          <p className="mt-3 text-sm text-ink-soft">
+            Sin asientos que pagar, sin panel de IT. Invitás, la persona crea su cuenta y entra
+            con el rol que le diste.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {[
+            {
+              n: "01",
+              title: "Invitás por correo",
+              body: "Escribís el mail y elegís rol: Editor o Lector. Le llega una invitación al instante.",
+            },
+            {
+              n: "02",
+              title: "Crea su contraseña",
+              body: "Abre el link, elige una clave y listo. La organización ya está definida — no llena ningún formulario.",
+            },
+            {
+              n: "03",
+              title: "Entra con su rol",
+              body: "El Lector ve y copia; el Editor además agrega y comparte. Cada acción queda firmada con su nombre en la auditoría.",
+            },
+          ].map((s) => (
+            <div key={s.n} data-reveal>
+              <p className="font-display text-sm font-semibold text-blue">{s.n}</p>
+              <h3 className="mt-2 font-display text-lg font-semibold text-ink">{s.title}</h3>
+              <p className="mt-2 text-sm text-ink-soft">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Features */}
       <section aria-labelledby="features-heading" className="w-full max-w-5xl">
         <div data-reveal className="mb-6 max-w-xl">
@@ -282,12 +335,18 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {features.map((f) => (
-            <div key={f.title} data-reveal className="rounded-2xl border border-blue/30 bg-blue/[0.08] p-6 backdrop-blur-md">
+            <div
+              key={f.title}
+              data-reveal
+              className={`rounded-2xl border border-blue/30 bg-blue/[0.08] p-6 backdrop-blur-md ${
+                f.wide ? "sm:col-span-2" : ""
+              }`}
+            >
               <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue-soft text-blue">
                 <f.Icon className="h-4 w-4" />
               </span>
               <h3 className="mt-4 font-display text-lg font-semibold text-ink">{f.title}</h3>
-              <p className="mt-1 text-sm text-ink-soft">{f.body}</p>
+              <p className="mt-1 max-w-xl text-sm text-ink-soft">{f.body}</p>
             </div>
           ))}
         </div>
@@ -339,7 +398,7 @@ export default function HomePage() {
         <div data-reveal className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/register"
-            className="rounded-full bg-blue-soft px-6 py-3 text-sm font-medium text-ink-reverse transition hover:brightness-95"
+            className="rounded-full bg-blue-soft px-6 py-3 text-sm font-medium text-ink-reverse transition hover:brightness-95 active:scale-[0.98]"
           >
             Crear mi bóveda gratis →
           </Link>

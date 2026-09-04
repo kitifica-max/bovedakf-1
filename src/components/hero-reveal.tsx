@@ -30,9 +30,11 @@ export function HeroReveal({ children }: { children: React.ReactNode }) {
       // panel keeps breathing next to the looping video.
       const float = el.querySelector<HTMLElement>("[data-float]");
       if (float) {
+        // Slow enough (~9s/cycle) to sit outside the ~0.2 Hz band that reads
+        // as distracting/vestibular; small amplitude so it's a breath, not a bob.
         gsap.to(float, {
-          y: -6,
-          duration: 3,
+          y: -4,
+          duration: 4.5,
           ease: "sine.inOut",
           repeat: -1,
           yoyo: true,
