@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
+import { KitificaCredit } from "@/components/kitifica-credit";
 
 export const metadata: Metadata = {
   title: "Admin — respuestas",
@@ -137,9 +138,13 @@ export default async function AdminPage() {
   const seenSurvey = users.filter((u) => u.surveyAnswer || u.surveyDismissedAt).length;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
       <header className="flex items-center justify-between gap-3 rounded-full bg-ink px-5 py-3 text-gray">
-        <p className="font-display text-lg font-semibold">Respuestas de usuarios</p>
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
+          <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-5 w-auto" />
+          <span className="hidden text-sm text-gray/70 sm:inline">· Admin</span>
+        </div>
         <Link
           href="/dashboard"
           className="shrink-0 rounded-full border border-gray/25 px-3 py-1.5 text-sm transition hover:bg-gray/10"
@@ -147,6 +152,8 @@ export default async function AdminPage() {
           ← Volver a la bóveda
         </Link>
       </header>
+
+      <p className="font-pixel text-lg leading-[1.3] tracking-tight text-ink">Respuestas de usuarios</p>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
@@ -206,6 +213,11 @@ export default async function AdminPage() {
           </table>
         </div>
       </div>
+
+      <footer className="mt-auto flex flex-col items-center gap-1 pt-6 text-center">
+        <p className="text-xs text-ink-soft">© {new Date().getFullYear()} Bóveda KF-1</p>
+        <KitificaCredit />
+      </footer>
     </div>
   );
 }
