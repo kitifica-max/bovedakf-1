@@ -18,130 +18,54 @@ export default function ConnectPage() {
       <main className="w-full max-w-3xl rounded-2xl border border-border-soft bg-paper p-8 sm:p-12">
         <SectionHead
           kicker="MCP"
-          title="Conecta tu agente de IA"
-          lead="Boveda KF-1 se integra con agentes de IA via MCP (Model Context Protocol). Tu agente puede listar y leer credenciales que vos autorices, con sesiones temporales de 2 horas."
+          title="Conectá tu agente a KF-1"
+          lead="Tu agente de IA puede listar credenciales y generar links temporales para que vos las veas. Las contraseñas NUNCA se exponen al modelo."
         />
 
-        <div className="flex flex-col gap-8">
-          {/* Step 1 */}
+        <div className="flex flex-col gap-6">
+          {/* Claude Code */}
           <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
-            <div className="mb-3 flex items-center gap-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue text-sm font-bold text-paper">
-                1
-              </span>
-              <h3 className="font-display text-lg font-semibold text-ink">
-                Activa credenciales para AI
-              </h3>
-            </div>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              Entra a tu bóveda, expandí una credencial y activá el toggle{" "}
-              <strong className="text-ink">&quot;Acceso AI (MCP)&quot;</strong>.
-              Solo las credenciales con este toggle activo serán visibles para el agente.
+            <h3 className="font-display text-lg font-semibold text-ink">Claude Code (terminal)</h3>
+            <p className="mt-2 text-sm text-ink-soft">
+              Copiá y pegá este comando en tu terminal:
+            </p>
+            <code className="mt-3 block break-all rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
+              claude mcp add --transport streamable-http kf1 {BASE_URL}/api/mcp
+            </code>
+            <p className="mt-3 text-xs text-ink-soft">
+              Después, abrí Claude en el directorio de tu proyecto y pedile credenciales.
+              Te va a pedir autorizar en el navegador.
             </p>
           </div>
 
-          {/* Step 2 */}
+          {/* Claude Desktop */}
           <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
-            <div className="mb-3 flex items-center gap-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue text-sm font-bold text-paper">
-                2
-              </span>
-              <h3 className="font-display text-lg font-semibold text-ink">
-                Instalá el MCP en tu agente
-              </h3>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-4">
-              {/* Claude Code */}
-              <details className="group rounded-xl border border-border-soft bg-paper p-4">
-                <summary className="cursor-pointer list-none font-medium text-ink transition hover:text-blue">
-                  Claude Code (terminal)
-                </summary>
-                <div className="mt-3 rounded-xl bg-gray/60 p-4">
-                  <p className="mb-2 text-xs text-ink-soft">
-                    Copiá y pegá este comando en tu terminal:
-                  </p>
-                  <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
-                    claude mcp add --transport streamable-http securevault {BASE_URL}/api/mcp
-                  </code>
-                  <p className="mt-2 text-xs text-ink-soft">
-                    Cuando el agente necesite acceder a credenciales, te va a pedir autorizar
-                    via el navegador. La sesión dura 2 horas.
-                  </p>
-                </div>
-              </details>
-
-              {/* Claude Desktop */}
-              <details className="group rounded-xl border border-border-soft bg-paper p-4">
-                <summary className="cursor-pointer list-none font-medium text-ink transition hover:text-blue">
-                  Claude Desktop (app de escritorio)
-                </summary>
-                <div className="mt-3 rounded-xl bg-gray/60 p-4">
-                  <p className="mb-2 text-xs text-ink-soft">
-                    Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong> y agregá:
-                  </p>
-                  <pre className="overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
+            <h3 className="font-display text-lg font-semibold text-ink">Claude Desktop (escritorio)</h3>
+            <p className="mt-2 text-sm text-ink-soft">
+              Andá a <strong>Claude &gt; Settings &gt; Developer &gt; Edit Config</strong> y agregá:
+            </p>
+            <pre className="mt-3 overflow-x-auto rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
 {`{
   "mcpServers": {
-    "securevault": {
+    "kf1": {
       "url": "${BASE_URL}/api/mcp"
     }
   }
 }`}
-                  </pre>
-                  <p className="mt-2 text-xs text-ink-soft">
-                    Reiniciá Claude Desktop. Al primer uso, te pedirá autorizar en el navegador.
-                  </p>
-                </div>
-              </details>
-
-              {/* Other agents */}
-              <details className="group rounded-xl border border-border-soft bg-paper p-4">
-                <summary className="cursor-pointer list-none font-medium text-ink transition hover:text-blue">
-                  Otros agentes (Cursor, Windsurf, etc.)
-                </summary>
-                <div className="mt-3 rounded-xl bg-gray/60 p-4">
-                  <p className="text-xs text-ink-soft">
-                    Cualquier agente que soporte MCP con{" "}
-                    <strong>streamable HTTP</strong> puede conectarse. Configurá el endpoint:
-                  </p>
-                  <code className="mt-2 block break-all rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
-                    {BASE_URL}/api/mcp
-                  </code>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
-            <div className="mb-3 flex items-center gap-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-blue text-sm font-bold text-paper">
-                3
-              </span>
-              <h3 className="font-display text-lg font-semibold text-ink">
-                Autorizá el acceso
-              </h3>
-            </div>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              La primera vez que el agente pida una credencial, se abrirá tu navegador
-              con una pantalla de autorización. Hace login con tu usuario de Boveda KF-1
-              y aprobá el acceso. El token dura 2 horas y se renueva automáticamente.
+            </pre>
+            <p className="mt-3 text-xs text-ink-soft">
+              Reiniciá Claude Desktop. Al primer uso, te pedirá autorizar.
             </p>
           </div>
 
-          {/* Security note */}
+          {/* Security */}
           <div className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-6">
-            <h3 className="mb-2 font-display text-sm font-semibold text-ink">
-              Seguridad
-            </h3>
+            <h3 className="mb-2 font-display text-sm font-semibold text-ink">Seguridad</h3>
             <ul className="flex flex-col gap-1.5 text-xs leading-relaxed text-ink-soft">
-              <li>• El agente NUNCA recibe contraseñas en texto plano</li>
-              <li>• Solo recibe links temporales que el usuario abre en su navegador</li>
-              <li>• Los links expiran en 15 minutos</li>
-              <li>• La sesión del agente dura 2 horas</li>
-              <li>• Cada acceso queda registrado en el log de auditoría</li>
-              <li>• Podes revocar el acceso en cualquier momento desde el dashboard</li>
+              <li>• El agente NUNCA recibe contraseñas — solo links temporales</li>
+              <li>• Vos abrís el link en tu navegador para ver el secreto</li>
+              <li>• Links expiran en 15 minutos, sesión en 2 horas</li>
+              <li>• Todo queda registrado en auditoría</li>
             </ul>
           </div>
         </div>

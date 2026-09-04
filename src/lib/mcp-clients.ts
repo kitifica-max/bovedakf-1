@@ -13,8 +13,8 @@ export type McpClient = {
 const CLIENTS: Record<string, McpClient> = {
   "claude-code": {
     clientId: "claude-code",
-    name: "Claude Code",
-    description: "Anthropic's agentic coding tool",
+    name: "KF-1",
+    description: "Bóveda KF-1 — credential vault for AI agents",
     allowedRedirectUris: [
       "http://localhost:3000/callback",
       "http://127.0.0.1:3000/callback",
@@ -26,8 +26,8 @@ const CLIENTS: Record<string, McpClient> = {
   },
   "claude-desktop": {
     clientId: "claude-desktop",
-    name: "Claude Desktop",
-    description: "Anthropic's desktop application",
+    name: "KF-1",
+    description: "Bóveda KF-1 — credential vault for AI agents",
     allowedRedirectUris: [
       "http://localhost:3000/callback",
       "http://127.0.0.1:3000/callback",
