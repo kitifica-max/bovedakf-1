@@ -48,11 +48,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Invalid scope" }, { status: 400 });
   }
 
-  // Validate vault_id is provided
-  if (!vaultId) {
-    return NextResponse.json({ error: "vault_id is required" }, { status: 400 });
-  }
-
   // Check authentication
   const session = await auth();
   if (!session?.user?.id || !session.user.email) {
