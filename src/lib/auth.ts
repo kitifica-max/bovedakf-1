@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // throttles the normal UI flow, but a script can POST here directly.
         // Shares the `login:<ip>` bucket so the two compound.
         try {
-          if (!rateLimit(`login:${clientIp(await headers())}`, 10).success) return null;
+          if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return null;
         } catch {
           // headers() unavailable in this context — fail open rather than
           // block every login.
