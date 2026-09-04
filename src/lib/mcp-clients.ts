@@ -45,10 +45,10 @@ export function getClient(clientId: string): McpClient | null {
 
 export function validateRedirectUri(client: McpClient, redirectUri: string): boolean {
   if (client.allowedRedirectUris.includes(redirectUri)) return true;
-  // mcp-remote uses a dynamic port derived from the server URL — allow any localhost port
+  // mcp-remote uses a dynamic port and path — allow any localhost redirect URI
   try {
-    const { hostname, pathname } = new URL(redirectUri);
-    if ((hostname === "localhost" || hostname === "127.0.0.1") && pathname === "/callback") return true;
+    const { hostname } = new URL(redirectUri);
+    if (hostname === "localhost" || hostname === "127.0.0.1") return true;
   } catch { /* fall through */ }
   return false;
 }
