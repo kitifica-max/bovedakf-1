@@ -4,18 +4,17 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ROLE_LABEL } from "@/lib/team-validation";
 import { AcceptForm } from "./accept-form";
+import { InviteSignupForm } from "./invite-signup-form";
 
 export const metadata: Metadata = {
   title: "Invitación a una bóveda",
   robots: { index: false, follow: false },
 };
 
+// Rendered inside (auth)/layout.tsx — which already provides the branded
+// header, footer, and centered wrapper.
 function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="glass w-full max-w-sm rounded-2xl p-8 text-sm">{children}</div>
-    </main>
-  );
+  return <div className="glass w-full max-w-sm rounded-2xl p-8 text-sm">{children}</div>;
 }
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
@@ -46,20 +45,14 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       <Shell>
         <h1 className="font-display text-2xl font-semibold text-ink">Te invitaron a “{invite.vault.name}”</h1>
         <p className="mt-2 text-ink-soft">
-          Rol: <strong className="text-ink">{roleLabel}</strong>. Entrá o creá una cuenta con{" "}
-          <strong className="text-ink">{invite.email}</strong> para aceptar.
+          Rol: <strong className="text-ink">{roleLabel}</strong>. Elegí una contraseña para unirte —
+          el correo ya está fijado por la invitación.
         </p>
-        <div className="mt-5 flex flex-col gap-2">
-          <Link href={`/login?next=${next}`} className="rounded-full bg-ink px-4 py-3 text-center font-medium text-gray">
-            Entrar
-          </Link>
-          <Link
-            href={`/register?email=${encodeURIComponent(invite.email)}&next=${next}`}
-            className="rounded-full border border-border-soft px-4 py-3 text-center font-medium text-ink"
-          >
-            Crear cuenta
-          </Link>
-        </div>
+        <InviteSignupForm token={token} email={invite.email} />
+        <p className="mt-4 text-center text-xs text-ink-soft">
+          ¿Ya tenés cuenta con ese correo?{" "}
+          <Link href={`/login?next=${next}`} className="underline">Entrá para aceptar</Link>
+        </p>
       </Shell>
     );
   }
