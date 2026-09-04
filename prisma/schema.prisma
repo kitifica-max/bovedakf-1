@@ -36,6 +36,9 @@ model User {
   vaults       Vault[]
   memberships  VaultMember[]
   sentInvites  VaultInvite[]
+  aiPoliciesCreated AIAccessPolicy[]
+  aiGrantsCreated   AIAccessGrant[]
+  aiGrantsRevoked   AIAccessGrant[] @relation("RevokedBy")
   // Fields below exist only to satisfy @auth/prisma-adapter's expected User
   // shape (Passkey/WebAuthn login). Unused elsewhere in the app.
   name          String?
@@ -110,6 +113,7 @@ model Vault {
   credentials Credential[]
   members     VaultMember[]
   invites     VaultInvite[]
+  aiGrants    AIAccessGrant[]
   createdAt   DateTime     @default(now())
 }
 
@@ -125,6 +129,8 @@ model Credential {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   shareLinks    ShareLink[]
+  aiPolicy      AIAccessPolicy?
+  aiGrants      AIAccessGrant[]
 }
 
 enum LinkPermission {
@@ -192,6 +198,8 @@ model AuditLog {
   id          String     @id @default(cuid())
   shareLinkId String?
   shareLink   ShareLink? @relation(fields: [shareLinkId], references: [id], onDelete: SetNull)
+  aiGrantId   String?
+  aiGrant     AIAccessGrant? @relation(fields: [aiGrantId], references: [id], onDelete: SetNull)
   vaultId     String?
   action      String
   // Email of the signed-in team member who caused the event (create/revoke
@@ -201,7 +209,61 @@ model AuditLog {
   // not a live join, so the row still names the credential even after the
   // share link is revoked/expired or the credential itself is deleted.
   credentialService String?
+  // Agent name for AI access events (e.g. "claude-code").
+  agentName   String?
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime   @default(now())
+}
+
+// ── AI Access (MCP) ──────────────────────────────────────────────────────
+//
+// Controls whether a credential can be accessed by AI agents via MCP.
+// Each credential has at most one AIAccessPolicy. When enabled, the owner
+// can grant temporary access to specific agents through the dashboard.
+
+model AIAccessPolicy {
+  id              String   @id @default(cuid())
+  credentialId    String   @unique
+  credential      Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+  enabled         Boolean  @default(false)
+  // Maximum duration (in minutes) an AI access grant can last.
+  maxDurationMin  Int      @default(30)
+  createdByUserId String
+  createdBy       User     @relation(fields: [createdByUserId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  grants          AIAccessGrant[]
+}
+
+// Represents a single temporary access grant to an AI agent.
+// The credential is re-encrypted with a one-time key (same pattern as
+// ShareLink). The decryption key lives only in the URL fragment — it never
+// touches the server or the LLM context.
+model AIAccessGrant {
+  id              String   @id @default(cuid())
+  policyId        String
+  policy          AIAccessPolicy @relation(fields: [policyId], references: [id])
+  credentialId    String
+  credential      Credential @relation(fields: [credentialId], references: [id])
+  vaultId         String
+  vault           Vault    @relation(fields: [vaultId], references: [id])
+  // Same pattern as ShareLink: unguessable lookup ID + encrypted payload.
+  publicId        String   @unique
+  payload         String   // AES-256-GCM with per-grant key, NOT server key
+  permission      LinkPermission @default(READ)
+  agentName       String   // e.g. "claude-code", "claude-desktop"
+  agentVersion    String?
+  grantedByUserId String
+  grantedBy       User     @relation(fields: [grantedByUserId], references: [id])
+  revokedByUserId String?
+  revokedBy       User?    @relation("RevokedBy", fields: [revokedByUserId], references: [id])
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  createdAt       DateTime @default(now())
+  accessLogs      AuditLog[]
+
+  @@index([publicId])
+  @@index([credentialId])
+  @@index([vaultId])
 }
