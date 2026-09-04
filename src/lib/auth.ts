@@ -12,6 +12,18 @@ class TotpRequiredSignin extends CredentialsSignin {
   code = "TotpRequired";
 }
 
+function warnInsecureUrl() {
+  if (process.env.NODE_ENV !== "production") return;
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (url && !url.startsWith("https://")) {
+    console.warn(
+      `[security] NEXT_PUBLIC_APP_URL is "${url}" — must start with https:// in production. ` +
+        "Email links (password reset, verification, invites) will use this URL."
+    );
+  }
+}
+warnInsecureUrl();
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Only used to back the Passkey/WebAuthn provider (register + list
   // credentials). Sessions stay JWT — the adapter's session/verification
@@ -21,6 +33,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: { signIn: "/login" },
   trustHost: true,
   experimental: { enableWebAuthn: true },
+  cookies: {
+    sessionToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true,
+        path: "/",
+      },
+    },
+    callbackUrl: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true,
+        path: "/",
+      },
+    },
+    csrfToken: {
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true,
+        path: "/",
+      },
+    },
+  },
   providers: [
     Passkey({
       // Netlify's Next.js runtime hands @auth/core a Request whose own URL
@@ -51,8 +89,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return null;
         } catch {
-          // headers() unavailable in this context — fail open rather than
-          // block every login.
+          // headers() unavailable — fail closed: block the login rather than
+          // allowing unauthenticated brute-force attempts.
+          return null;
         }
 
         const user = await db.user.findUnique({ where: { email } });
