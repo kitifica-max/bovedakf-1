@@ -51,7 +51,17 @@ export async function GET(req: NextRequest) {
   // Check authentication
   const session = await auth();
   if (!session?.user?.id || !session.user.email) {
-    // Redirect to login with return URL
+    // If the client expects JSON (e.g. mcp-remote validating the endpoint
+    // server-side), return a JSON error instead of a redirect — mcp-remote
+    // can't parse HTML and will crash with "[object Response]".
+    const accept = req.headers.get("accept") ?? "";
+    if (accept.includes("application/json")) {
+      return NextResponse.json(
+        { error: "login_required", error_description: "User must log in to authorize" },
+        { status: 401 }
+      );
+    }
+    // Browser-based flow: redirect to login with return URL
     const loginUrl = new URL("/login", BASE_URL);
     loginUrl.searchParams.set("from", req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(loginUrl);
