@@ -13,16 +13,19 @@ export function Section({
   wide = false,
   className = "",
   children,
+  "aria-labelledby": ariaLabelledby,
 }: {
   id?: string;
   variant?: Variant;
   wide?: boolean;
   className?: string;
   children: React.ReactNode;
+  "aria-labelledby"?: string;
 }) {
   return (
     <section
       id={id}
+      aria-labelledby={ariaLabelledby}
       className={`w-full ${wide ? "max-w-6xl" : "max-w-5xl"} ${SURFACE[variant]} ${className}`}
     >
       {children}
