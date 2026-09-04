@@ -20,12 +20,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen flex-col p-4 sm:p-6">
       <IdleSessionGuard />
-      <header className="mx-auto flex w-full max-w-3xl items-center justify-between rounded-full bg-ink px-5 py-3 text-gray">
+      <header className="sticky top-4 z-40 mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-full bg-ink px-4 py-2.5 text-gray shadow-lg shadow-black/25 ring-1 ring-white/5 sm:top-6 sm:px-5 sm:py-3">
         {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
-        <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto" />
-        <div className="flex items-center gap-4 text-sm">
+        <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-6 w-auto shrink-0" />
+        <div className="flex min-w-0 items-center gap-2 text-xs sm:gap-4 sm:text-sm">
           {isAdmin(session.user.email) && (
-            <Link href="/admin" className="rounded-full border border-gray/25 px-3 py-1.5 transition hover:bg-gray/10">
+            <Link href="/admin" className="shrink-0 rounded-full border border-gray/25 px-2.5 py-1 transition hover:bg-gray/10 sm:px-3 sm:py-1.5">
               Admin
             </Link>
           )}
@@ -36,7 +36,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               await signOut({ redirectTo: "/login" });
             }}
           >
-            <button className="flex cursor-pointer items-center gap-1.5 rounded-full border border-gray/25 px-3 py-1.5 transition hover:bg-gray/10">
+            <button className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-gray/25 px-2.5 py-1 transition hover:bg-gray/10 sm:px-3 sm:py-1.5">
               <LogOutIcon aria-hidden="true" className="h-3.5 w-3.5" />
               Salir
             </button>
