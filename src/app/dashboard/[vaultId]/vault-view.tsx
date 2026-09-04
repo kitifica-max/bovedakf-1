@@ -63,7 +63,7 @@ export function VaultView({
         <h1 className="font-pixel text-xl leading-[1.3] text-ink">{vault.name}</h1>
         {role === "OWNER" && (
           <Link
-            href="/connect"
+            href="/dashboard/ai"
             className="ml-auto text-xs text-ink-soft underline decoration-border-soft underline-offset-4 transition hover:text-ink"
           >
             Conectar AI →
