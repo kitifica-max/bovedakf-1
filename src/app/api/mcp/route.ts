@@ -254,10 +254,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// MCP servers respond to POST only
+// MCP servers respond to POST only — but return 401 with WWW-Authenticate
+// so mcp-remote can discover the OAuth server (it probes with GET at startup).
 export async function GET() {
   return NextResponse.json(
-    { error: "MCP server requires POST with JSON-RPC 2.0" },
-    { status: 405, headers: NO_STORE }
+    { jsonrpc: "2.0", id: null, error: { code: -32600, message: "MCP server requires POST with JSON-RPC 2.0" } },
+    { status: 401, headers: { ...NO_STORE, "WWW-Authenticate": WWW_AUTH } }
   );
 }
