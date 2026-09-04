@@ -109,7 +109,7 @@ os.makedirs(os.path.dirname(path), exist_ok=True)
 try:
     with open(path) as f: config = json.load(f)
 except: config = {}
-config.setdefault('mcpServers', {})['kf1'] = {'url': '${BASE_URL}/api/mcp'}
+config.setdefault('mcpServers', {})['kf1'] = {'command': 'npx', 'args': ['-y', 'mcp-remote', '${BASE_URL}/api/mcp']}
 with open(path, 'w') as f: json.dump(config, f, indent=2)
 print('KF-1 instalado. Reiniciá Claude Desktop.')
 "`}</pre>
