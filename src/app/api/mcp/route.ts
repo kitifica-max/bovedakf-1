@@ -18,6 +18,9 @@ import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from
 import { validateToken, hasScope, type McpTokenPayload } from "@/lib/mcp-auth";
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+// Sent on every 401 so mcp-remote can discover the OAuth server (RFC 9728 / RFC 8414).
+const WWW_AUTH = `Bearer realm="${BASE_URL}", resource_metadata="${BASE_URL}/.well-known/oauth-protected-resource"`;
 
 // ── JSON-RPC helpers ─────────────────────────────────────────────────────
 
@@ -152,12 +155,33 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Validate Bearer token
+  // Parse body early so we can handle initialize without auth (MCP handshake).
+  let body: { method?: string; params?: Record<string, unknown>; id?: number | string };
+  try {
+    body = await req.json();
+  } catch {
+    return jsonrpcError(null, -32700, "Parse error");
+  }
+
+  // MCP protocol handshake — allow without auth so mcp-remote can complete
+  // the initialize round-trip before triggering OAuth discovery.
+  if (body.method === "initialize") {
+    return jsonrpcOk(body.id ?? 0, {
+      protocolVersion: "2024-11-05",
+      capabilities: { tools: {} },
+      serverInfo: { name: "KF-1 Vault", version: "1.0.0" },
+    });
+  }
+  if (body.method === "notifications/initialized") {
+    return new Response(null, { status: 204 });
+  }
+
+  // All other methods require a valid Bearer token.
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) {
     return NextResponse.json(
       { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Missing or invalid authorization" } },
-      { status: 401, headers: NO_STORE }
+      { status: 401, headers: { ...NO_STORE, "WWW-Authenticate": WWW_AUTH } }
     );
   }
 
@@ -165,16 +189,8 @@ export async function POST(req: NextRequest) {
   if (!token) {
     return NextResponse.json(
       { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Invalid or expired token" } },
-      { status: 401, headers: NO_STORE }
+      { status: 401, headers: { ...NO_STORE, "WWW-Authenticate": WWW_AUTH } }
     );
-  }
-
-  // Parse JSON-RPC request
-  let body: { method?: string; params?: Record<string, unknown>; id?: number | string };
-  try {
-    body = await req.json();
-  } catch {
-    return jsonrpcError(null, -32700, "Parse error");
   }
 
   const { method, params, id } = body;
