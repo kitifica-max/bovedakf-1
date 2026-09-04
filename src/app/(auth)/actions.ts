@@ -7,6 +7,7 @@ import { hashPassword, verifyPassword, burnPasswordCompare } from "@/lib/crypto"
 import { loginSchema, registerSchema, emailSchema, resetPasswordSchema } from "@/lib/validation";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { createToken, consumeToken } from "@/lib/tokens";
+import { applyMembership } from "@/lib/vault-access";
 import {
   sendEmail,
   verificationEmail,
@@ -68,12 +69,11 @@ export async function registerAction(_prev: string | null, formData: FormData) {
     where: { email: email.toLowerCase(), acceptedAt: null, expiresAt: { gt: new Date() } },
   });
   for (const inv of pendingInvites) {
-    await db.vaultMember.upsert({
-      where: { vaultId_userId: { vaultId: inv.vaultId, userId: user.id } },
-      create: { vaultId: inv.vaultId, userId: user.id, role: inv.role },
-      update: { role: inv.role },
-    });
+    await applyMembership(inv.vaultId, user.id, inv.role);
     await db.vaultInvite.update({ where: { id: inv.id }, data: { acceptedAt: new Date() } });
+    await db.auditLog.create({
+      data: { vaultId: inv.vaultId, action: "member_joined", actorEmail: email.toLowerCase() },
+    });
   }
 
   await sendVerification(email);

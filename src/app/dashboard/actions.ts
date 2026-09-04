@@ -6,7 +6,7 @@ import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { inviteEmail, sendEmail } from "@/lib/email";
-import { inviteSchema, ROLE_LABEL } from "@/lib/team-validation";
+import { inviteSchema, memberRoleSchema, ROLE_LABEL } from "@/lib/team-validation";
 import {
   decryptAtRest,
   encryptAtRest,
@@ -30,7 +30,7 @@ import {
   totpCodeSchema,
   updateCompanyNameSchema,
 } from "@/lib/validation";
-import { requireVaultAccess } from "@/lib/vault-access";
+import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
 
 export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
@@ -297,8 +297,9 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
+  // Case-insensitive: emails may be stored with mixed case from older signups.
   const already = await db.vaultMember.findFirst({
-    where: { vaultId, user: { email } },
+    where: { vaultId, user: { email: { equals: email, mode: "insensitive" } } },
     select: { id: true },
   });
   if (already) return "Esa persona ya es parte de la bóveda.";
@@ -306,7 +307,7 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
   const token = randomBytes(32).toString("hex");
   // One live invite per (vault, email): replace any prior unaccepted one.
   await db.vaultInvite.deleteMany({ where: { vaultId, email, acceptedAt: null } });
-  await db.vaultInvite.create({
+  const created = await db.vaultInvite.create({
     data: {
       vaultId,
       email,
@@ -317,10 +318,19 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
     },
   });
 
-  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { name: true } });
+  const [vault, session] = await Promise.all([
+    db.vault.findUnique({ where: { id: vaultId }, select: { name: true } }),
+    auth(),
+  ]);
+  const inviterName = session?.user?.companyName || actorEmail;
   const link = `${APP_URL}/invite/${token}`;
-  const { subject, html } = inviteEmail(link, vault?.name ?? "una bóveda", actorEmail, ROLE_LABEL[role]);
-  await sendEmail(email, subject, html);
+  const { subject, html } = inviteEmail(link, vault?.name ?? "una bóveda", inviterName, ROLE_LABEL[role]);
+  const sent = await sendEmail(email, subject, html);
+  if (!sent.ok) {
+    // No resend UI yet — don't leave a "pending" invite whose email never went out.
+    await db.vaultInvite.delete({ where: { id: created.id } });
+    return "No se pudo enviar la invitación. Revisá el correo e intentá de nuevo.";
+  }
 
   await db.auditLog.create({
     data: { vaultId, action: "member_invited", actorEmail, credentialService: email },
@@ -331,11 +341,16 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
 export async function revokeInviteAction(vaultId: string, inviteId: string): Promise<void> {
   const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
-  const { count } = await db.vaultInvite.deleteMany({ where: { id: inviteId, vaultId, acceptedAt: null } });
-  if (count) {
-    await db.auditLog.create({ data: { vaultId, action: "invite_revoked", actorEmail } });
-    revalidatePath(`/dashboard/${vaultId}`);
-  }
+  const invite = await db.vaultInvite.findFirst({
+    where: { id: inviteId, vaultId, acceptedAt: null },
+    select: { email: true },
+  });
+  if (!invite) return;
+  await db.vaultInvite.delete({ where: { id: inviteId } });
+  await db.auditLog.create({
+    data: { vaultId, action: "invite_revoked", actorEmail, credentialService: invite.email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
 }
 
 export async function changeMemberRoleAction(
@@ -344,24 +359,42 @@ export async function changeMemberRoleAction(
   role: "EDITOR" | "VIEWER"
 ): Promise<string | null> {
   const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
-  const member = await db.vaultMember.findFirst({ where: { id: memberId, vaultId } });
+  // Server action — validate the role at runtime, not just at the type level.
+  const parsed = memberRoleSchema.safeParse({ role });
+  if (!parsed.success) return "Rol inválido.";
+
+  const member = await db.vaultMember.findFirst({
+    where: { id: memberId, vaultId },
+    include: { user: { select: { email: true } } },
+  });
   if (!member) return "Miembro no encontrado.";
   if (member.role === "OWNER") return "No podés cambiar el rol del dueño.";
-  await db.vaultMember.update({ where: { id: memberId }, data: { role } });
-  await db.auditLog.create({ data: { vaultId, action: "member_role_changed", actorEmail } });
+
+  await db.vaultMember.update({ where: { id: memberId }, data: { role: parsed.data.role } });
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: "member_role_changed",
+      actorEmail,
+      credentialService: `${member.user.email} → ${ROLE_LABEL[parsed.data.role]}`,
+    },
+  });
   revalidatePath(`/dashboard/${vaultId}`);
   return null;
 }
 
 export async function removeMemberAction(vaultId: string, memberId: string): Promise<void> {
   const { email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
-  const { count } = await db.vaultMember.deleteMany({
+  const member = await db.vaultMember.findFirst({
     where: { id: memberId, vaultId, role: { not: "OWNER" } },
+    include: { user: { select: { email: true } } },
   });
-  if (count) {
-    await db.auditLog.create({ data: { vaultId, action: "member_removed", actorEmail } });
-    revalidatePath(`/dashboard/${vaultId}`);
-  }
+  if (!member) return;
+  await db.vaultMember.delete({ where: { id: memberId } });
+  await db.auditLog.create({
+    data: { vaultId, action: "member_removed", actorEmail, credentialService: member.user.email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
 }
 
 export async function acceptInviteAction(
@@ -377,11 +410,7 @@ export async function acceptInviteAction(
     return { ok: false, error: `Esta invitación es para ${invite.email}.` };
   }
 
-  await db.vaultMember.upsert({
-    where: { vaultId_userId: { vaultId: invite.vaultId, userId: session.user.id } },
-    create: { vaultId: invite.vaultId, userId: session.user.id, role: invite.role },
-    update: { role: invite.role },
-  });
+  await applyMembership(invite.vaultId, session.user.id, invite.role);
   await db.vaultInvite.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
   await db.auditLog.create({
     data: { vaultId: invite.vaultId, action: "member_joined", actorEmail: session.user.email },
