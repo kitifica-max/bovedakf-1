@@ -2,17 +2,18 @@
 // Validates Bearer token, routes to tool handlers, returns results.
 //
 // Tools:
-//   tools/list       → lists credentials with AI access enabled
+//   tools/list       → lists credentials with aiAccessible=true in a vault
 //   tools/call        → routes to individual tool handlers
 //
-// The agent NEVER receives the secret in plaintext. It receives a secure
-// link (same pattern as share links) that it can fetch and decrypt locally.
+// The agent receives decrypted credentials directly (the agent IS an
+// authenticated user with a scoped session). No temporary links or
+// re-encryption — just standard decryptAtRest.
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
-import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
+import { decryptAtRest } from "@/lib/crypto";
 import { validateToken, hasScope, type McpTokenPayload } from "@/lib/mcp-auth";
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
@@ -33,7 +34,7 @@ const TOOLS = [
   {
     name: "list_credentials",
     description:
-      "List credentials in a vault that have AI access enabled. Returns service names and IDs only — never secrets.",
+      "List credentials in a vault that are available for AI access. Returns service names and IDs only.",
     inputSchema: {
       type: "object",
       properties: {
@@ -43,20 +44,14 @@ const TOOLS = [
     },
   },
   {
-    name: "request_credential",
+    name: "get_credential",
     description:
-      "Request temporary access to a specific credential. Returns a secure link that expires. The secret is never included in the response — the link must be fetched and decrypted separately.",
+      "Get a credential's details including the decrypted secret. Only works for credentials with AI access enabled.",
     inputSchema: {
       type: "object",
       properties: {
         vaultId: { type: "string", description: "The vault ID" },
-        credentialId: { type: "string", description: "The credential ID to request access to" },
-        durationMinutes: {
-          type: "number",
-          description: "Access duration in minutes (max determined by policy)",
-          minimum: 1,
-          maximum: 240,
-        },
+        credentialId: { type: "string", description: "The credential ID to retrieve" },
       },
       required: ["vaultId", "credentialId"],
     },
@@ -66,108 +61,51 @@ const TOOLS = [
 // ── Tool handlers ────────────────────────────────────────────────────────
 
 async function handleListCredentials(token: McpTokenPayload, vaultId: string) {
-  // Verify the token is scoped to this vault
   if (token.vaultId !== vaultId) {
     return { error: "Token not authorized for this vault" };
   }
 
-  const policies = await db.aIAccessPolicy.findMany({
-    where: { enabled: true, credential: { vaultId } },
-    include: { credential: { select: { id: true, service: true, username: true } } },
+  const credentials = await db.credential.findMany({
+    where: { vaultId, aiAccessible: true },
+    select: { id: true, service: true, username: true },
+    orderBy: { service: "asc" },
   });
 
-  return {
-    credentials: policies.map((p) => ({
-      id: p.credential.id,
-      service: p.credential.service,
-      username: p.credential.username,
-      maxDurationMin: p.maxDurationMin,
-    })),
-  };
+  return { credentials };
 }
 
-async function handleRequestCredential(
-  token: McpTokenPayload,
-  vaultId: string,
-  credentialId: string,
-  durationMinutes?: number
-) {
-  // 1. Verify vault access
+async function handleGetCredential(token: McpTokenPayload, vaultId: string, credentialId: string) {
   if (token.vaultId !== vaultId) {
     return { error: "Token not authorized for this vault" };
   }
 
-  // 2. Verify AI access policy
-  const policy = await db.aIAccessPolicy.findUnique({
-    where: { credentialId },
-    include: { credential: { select: { id: true, service: true, username: true, vaultId: true, encryptedData: true } } },
+  const credential = await db.credential.findFirst({
+    where: { id: credentialId, vaultId, aiAccessible: true },
   });
 
-  if (!policy || !policy.enabled) {
-    return { error: "AI access not enabled for this credential" };
+  if (!credential) {
+    return { error: "Credential not found or AI access not enabled" };
   }
 
-  if (policy.credential.vaultId !== vaultId) {
-    return { error: "Credential not found in this vault" };
-  }
+  const decrypted = JSON.parse(decryptAtRest(credential.encryptedData));
 
-  // 3. Validate duration
-  const requestedDuration = Math.min(durationMinutes ?? policy.maxDurationMin, policy.maxDurationMin);
-  if (requestedDuration < 1 || requestedDuration > policy.maxDurationMin) {
-    return { error: `Duration must be between 1 and ${policy.maxDurationMin} minutes` };
-  }
-
-  // 4. Decrypt credential and re-encrypt with one-time key (same as share links)
-  const plaintext = JSON.stringify({
-    service: policy.credential.service,
-    username: policy.credential.username,
-    ...JSON.parse(decryptAtRest(policy.credential.encryptedData)),
-  });
-
-  const linkKey = generateLinkKey();
-  const publicId = generatePublicId();
-
-  // 5. Store encrypted grant
-  const expiresAt = new Date(Date.now() + requestedDuration * 60 * 1000);
-
-  const grant = await db.aIAccessGrant.create({
-    data: {
-      policyId: policy.id,
-      credentialId,
-      vaultId,
-      publicId,
-      payload: encryptForLink(plaintext, linkKey),
-      permission: "READ",
-      agentName: token.client_id,
-      grantedByUserId: token.sub,
-      expiresAt,
-    },
-  });
-
-  // 6. Audit log
+  // Audit log
   await db.auditLog.create({
     data: {
       vaultId,
-      aiGrantId: grant.id,
-      action: "ai_access_granted",
-      actorEmail: token.email,
-      credentialService: policy.credential.service,
+      action: "ai_credential_accessed",
+      credentialService: credential.service,
       agentName: token.client_id,
+      actorEmail: token.email,
     },
   });
 
-  // 7. Return secure link — the key is in the fragment, never in the JSON body
-  //    that could be logged or intercepted by the LLM context.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const url = `${baseUrl}/s/${publicId}#k=${linkKey.toString("base64url")}`;
-
   return {
-    url,
-    expiresAt: expiresAt.toISOString(),
-    credential: {
-      service: policy.credential.service,
-      username: policy.credential.username,
-    },
+    id: credential.id,
+    service: credential.service,
+    username: credential.username,
+    secret: decrypted.secret,
+    notes: decrypted.notes || undefined,
   };
 }
 
@@ -236,15 +174,14 @@ export async function POST(req: NextRequest) {
           return jsonrpcOk(id, result);
         }
 
-        if (toolName === "request_credential") {
-          if (!hasScope(token, "credentials:request")) {
-            return jsonrpcError(id, -32003, "Insufficient scope: credentials:request required");
+        if (toolName === "get_credential") {
+          if (!hasScope(token, "credentials:read")) {
+            return jsonrpcError(id, -32003, "Insufficient scope: credentials:read required");
           }
           const vaultId = toolArgs.vaultId as string;
           const credentialId = toolArgs.credentialId as string;
-          const durationMinutes = toolArgs.durationMinutes as number | undefined;
           if (!vaultId || !credentialId) return jsonrpcError(id, -32602, "Missing vaultId or credentialId");
-          const result = await handleRequestCredential(token, vaultId, credentialId, durationMinutes);
+          const result = await handleGetCredential(token, vaultId, credentialId);
           return jsonrpcOk(id, result);
         }
 
