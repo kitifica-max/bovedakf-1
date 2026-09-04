@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { registerAction } from "../actions";
 import { ChevronDownIcon } from "@/components/icons";
+import { CTAButton } from "@/components/site/cta-button";
 
 const INDUSTRIES = [
   "Tecnología / Software",
@@ -50,7 +51,7 @@ export function RegisterForm() {
 
   return (
       <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">
+        <h1 className="t-display text-ink">
           Crear bóveda
         </h1>
         <p className="mt-1 text-sm text-ink-soft">Un espacio encriptado para tu equipo.</p>
@@ -136,16 +137,13 @@ export function RegisterForm() {
           {error && (
             <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
           )}
-          <button
-            disabled={pending}
-            className="mt-2 cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
             {pending ? "Creando..." : "Crear bóveda"}
-          </button>
+          </CTAButton>
         </form>
-        <a href="/login" className="mt-5 block text-center text-sm text-ink-soft underline">
+        <CTAButton href="/login" variant="secondary" className="mt-5 w-full">
           Ya tengo cuenta
-        </a>
+        </CTAButton>
       </div>
   );
 }
