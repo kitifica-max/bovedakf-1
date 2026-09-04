@@ -153,7 +153,7 @@ export default async function AdminPage() {
         </Link>
       </header>
 
-      <p className="font-pixel text-lg leading-[1.3] tracking-tight text-ink">Respuestas de usuarios</p>
+      <p className="font-pixel text-lg leading-[1.3] text-ink">Respuestas de usuarios</p>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[

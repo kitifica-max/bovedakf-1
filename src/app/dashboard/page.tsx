@@ -28,7 +28,7 @@ export default async function DashboardIndexPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <h1 className="font-pixel text-xl leading-[1.3] tracking-tight text-ink">Tus bóvedas</h1>
+      <h1 className="font-pixel text-xl leading-[1.3] text-ink">Tus bóvedas</h1>
       <ul className="flex flex-col gap-3">
         {vaults.map((v) => (
           <li key={v.id}>

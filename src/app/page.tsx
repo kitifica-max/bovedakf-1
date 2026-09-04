@@ -226,7 +226,7 @@ export default function HomePage() {
                 {securityBadges.map(({ label, note, Icon }) => (
                   <div
                     key={label}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/15 px-4 py-4 text-center backdrop-blur-lg"
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-blue/40 bg-blue/25 px-4 py-4 text-center backdrop-blur-lg"
                   >
                     <Icon aria-hidden="true" className="h-6 w-6 text-blue-soft" />
                     <span className="font-pixel text-sm text-blue-soft">{label}</span>
@@ -246,7 +246,7 @@ export default function HomePage() {
       <section aria-labelledby="problema-heading" className="w-full max-w-5xl">
         <div data-reveal className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">El problema</p>
-          <h2 id="problema-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+          <h2 id="problema-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
             No es la contraseña. Es dónde vive.
           </h2>
         </div>
@@ -265,7 +265,7 @@ export default function HomePage() {
       <section aria-labelledby="como-funciona-heading" className="w-full max-w-5xl rounded-2xl border border-border-soft bg-paper p-6 sm:p-10">
         <div data-reveal className="mb-8 max-w-xl">
           <p className="text-sm font-medium text-blue">Cómo funciona</p>
-          <h2 id="como-funciona-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+          <h2 id="como-funciona-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
             Tres pasos, cero fricción
           </h2>
         </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
       >
         <div data-reveal className="mb-8 max-w-xl">
           <p className="text-sm font-medium text-blue">Para equipos</p>
-          <h2 id="equipos-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+          <h2 id="equipos-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
             Sumá a tu equipo por correo, en segundos
           </h2>
           <p className="mt-3 text-sm text-ink-soft">
@@ -329,8 +329,8 @@ export default function HomePage() {
       <section aria-labelledby="features-heading" className="w-full max-w-5xl">
         <div data-reveal className="mb-6 max-w-xl">
           <p className="text-sm font-medium text-blue">Qué incluye</p>
-          <h2 id="features-heading" className="mt-1 font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
-            Diseñado para que nadie tenga que confiar a ciegas
+          <h2 id="features-heading" className="mt-1 font-pixel text-2xl leading-[1.3] text-ink">
+            Todo lo que incluye
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -355,7 +355,7 @@ export default function HomePage() {
       {/* Mecanismo de seguridad */}
       <section aria-labelledby="seguridad-heading" className="glass w-full max-w-5xl rounded-2xl p-6 sm:p-10">
         <p data-reveal className="text-sm font-medium text-ink">Cómo protegemos tu secreto</p>
-        <h2 data-reveal id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] tracking-tight text-ink sm:text-2xl">
+        <h2 data-reveal id="seguridad-heading" className="mt-1 max-w-2xl font-pixel text-xl leading-[1.3] text-ink sm:text-2xl">
           La clave de cada link vive solo en la URL — nunca en nuestra base de datos
         </h2>
         <p data-reveal className="mt-3 max-w-2xl text-sm text-ink-soft">
@@ -369,7 +369,7 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section aria-labelledby="faq-heading" className="w-full max-w-5xl">
-        <h2 data-reveal id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] tracking-tight text-ink">
+        <h2 data-reveal id="faq-heading" className="mb-6 text-center font-pixel text-2xl leading-[1.3] text-ink">
           Preguntas frecuentes
         </h2>
         <div className="flex flex-col gap-3">
@@ -389,7 +389,7 @@ export default function HomePage() {
 
       {/* CTA final */}
       <section className="w-full max-w-5xl rounded-2xl bg-ink p-8 text-center text-gray sm:p-14">
-        <h2 data-reveal className="font-pixel text-2xl leading-[1.3] tracking-tight sm:text-3xl">
+        <h2 data-reveal className="font-pixel text-2xl leading-[1.3] sm:text-3xl">
           Dejá de reenviar contraseñas por chat
         </h2>
         <p data-reveal className="mx-auto mt-3 max-w-md text-gray/70">

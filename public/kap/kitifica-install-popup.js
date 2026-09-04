@@ -263,6 +263,61 @@
     if (e.key === 'Escape' || e.key === 'Esc') kapClose();
   });
 
+  // Let inline transforms win once the entrance keyframe has played.
+  (function () {
+    var c = document.getElementById('kap-card');
+    if (c) c.addEventListener('animationend', function () { c.style.animation = 'none'; });
+  })();
+
+  // Drag the header down to dismiss (iOS-sheet style). Tracks 1:1, rubber-bands
+  // upward, projects momentum on release, springs back if it wasn't a real
+  // dismiss. Scoped to the header so body scroll and buttons keep working.
+  (function () {
+    var card = document.getElementById('kap-card');
+    var header = document.querySelector('.kap-header');
+    if (!card || !header) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var DRAWER = 'cubic-bezier(.32,.72,0,1)';
+    var startY = 0, curY = 0, lastY = 0, lastT = 0, vel = 0, dragging = false;
+
+    header.style.cursor = 'grab';
+    header.style.touchAction = 'none';
+
+    header.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      startY = e.clientY; curY = 0; lastY = e.clientY; lastT = e.timeStamp; vel = 0;
+      card.style.transition = 'none';
+      header.style.cursor = 'grabbing';
+      try { header.setPointerCapture(e.pointerId); } catch {}
+    });
+
+    header.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dy = e.clientY - startY;
+      curY = dy < 0 ? dy * 0.35 : dy;
+      card.style.transform = 'translateY(' + curY + 'px)';
+      var dt = e.timeStamp - lastT;
+      if (dt > 0) vel = ((e.clientY - lastY) / dt) * 1000;
+      lastY = e.clientY; lastT = e.timeStamp;
+    });
+
+    function end(e) {
+      if (!dragging) return;
+      dragging = false;
+      header.style.cursor = 'grab';
+      try { header.releasePointerCapture(e.pointerId); } catch {}
+      var projected = curY + (vel / 1000) * 0.998 / (1 - 0.998);
+      if (projected > 120 || vel > 600) {
+        kapClose();
+      } else {
+        card.style.transition = reduce ? 'none' : 'transform .35s ' + DRAWER;
+        card.style.transform = 'translateY(0)';
+      }
+    }
+    header.addEventListener('pointerup', end);
+    header.addEventListener('pointercancel', end);
+  })();
+
   // ── Funciones ─────────────────────────────────────────────────────────────
   function setDevice(key) {
     var d = DEVS[key];
@@ -293,12 +348,26 @@
     document.getElementById('kap-step-2').style.display = n === 2 ? 'block' : 'none';
   }
 
+  // Exits along the same path it entered — the card slides back down while
+  // the scrim fades. Starts from whatever transform the drag left it at, so
+  // there's no jump.
   function kapClose() {
     var o = document.getElementById('kap-overlay');
     if (!o) return;
+    var c = document.getElementById('kap-card');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !c) {
+      o.style.transition = 'opacity .15s';
+      o.style.opacity = '0';
+      setTimeout(function () { container.remove(); }, 160);
+      return;
+    }
+    var dist = c.getBoundingClientRect().height + 48;
+    c.style.transition = 'transform .3s cubic-bezier(.32,.72,0,1)';
+    c.style.transform = 'translateY(' + dist + 'px)';
+    o.style.transition = 'opacity .3s ease';
     o.style.opacity = '0';
-    o.style.transition = 'opacity .2s';
-    setTimeout(function () { container.remove(); }, 220);
+    setTimeout(function () { container.remove(); }, 320);
   }
 
 })();

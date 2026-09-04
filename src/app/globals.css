@@ -77,6 +77,26 @@ kbd {
   outline-offset: 2px;
 }
 
+/* Press feedback: every button responds the instant it's pressed, not on
+   release. Kept subtle; opt out on a specific button with `active:scale-100`. */
+button:not(:disabled) {
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Respect the OS "reduce transparency" / "increase contrast" settings —
+   the glass and blurred surfaces go solid so text stays legible. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass,
+  [class*="backdrop-blur"] {
+    background: var(--color-paper) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
