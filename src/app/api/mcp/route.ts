@@ -32,6 +32,11 @@ function jsonrpcError(id: number | string | null, code: number, message: string)
   return NextResponse.json({ jsonrpc: "2.0", id, error: { code, message } }, { headers: NO_STORE });
 }
 
+// Supported protocol versions — respond with the client's preferred version
+// if we support it, otherwise fall back to the oldest supported version.
+const SUPPORTED_PROTOCOL_VERSIONS = ["2025-03-26", "2024-11-05"];
+const DEFAULT_PROTOCOL_VERSION = "2024-11-05";
+
 // ── Tool definitions ─────────────────────────────────────────────────────
 
 const TOOLS = [
@@ -166,14 +171,22 @@ export async function POST(req: NextRequest) {
   // MCP protocol handshake — allow without auth so mcp-remote can complete
   // the initialize round-trip before triggering OAuth discovery.
   if (body.method === "initialize") {
+    // Negotiate protocol version: use client's preferred version if supported
+    const clientVersion = body.params?.protocolVersion as string | undefined;
+    const protocolVersion =
+      clientVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(clientVersion)
+        ? clientVersion
+        : DEFAULT_PROTOCOL_VERSION;
+
     return jsonrpcOk(body.id ?? 0, {
-      protocolVersion: "2024-11-05",
+      protocolVersion,
       capabilities: { tools: {} },
       serverInfo: { name: "KF-1 Vault", version: "1.0.0" },
     });
   }
   if (body.method === "notifications/initialized") {
-    return new Response(null, { status: 204 });
+    // Return 200 with empty JSON object — some MCP clients treat 204 as an error
+    return NextResponse.json({}, { status: 200, headers: NO_STORE });
   }
 
   // All other methods require a valid Bearer token.
