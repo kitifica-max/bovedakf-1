@@ -10,6 +10,7 @@ import {
   revokeShareLinkAction,
 } from "../actions";
 import { ChevronDownIcon, EyeIcon, EyeOffIcon, Link2Icon, Share2Icon, ShieldCheckIcon, Trash2Icon, XCircleIcon } from "@/components/icons";
+import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
 import { VerifyBanner } from "@/components/verify-banner";
@@ -60,6 +61,14 @@ export function VaultView({
           <ShieldCheckIcon className="h-4 w-4" />
         </span>
         <h1 className="font-pixel text-xl leading-[1.3] text-ink">{vault.name}</h1>
+        {role === "OWNER" && (
+          <Link
+            href="/connect"
+            className="ml-auto text-xs text-ink-soft underline decoration-border-soft underline-offset-4 transition hover:text-ink"
+          >
+            Conectar AI →
+          </Link>
+        )}
       </div>
       <VerifyResult />
       {!emailVerified && <VerifyBanner />}

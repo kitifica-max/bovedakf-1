@@ -97,5 +97,7 @@ export async function GET(req: NextRequest) {
   // Redirect to consent page
   const consentUrl = new URL("/dashboard/ai-access/consent", BASE_URL);
   consentUrl.searchParams.set("token", consentToken);
+  consentUrl.searchParams.set("client_id", clientId);
+  consentUrl.searchParams.set("vault_id", vaultId);
   return NextResponse.redirect(consentUrl);
 }
