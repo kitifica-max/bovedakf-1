@@ -6,8 +6,9 @@ type Name = "step-save" | "step-share" | "step-audit" | "roles";
 
 /**
  * Wraps an inline-SVG illustration and runs a slow, meaning-driven GSAP loop on it.
- * Selectors resolve inside this wrapper via gsap.context. No-ops under
- * prefers-reduced-motion; cleans up on unmount.
+ * Selectors resolve inside this wrapper via gsap.context. Rotations pivot on a
+ * viewBox point via `svgOrigin`. No-ops under prefers-reduced-motion; cleans up
+ * on unmount.
  */
 export function IllustrationLoop({
   name,
@@ -34,46 +35,41 @@ export function IllustrationLoop({
         const tl = gsap.timeline({ repeat: -1, defaults: { ease: "power2.inOut" } });
 
         if (name === "step-save") {
-          // the shackle drops shut, the block sinks in, the keyhole locks
-          gsap.set("[data-block]", { transformOrigin: "50% 50%" });
-          gsap.set("[data-shackle]", { transformOrigin: "50% 100%" });
-          gsap.set("[data-keyhole]", { transformOrigin: "60px 88px" });
+          // the block sinks in, the shackle drops shut, the keyhole locks
           tl.fromTo("[data-block]", { y: -10, opacity: 0.35 }, { y: 0, opacity: 1, duration: 0.7 })
             .fromTo("[data-shackle]", { y: -12 }, { y: 0, duration: 0.5 }, "-=0.2")
-            .fromTo("[data-keyhole]", { scale: 0.5, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.35 })
+            .fromTo("[data-keyhole]", { opacity: 0.3 }, { opacity: 1, duration: 0.35 })
             .to({}, { duration: 1.8 })
-            .to("[data-lock]", { opacity: 0.2, duration: 0.5 })
+            .to("[data-lock]", { opacity: 0.25, duration: 0.5 })
             .set("[data-lock]", { opacity: 1 });
         }
 
         if (name === "step-share") {
-          // the expiry ring sweeps a full turn; the key ticks with it
-          gsap.set("[data-arc]", { transformOrigin: "60px 62px" });
-          gsap.set("[data-key]", { transformOrigin: "52px 62px" });
+          // the expiry ring spins on its own centre; the key ticks with it
+          gsap.set("[data-arc]", { svgOrigin: "60 62" });
+          gsap.set("[data-key]", { svgOrigin: "52 62" });
           tl.fromTo(
             "[data-arc]",
-            { rotate: 0 },
-            { rotate: 360, duration: 3.6, ease: "none" }
-          ).fromTo("[data-key]", { rotate: -10 }, { rotate: 0, duration: 0.5 }, 0);
+            { rotation: 0 },
+            { rotation: 360, duration: 3.6, ease: "none" }
+          ).fromTo("[data-key]", { rotation: -10 }, { rotation: 0, duration: 0.5 }, 0);
         }
 
         if (name === "step-audit") {
           // rows check in one by one, the eye scans across, then it resets
-          gsap.set("[data-check]", { transformOrigin: "26px 32px" });
           tl.fromTo(
             "[data-check]",
-            { scale: 0, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.4, stagger: 0.4 }
+            { opacity: 0, y: -6 },
+            { opacity: 1, y: 0, duration: 0.4, stagger: 0.4 }
           )
             .fromTo("[data-eye]", { x: -7 }, { x: 7, duration: 0.9, yoyo: true, repeat: 1 }, "-=0.3")
             .to({}, { duration: 1.2 })
             .to("[data-check]", { opacity: 0.15, duration: 0.4 })
-            .set("[data-check]", { opacity: 1, scale: 1 });
+            .set("[data-check]", { opacity: 1 });
         }
 
         if (name === "roles") {
           // the invite pushes toward the two badges; arrows carry it; each badge lights in turn
-          gsap.set("[data-envelope]", { transformOrigin: "50% 50%" });
           tl.fromTo("[data-envelope]", { x: 0 }, { x: 7, duration: 0.7, yoyo: true, repeat: 1 })
             .fromTo(
               "[data-arrow]",
