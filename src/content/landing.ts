@@ -137,7 +137,7 @@ export const securitySpec: { label: string; items: { claim: string; plain: strin
     label: "Cifrado",
     items: [
       { claim: "AES-256-GCM", plain: "Cada credencial se guarda cifrada, con un estándar que usan bancos y gobiernos." },
-      { claim: "Zero-knowledge en los links", plain: "La llave para abrir un link nunca toca nuestro servidor. Sin ella, lo que guardamos es texto ilegible." },
+      { claim: "Zero-knowledge en los links", plain: "La llave para abrir un link viaja en el enlace y no se guarda en nuestro servidor. Sin ella, lo que guardamos es texto ilegible." },
     ],
   },
   {
@@ -145,7 +145,7 @@ export const securitySpec: { label: string; items: { claim: string; plain: strin
     items: [
       { claim: "Expiración 1h–7d", plain: "Cada link deja de funcionar solo, en el plazo que elijas." },
       { claim: "Revocación instantánea", plain: "Cortás cualquier link con un click, antes de que expire." },
-      { claim: "Un destinatario", plain: "Un link es para una persona. Cada apertura queda registrada." },
+      { claim: "Cada apertura registrada", plain: "Cada vez que se abre un link queda escrito, con hora e IP aproximada. Al dueño le llega un aviso en la primera apertura." },
     ],
   },
   {
