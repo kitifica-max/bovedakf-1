@@ -4,3 +4,10 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Fonts need CORP: cross-origin so browsers allow them when COEP: require-corp
+# is active. next.config.ts sets same-origin for all other resources.
+[[headers]]
+  for = "/_next/static/media/*"
+  [headers.values]
+    Cross-Origin-Resource-Policy = "cross-origin"
