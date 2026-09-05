@@ -6,7 +6,7 @@ Si encontrás una vulnerabilidad de seguridad en Bóveda KF-1, **no abras un iss
 
 ### Cómo reportar
 
-Enviá un correo a: **[COMPLETAR — email de seguridad]**
+Enviá un correo a: **hola@kitifica.com**
 
 Incluí en el reporte:
 
