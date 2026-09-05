@@ -10,13 +10,38 @@ const DISMISS_KEY = "kap-install-dismissed";
 export function InstallPrompt() {
   const pathname = usePathname();
   const [show, setShow] = useState(false);
+  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     if (!ALLOWED.includes(pathname)) return;
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;
     if (navigator.standalone === true) return;
-    setShow(true);
+
+    function onPrompt(e: BeforeInstallPromptEvent) {
+      e.preventDefault();
+      setDeferred(e);
+      setShow(true);
+    }
+
+    function onInstalled() {
+      setShow(false);
+      localStorage.setItem(DISMISS_KEY, "1");
+    }
+
+    window.addEventListener("beforeinstallprompt", onPrompt as EventListener);
+    window.addEventListener("appinstalled", onInstalled);
+
+    // Show anyway after 2s even if no native prompt (for iOS / non-supported browsers)
+    const timer = setTimeout(() => {
+      if (!localStorage.getItem(DISMISS_KEY)) setShow(true);
+    }, 2000);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt as EventListener);
+      window.removeEventListener("appinstalled", onInstalled);
+      clearTimeout(timer);
+    };
   }, [pathname]);
 
   if (!ALLOWED.includes(pathname) || !show) return null;
@@ -24,6 +49,17 @@ export function InstallPrompt() {
   function dismiss() {
     setShow(false);
     localStorage.setItem(DISMISS_KEY, "1");
+  }
+
+  async function install() {
+    if (!deferred) return;
+    deferred.prompt();
+    const { outcome } = await deferred.userChoice;
+    if (outcome === "accepted") {
+      setShow(false);
+      localStorage.setItem(DISMISS_KEY, "1");
+    }
+    setDeferred(null);
   }
 
   return (
@@ -59,14 +95,24 @@ export function InstallPrompt() {
           Accedé a tu bóveda como una app nativa.
         </p>
 
-        <Link
-          href="https://kitifica.com/appdirecta/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mb-3 inline-flex w-full items-center justify-center rounded-full bg-blue px-6 py-3 text-sm font-medium text-white transition hover:brightness-110 active:scale-[0.98]"
-        >
-          Cómo instalar &#8594;
-        </Link>
+        {deferred ? (
+          <button
+            type="button"
+            onClick={install}
+            className="mb-3 inline-flex w-full cursor-pointer items-center justify-center rounded-full border-none bg-blue px-6 py-3 text-sm font-medium text-white transition hover:brightness-110 active:scale-[0.98]"
+          >
+            Instalar ahora &#8594;
+          </button>
+        ) : (
+          <Link
+            href="https://kitifica.com/appdirecta/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-3 inline-flex w-full items-center justify-center rounded-full bg-blue px-6 py-3 text-sm font-medium text-white transition hover:brightness-110 active:scale-[0.98]"
+          >
+            Cómo instalar &#8594;
+          </Link>
+        )}
 
         <button
           type="button"
@@ -78,4 +124,9 @@ export function InstallPrompt() {
       </div>
     </div>
   );
+}
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
