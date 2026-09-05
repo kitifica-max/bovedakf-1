@@ -35,11 +35,11 @@ export default async function HomePage() {
       <SiteHeader />
       <main className="flex flex-col items-center gap-16 px-4 pb-16 pt-6 sm:gap-24 sm:px-8">
       <HeroSection />
+      <AiAgentSection />
       <ProblemaSection />
       <ComoFuncionaSection />
       <ParaEquiposSection />
       <SeguridadSection />
-      <AiAgentSection />
       <YAdemasSection />
       <FaqSection />
       <CtaFinalSection />
