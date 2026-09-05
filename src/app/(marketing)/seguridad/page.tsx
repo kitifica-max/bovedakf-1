@@ -119,7 +119,7 @@ export default function SecurityPage() {
       </p>
 
       {/* Badges */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Badge
           grade="A+"
           label="SSL Labs"
@@ -137,6 +137,13 @@ export default function SecurityPage() {
           <div>
             <p className="text-xs font-semibold text-ink">Zero-Knowledge Links</p>
             <p className="text-[11px] text-ink-soft">Clave nunca toca el servidor</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
+          <span className="font-display text-2xl font-bold text-blue">9.0</span>
+          <div>
+            <p className="text-xs font-semibold text-ink">OWASP ZAP</p>
+            <p className="text-[11px] text-ink-soft">0 críticos · 0 altos · scan pasivo</p>
           </div>
         </div>
       </div>
