@@ -88,12 +88,6 @@ export function CliTokenManager() {
             <code className="flex-1 truncate px-3 py-2 font-mono text-xs text-ink">{newToken}</code>
             <CopyButton value={newToken} label="Copiar" />
           </div>
-          <div className="mt-3 rounded-lg bg-gray/40 p-3">
-            <p className="mb-1 text-xs text-ink-soft">Instalá la skill:</p>
-            <code className="block break-all font-mono text-[10px] text-ink">
-              mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/
-            </code>
-          </div>
           <button
             type="button"
             onClick={() => setNewToken(null)}
