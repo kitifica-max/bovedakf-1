@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheckIcon } from "@/components/icons";
 import { CliTokenManager } from "@/components/cli-token-manager";
+import { CopyCodeBlock } from "@/components/copy-code-block";
 
 export default async function AiDashboardPage() {
   const session = await auth();
@@ -84,15 +85,11 @@ export default async function AiDashboardPage() {
         <div className="mt-4 flex flex-col gap-3">
           <div className="rounded-xl bg-gray/40 p-4">
             <p className="mb-2 text-xs font-medium text-ink">Copiá y pegá en tu terminal:</p>
-            <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
-              mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/
-            </code>
+            <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/" />
           </div>
           <div className="rounded-xl bg-gray/40 p-4">
             <p className="mb-2 text-xs font-medium text-ink">Configurá tu token:</p>
-            <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
-              bash ~/.claude/skills/kf1/kf1.sh setup
-            </code>
+            <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
           </div>
         </div>
       </div>

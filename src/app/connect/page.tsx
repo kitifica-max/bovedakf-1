@@ -2,6 +2,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SectionHead } from "@/components/site/section-head";
 import Link from "next/link";
+import { CopyCodeBlock } from "@/components/copy-code-block";
 
 export const metadata = {
   title: "Conectar agente de IA — Boveda KF-1",
@@ -36,22 +37,16 @@ export default function ConnectPage() {
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">2. Instalá la skill</p>
-                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
-                  mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/
-                </code>
+                <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/" />
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">3. Configurá el token</p>
-                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
-                  bash ~/.claude/skills/kf1/kf1.sh setup
-                </code>
+                <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">4. Usá la skill</p>
-                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
-                  /kf1 list<br/>
-                  /kf1 view &lt;credential-id&gt;
-                </code>
+                <CopyCodeBlock code="/kf1 list" />
+                <CopyCodeBlock code="/kf1 view <credential-id>" />
               </div>
             </div>
           </div>
