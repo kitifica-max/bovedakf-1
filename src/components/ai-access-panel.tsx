@@ -31,7 +31,7 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
     <div className="mt-4 rounded-2xl border border-border-soft p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-ink">Acceso AI (MCP)</h3>
+          <h3 className="text-sm font-medium text-ink">Acceso AI (Skill)</h3>
           <p className="mt-0.5 text-xs text-ink-soft">
             Permite que agentes de IA generen links temporales para esta credencial
           </p>

@@ -3,14 +3,13 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheckIcon } from "@/components/icons";
-
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kf1.kitifica.com";
+import { CliTokenManager } from "@/components/cli-token-manager";
+import { CopyCodeBlock } from "@/components/copy-code-block";
 
 export default async function AiDashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  // Get all vaults the user owns
   const vaults = await db.vault.findMany({
     where: { owner: { id: session.user.id } },
     include: {
@@ -40,7 +39,7 @@ export default async function AiDashboardPage() {
         <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-blue text-paper">
           <ShieldCheckIcon className="h-4 w-4" />
         </span>
-        <h1 className="font-pixel text-xl leading-[1.3] text-ink">AI &amp; MCP</h1>
+        <h1 className="font-pixel text-xl leading-[1.3] text-ink">AI &amp; Skill</h1>
       </div>
 
       {/* Status */}
@@ -63,82 +62,53 @@ export default async function AiDashboardPage() {
         <ol className="mt-3 flex flex-col gap-3 text-sm text-ink-soft">
           <li className="flex items-start gap-3">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">1</span>
-            <span>Instalá el MCP en tu agente (Claude Code, Desktop, etc.) con el comando de abajo.</span>
+            <span>Generá un token CLI en esta página.</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">2</span>
-            <span>Cuando el agente necesite credenciales, te va a pedir autorizar en el navegador.</span>
+            <span>Instalá la skill de KF-1 en Claude Code con dos comandos.</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">3</span>
-            <span>Hacé login y aprobá. La sesión dura 2 horas.</span>
+            <span>Pedile credenciales en lenguaje natural. La skill genera links temporales.</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">4</span>
-            <span>Pedile credenciales en lenguaje natural. El agente genera links temporales que vos abrís en el navegador.</span>
+            <span>Abrí el link en tu navegador para ver la credencial.</span>
           </li>
         </ol>
       </div>
 
       {/* Install */}
       <div className="rounded-2xl border border-border-soft bg-paper p-5">
-        <h2 className="font-display text-sm font-semibold text-ink">Instalar MCP</h2>
-
+        <h2 className="font-display text-sm font-semibold text-ink">Instalar Skill</h2>
         <div className="mt-4 flex flex-col gap-3">
-          <details className="group rounded-xl border border-border-soft bg-gray/40 p-4">
-            <summary className="cursor-pointer list-none font-medium text-sm text-ink transition hover:text-blue">
-              Claude Code (terminal)
-            </summary>
-            <div className="mt-3 rounded-xl bg-gray/60 p-4">
-              <p className="mb-2 text-xs text-ink-soft">Copiá y pegá en tu terminal:</p>
-              <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
-                claude mcp add --transport streamable-http kf1 {BASE_URL}/api/mcp
-              </code>
+          <div className="rounded-xl bg-gray/40 p-4">
+            <p className="mb-2 text-xs font-medium text-ink">Copiá y pegá en tu terminal:</p>
+            <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && curl -sL https://kf1.kitifica.com/skill/SKILL.md -o ~/.claude/skills/kf1/SKILL.md && curl -sL https://kf1.kitifica.com/skill/kf1.sh -o ~/.claude/skills/kf1/kf1.sh" />
+          </div>
+          <div className="rounded-xl bg-gray/40 p-4">
+            <p className="mb-2 text-xs font-medium text-ink">Configurá tu token:</p>
+            <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
+          </div>
+          <div className="rounded-xl bg-gray/40 p-4">
+            <p className="mb-2 text-xs font-medium text-ink">Usá la skill:</p>
+            <div className="flex flex-col gap-2">
+              <CopyCodeBlock code="/kf1 list" />
+              <CopyCodeBlock code="/kf1 view <credential-id>" />
             </div>
-          </details>
-
-          <details className="group rounded-xl border border-border-soft bg-gray/40 p-4">
-            <summary className="cursor-pointer list-none font-medium text-sm text-ink transition hover:text-blue">
-              Claude Desktop (escritorio)
-            </summary>
-            <div className="mt-3 rounded-xl bg-gray/60 p-4">
-              <p className="text-xs text-ink-soft">
-                Copiá y pegá este comando en tu terminal. Detecta tu sistema operativo automáticamente:
-              </p>
-              <pre className="mt-3 overflow-x-auto rounded-lg bg-gray px-3 py-2 font-mono text-[10px] leading-relaxed text-ink">{`python3 -c "
-import json, os, sys
-if sys.platform == 'win32':
-    path = os.path.expandvars(r'%APPDATA%\\Claude\\claude_desktop_config.json')
-else:
-    path = os.path.expanduser('~/Library/Application Support/Claude/claude_desktop_config.json')
-os.makedirs(os.path.dirname(path), exist_ok=True)
-try:
-    with open(path) as f: config = json.load(f)
-except: config = {}
-config.setdefault('mcpServers', {})['kf1'] = {'command': 'npx', 'args': ['-y', 'mcp-remote', '${BASE_URL}/api/mcp']}
-with open(path, 'w') as f: json.dump(config, f, indent=2)
-print('KF-1 instalado. Reiniciá Claude Desktop.')
-"`}</pre>
-              <p className="mt-2 text-xs text-ink-soft">
-                Reiniciá Claude Desktop después de ejecutarlo.
-              </p>
-            </div>
-          </details>
-
-          <details className="group rounded-xl border border-border-soft bg-gray/40 p-4">
-            <summary className="cursor-pointer list-none font-medium text-sm text-ink transition hover:text-blue">
-              Otros agentes (Cursor, Windsurf, etc.)
-            </summary>
-            <div className="mt-3 rounded-xl bg-gray/60 p-4">
-              <p className="text-xs text-ink-soft">
-                Endpoint para cualquier agente con soporte MCP streamable HTTP:
-              </p>
-              <code className="mt-2 block break-all rounded-lg bg-gray px-3 py-2 font-mono text-xs text-ink">
-                {BASE_URL}/api/mcp
-              </code>
-            </div>
-          </details>
+          </div>
         </div>
+      </div>
+
+      {/* CLI Token */}
+      <div className="rounded-2xl border border-border-soft bg-paper p-5">
+        <h2 className="font-display text-sm font-semibold text-ink">Token CLI</h2>
+        <p className="mt-2 text-sm text-ink-soft">
+          Generá un token para usar con la skill. El token se almacena localmente
+          y permite acceder a tus credenciales sin OAuth.
+        </p>
+        <CliTokenManager />
       </div>
 
       {/* AI-accessible credentials */}
@@ -174,8 +144,8 @@ print('KF-1 instalado. Reiniciá Claude Desktop.')
         <ul className="mt-3 flex flex-col gap-1.5 text-xs text-ink-soft">
           <li>• El agente <strong className="text-ink">NUNCA</strong> recibe contraseñas en texto plano</li>
           <li>• Solo recibe links temporales que vos abrís en el navegador</li>
-          <li>• Los links expiran en 15 minutos</li>
-          <li>• La sesión del agente dura 2 horas</li>
+          <li>• Los links expiran en 1 hora</li>
+          <li>• El token CLI expira en 30 días</li>
           <li>• Cada acceso queda registrado en auditoría</li>
           <li>• Podes desactivar el acceso a cualquier credencial en cualquier momento</li>
         </ul>
