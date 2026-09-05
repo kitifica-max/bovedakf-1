@@ -31,7 +31,7 @@ export default function ConnectPage() {
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">1. Generá un token CLI</p>
                 <p className="text-xs text-ink-soft">
-                  Andá a <Link href="/dashboard/ai" className="text-blue underline">AI &amp; MCP</Link> y generá un token.
+                  Andá a <Link href="/dashboard/ai" className="text-blue underline">AI &amp; Skill</Link> y generá un token.
                 </p>
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
