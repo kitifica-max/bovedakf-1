@@ -1,7 +1,7 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { Section } from "@/components/site/section";
 import { SectionHead } from "@/components/site/section-head";
+import Link from "next/link";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kf1.kitifica.com";
 
@@ -23,22 +23,50 @@ export default function ConnectPage() {
         />
 
         <div className="flex flex-col gap-6">
-          {/* Claude Code */}
-          <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
-            <h3 className="font-display text-lg font-semibold text-ink">Claude Code (terminal)</h3>
+          {/* Claude Code - Skill (Recommended) */}
+          <div className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-6">
+            <h3 className="font-display text-lg font-semibold text-ink">Claude Code — Skill (Recomendado)</h3>
             <p className="mt-2 text-sm text-ink-soft">
-              Copiá y pegá este comando en tu terminal:
+              La forma más simple. Funciona en terminal, escritorio, y cualquier modo.
+            </p>
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="rounded-xl bg-gray/60 p-4">
+                <p className="mb-2 text-xs font-medium text-ink">1. Generá un token CLI</p>
+                <p className="text-xs text-ink-soft">
+                  Andá a <Link href="/dashboard/ai" className="text-blue underline">AI &amp; MCP</Link> y generá un token.
+                </p>
+              </div>
+              <div className="rounded-xl bg-gray/60 p-4">
+                <p className="mb-2 text-xs font-medium text-ink">2. Instalá la skill</p>
+                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                  mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/
+                </code>
+              </div>
+              <div className="rounded-xl bg-gray/60 p-4">
+                <p className="mb-2 text-xs font-medium text-ink">3. Configurá el token</p>
+                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                  bash ~/.claude/skills/kf1/kf1.sh setup
+                </code>
+              </div>
+              <div className="rounded-xl bg-gray/60 p-4">
+                <p className="mb-2 text-xs font-medium text-ink">4. Usá la skill</p>
+                <code className="block break-all rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                  /kf1 list<br/>
+                  /kf1 view &lt;credential-id&gt;
+                </code>
+              </div>
+            </div>
+          </div>
+
+          {/* Claude Code - MCP */}
+          <div className="rounded-2xl border border-border-soft bg-gray/40 p-6">
+            <h3 className="font-display text-lg font-semibold text-ink">Claude Code — MCP (Terminal)</h3>
+            <p className="mt-2 text-sm text-ink-soft">
+              Solo funciona en terminal. Para Cowork/Code sessions, usá la skill.
             </p>
             <code className="mt-3 block break-all rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
               claude mcp add kf1 npx -y mcp-remote {BASE_URL}/api/mcp
             </code>
-            <p className="mt-3 text-xs text-ink-soft">
-              Después, abrí <strong>claude</strong> en el directorio de tu proyecto y pedile credenciales.
-              Te va a pedir autorizar en el navegador.
-            </p>
-            <p className="mt-2 text-[11px] text-ink-soft/60">
-              Importante: usá Claude Code desde la terminal, no desde la app de escritorio.
-            </p>
           </div>
 
           {/* Claude Desktop */}
