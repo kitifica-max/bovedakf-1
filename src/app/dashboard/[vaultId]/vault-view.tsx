@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import type { AuditLog, Credential, ShareLink, Vault } from "@prisma/client";
 import {
@@ -90,6 +90,8 @@ export function VaultView({
   const canEdit = role === "OWNER" || role === "EDITOR";
   const [activeTab, setActiveTab] = useState<Tab>("credenciales");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const activeLinks = vault.credentials
     .flatMap((c) => c.shareLinks)
@@ -169,18 +171,56 @@ export function VaultView({
       {/* ── Main column ───────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border-soft bg-paper/60 backdrop-blur-xl">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border-soft bg-paper/60 backdrop-blur-xl relative">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-7 w-7 place-items-center rounded-[9px] bg-blue text-white">
-              <ShieldCheckIcon className="h-3.5 w-3.5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-ink leading-tight">{vault.name}</p>
-              <p className="text-[10px] text-ink-soft">{ROLE_LABEL[role]}</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-on-dark.svg" alt="KF-1" className="h-5 w-auto" />
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue/[0.07] border border-blue/20">
+              <ShieldCheckIcon className="h-3 w-3 text-blue shrink-0" />
+              <span className="text-[11px] font-medium text-ink-soft">{ROLE_LABEL[role]}</span>
             </div>
           </div>
-          <div className="grid h-7 w-7 place-items-center rounded-full bg-blue/15 border border-border-soft text-[10px] font-bold text-blue">
-            {initials}
+          <div className="flex items-center gap-2" ref={userMenuRef}>
+            <button
+              onClick={() => setShowUserMenu((v) => !v)}
+              className="grid h-7 w-7 place-items-center rounded-full bg-blue/15 border border-border-soft text-[10px] font-bold text-blue"
+              aria-label="Menú de cuenta"
+              aria-expanded={showUserMenu}
+            >
+              {initials}
+            </button>
+            {showUserMenu && (
+              <div className="absolute top-full right-4 z-50 mt-1 min-w-[180px] rounded-2xl border border-border-soft bg-paper/95 backdrop-blur-xl shadow-lg overflow-hidden">
+                <div className="px-3.5 py-2.5 border-b border-border-soft">
+                  <p className="text-[11px] text-ink-soft truncate">{userEmail}</p>
+                </div>
+                {role === "OWNER" && (
+                  <Link
+                    href="/dashboard/ai"
+                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Conectar IA
+                  </Link>
+                )}
+                {isAdminUser && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="flex w-full items-center gap-2 px-3.5 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors border-t border-border-soft"
+                >
+                  <LogOutIcon className="h-3.5 w-3.5" />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
@@ -193,7 +233,7 @@ export function VaultView({
                 href="/dashboard/ai"
                 className="rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:text-ink"
               >
-                Conectar AI →
+                Conectar IA →
               </Link>
             )}
             {activeTab === "credenciales" && canEdit && (
@@ -208,8 +248,8 @@ export function VaultView({
           </div>
         </div>
 
-        {/* Desktop stats row */}
-        <div className="hidden md:grid grid-cols-4 gap-2 px-6 py-3 border-b border-border-soft">
+        {/* Stats row — 2×2 mobile, 4×1 desktop */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-3 border-b border-border-soft md:grid-cols-4 md:px-6">
           {[
             { value: vault.credentials.length, label: "Credenciales" },
             { value: activeLinks, label: "Links activos" },
