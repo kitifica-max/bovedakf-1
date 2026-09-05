@@ -16,7 +16,7 @@ export function InstallPrompt() {
     if (!ALLOWED.includes(pathname)) return;
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;
-    if (navigator.standalone === true) return;
+    if ((navigator as any).standalone === true) return;
 
     function onPrompt(e: BeforeInstallPromptEvent) {
       e.preventDefault();
