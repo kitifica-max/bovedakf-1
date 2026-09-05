@@ -80,9 +80,10 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // Redirect back to client with auth code
-  const redirectUrl = new URL(authParams.redirectUri);
-  redirectUrl.searchParams.set("code", authCode);
-  redirectUrl.searchParams.set("state", authParams.state);
-  return NextResponse.json({ redirectUrl: redirectUrl.toString() });
+  // Redirect through our styled success page, which then forwards to mcp-remote's callback
+  const successUrl = new URL("/oauth/success", BASE_URL);
+  successUrl.searchParams.set("code", authCode);
+  successUrl.searchParams.set("state", authParams.state);
+  successUrl.searchParams.set("callback", authParams.redirectUri);
+  return NextResponse.json({ redirectUrl: successUrl.toString() });
 }
