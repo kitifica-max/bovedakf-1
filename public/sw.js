@@ -2,7 +2,7 @@
 // pages. Not a full offline data sync — dashboard data still needs network.
 // Upgrade to a proper caching strategy (e.g. Workbox) if offline write or
 // background sync is ever needed.
-const CACHE = "securevault-shell-v1";
+const CACHE = "securevault-shell-v2";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(["/"])));
