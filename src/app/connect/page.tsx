@@ -30,11 +30,14 @@ export default function ConnectPage() {
               Copiá y pegá este comando en tu terminal:
             </p>
             <code className="mt-3 block break-all rounded-xl bg-gray px-4 py-3 font-mono text-xs text-ink">
-              claude mcp add --transport streamable-http kf1 {BASE_URL}/api/mcp
+              claude mcp add kf1 npx -y mcp-remote {BASE_URL}/api/mcp
             </code>
             <p className="mt-3 text-xs text-ink-soft">
-              Después, abrí Claude en el directorio de tu proyecto y pedile credenciales.
+              Después, abrí <strong>claude</strong> en el directorio de tu proyecto y pedile credenciales.
               Te va a pedir autorizar en el navegador.
+            </p>
+            <p className="mt-2 text-[11px] text-ink-soft/60">
+              Importante: usá Claude Code desde la terminal, no desde la app de escritorio.
             </p>
           </div>
 
