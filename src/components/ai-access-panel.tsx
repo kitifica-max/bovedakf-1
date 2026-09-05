@@ -31,7 +31,7 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
     <div className="mt-4 rounded-2xl border border-border-soft p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-ink">Acceso AI (Skill)</h3>
+          <h3 className="text-sm font-medium text-ink">Acceso IA (Skill)</h3>
           <p className="mt-0.5 text-xs text-ink-soft">
             Permite que agentes de IA generen links temporales para esta credencial
           </p>
@@ -40,8 +40,10 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
           type="button"
           disabled={loading}
           onClick={handleToggle}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
-            aiAccessible ? "bg-ink" : "bg-gray"
+          aria-checked={aiAccessible}
+          role="switch"
+          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ${
+            aiAccessible ? "bg-green-500" : "bg-gray"
           } disabled:opacity-50`}
         >
           <span
