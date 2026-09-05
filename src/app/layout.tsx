@@ -29,14 +29,14 @@ const silkscreen = Silkscreen({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const title = "Bóveda KF-1 — Gestor de credenciales compartidas seguro";
+const title = "Bóveda KF-1 — Tu IA accede a tus credenciales sin exponer contraseñas";
 const description =
-  "Guarda credenciales de equipo encriptadas y compártelas con links que expiran solos. Auditoría completa de accesos, sin spreadsheets ni contraseñas por chat.";
+  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal zero-knowledge que vos abrís.";
 
-// Social preview leads with the problem, not the product description.
-const ogTitle = "Bóveda KF-1 — Comparte credenciales sin dejarlas en el chat";
+// Social preview leads with the AI skill differentiation.
+const ogTitle = "Tu IA accede a tus credenciales. Sin exponer tus contraseñas.";
 const ogDescription =
-  "Guarda accesos de equipo y compártelos con links que expiran solos. Cifrado E2E y auditoría completa de accesos.";
+  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal que vos abrís.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -59,12 +59,15 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   keywords: [
-    "gestor de credenciales",
+    "skill claude code credenciales",
+    "AI accede a contraseñas sin verlas",
+    "gestor de credenciales para agentes IA",
+    "zero-knowledge credential vault",
     "compartir contraseñas de forma segura",
-    "vault de contraseñas para equipos",
     "encriptación AES-256",
     "links temporales de credenciales",
-    "zero-knowledge",
+    "vault de contraseñas para equipos",
+    "KF-1 skill",
   ],
   authors: [{ name: "Kitifica", url: "https://www.kitifica.com" }],
   category: "technology",
