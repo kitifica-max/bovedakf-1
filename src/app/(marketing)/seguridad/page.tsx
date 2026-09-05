@@ -140,7 +140,7 @@ export default function SecurityPage() {
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
-          <span className="font-display text-2xl font-bold text-blue">9.0</span>
+          <span className="font-display text-2xl font-bold text-blue">10/10</span>
           <div>
             <p className="text-xs font-semibold text-ink">OWASP ZAP</p>
             <p className="text-[11px] text-ink-soft">0 críticos · 0 altos · scan pasivo</p>
