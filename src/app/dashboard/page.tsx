@@ -7,7 +7,8 @@ import type { Role } from "@/lib/vault-access";
 
 export default async function DashboardIndexPage() {
   const session = await auth();
-  const userId = session!.user.id;
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
 
   const [owned, memberships] = await Promise.all([
     db.vault.findMany({ where: { ownerId: userId }, select: { id: true, name: true } }),
