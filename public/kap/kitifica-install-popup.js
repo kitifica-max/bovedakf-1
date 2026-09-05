@@ -46,6 +46,10 @@
   })();
   var base = _el && _el.src ? _el.src.replace(/[^/]*$/, '') : './';
 
+  // Nonce for CSP — Next.js stamps it on <script>, we forward it to <style>.
+  var _nonce = '';
+  try { _nonce = _el && _el.getAttribute('nonce') || ''; } catch (_e) {}
+
   // ── Config de dispositivos ───────────────────────────────────────────────
   var DEVS = {
     ios:     { label: 'iPhone / iPad',  title: 'Instala en iPhone o iPad',     img: 'install_iphone_ipad.png',    cols: 3 },
@@ -176,6 +180,7 @@
 
   var style = document.createElement('style');
   style.textContent = css;
+  if (_nonce) style.setAttribute('nonce', _nonce);
   document.head.appendChild(style);
 
   // ── HTML ─────────────────────────────────────────────────────────────────
