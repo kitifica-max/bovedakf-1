@@ -1,0 +1,52 @@
+# Bóveda KF-1
+
+> Gestor de credenciales con Skill para Claude Code. Tu agente IA accede a credenciales en lenguaje natural sin que la contraseña llegue al modelo.
+
+## ¿Qué es KF-1?
+
+KF-1 es una bóveda de credenciales diseñada para equipos que usan agentes de IA (especialmente Claude Code). Permite que un agente liste y acceda a credenciales sin ver nunca la contraseña — solo recibe un link temporal zero-knowledge que el usuario abre en su navegador.
+
+## Skill para Claude Code
+
+KF-1 incluye una Skill oficial para Claude Code (`~/.claude/skills/kf1/`). El agente puede ejecutar:
+
+- `/kf1 list` — lista credenciales con acceso AI activo
+- `/kf1 view <id>` — genera un link temporal seguro
+
+La Skill llama a la API de KF-1 con un CLI token. El fragmento `#k=<clave>` del link nunca se envía al servidor — el descifrado ocurre en el navegador del usuario (Web Crypto API).
+
+## Seguridad
+
+- Cifrado en reposo: AES-256-GCM (clave en servidor, IV aleatorio de 12 bytes)
+- Share links zero-knowledge: clave de un solo uso solo en fragmento de URL
+- Contraseñas de cuenta: scrypt (N=32768, timing-safe)
+- Sesiones: JWT httpOnly + secure + sameSite=lax
+- 2FA: TOTP RFC 6238 + backup codes
+- Rate limiting: Upstash Redis sliding window
+- Audit log con anonimización de IP
+
+## Stack
+
+- Next.js 16 (App Router) + TypeScript
+- Prisma + PostgreSQL (Supabase)
+- NextAuth v5
+- Deploy: Netlify
+
+## Código abierto
+
+Repositorio: https://github.com/kitifica-max/bovedakf-1
+Licencia: AGPL v3
+
+## Instalación de la Skill
+
+```bash
+mkdir -p ~/.claude/skills/kf1
+curl -sL https://kf1.kitifica.com/skill/SKILL.md -o ~/.claude/skills/kf1/SKILL.md
+curl -sL https://kf1.kitifica.com/skill/kf1.sh -o ~/.claude/skills/kf1/kf1.sh
+bash ~/.claude/skills/kf1/kf1.sh setup
+```
+
+## Contacto
+
+- Web: https://kf1.kitifica.com
+- Seguridad: hola@kitifica.com (ver /seguridad para disclosure policy)
