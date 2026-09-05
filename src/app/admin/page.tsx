@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -20,15 +21,18 @@ function tally(rows: (string | null)[]): [string, number][] {
   return [...map.entries()].sort((a, b) => b[1] - a[1]);
 }
 
-function TallyCard({ title, rows, total }: { title: string; rows: [string, number][]; total: number }) {
+function TallyCard({ title, rows, total, nonce }: { title: string; rows: [string, number][]; total: number; nonce: string }) {
+  const prefix = `tc-${title.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`;
+  const barCss = rows.map(([, count], i) => `.${prefix}-${i}{width:${(count / total) * 100}%}`).join("");
   return (
     <div className="rounded-2xl border border-border-soft bg-paper p-5">
+      {barCss && <style nonce={nonce}>{barCss}</style>}
       <p className="font-display text-lg font-semibold text-ink">{title}</p>
       {rows.length === 0 ? (
         <p className="mt-3 text-sm text-ink-soft">Sin respuestas todavía.</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2 text-sm">
-          {rows.map(([label, count]) => (
+          {rows.map(([label, count], i) => (
             <li key={label} className="flex flex-col gap-1">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-ink">{label}</span>
@@ -37,7 +41,7 @@ function TallyCard({ title, rows, total }: { title: string; rows: [string, numbe
                 </span>
               </div>
               <div className="h-1.5 rounded-full bg-gray/60">
-                <div className="h-full rounded-full bg-blue" style={{ width: `${(count / total) * 100}%` }} />
+                <div className={`${prefix}-${i} h-full rounded-full bg-blue`} />
               </div>
             </li>
           ))}
@@ -118,6 +122,7 @@ export default async function AdminPage() {
   const session = await auth();
   if (!session?.user) redirect("/login?from=/admin");
   if (!isAdmin(session.user.email)) notFound();
+  const nonce = (await headers()).get("x-nonce") ?? "";
 
   const users = await db.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -169,7 +174,7 @@ export default async function AdminPage() {
         ))}
       </div>
 
-      <TallyCard title="Rubro de la empresa" rows={industries} total={users.length || 1} />
+      <TallyCard title="Rubro de la empresa" rows={industries} total={users.length || 1} nonce={nonce} />
 
       <RadarSection
         title="Qué tarea les quita más tiempo"

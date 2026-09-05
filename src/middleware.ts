@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   const csp = [
     "default-src 'none'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-    "style-src 'self' 'unsafe-inline'",
+    `style-src 'self' 'nonce-${nonce}'`,
     "img-src 'self'",
     "font-src 'self'",
     "connect-src 'self'",
