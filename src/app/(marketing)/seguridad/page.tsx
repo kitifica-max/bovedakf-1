@@ -135,8 +135,8 @@ export default function SecurityPage() {
         <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
           <span className="font-display text-2xl font-bold text-blue">ZK</span>
           <div>
-            <p className="text-xs font-semibold text-ink">Zero-Knowledge</p>
-            <p className="text-[11px] text-ink-soft">Arquitectura by design</p>
+            <p className="text-xs font-semibold text-ink">Zero-Knowledge Links</p>
+            <p className="text-[11px] text-ink-soft">Clave nunca toca el servidor</p>
           </div>
         </div>
       </div>
@@ -144,37 +144,42 @@ export default function SecurityPage() {
       <div className="mt-10 flex flex-col gap-10">
 
         {/* 1 — Promesa */}
-        <SectionCard icon={<IconShield />} kicker="Promesa de privacidad" title="Solo vos tenés la llave">
+        <SectionCard icon={<IconShield />} kicker="Privacidad y cifrado" title="Cómo protegemos tus credenciales">
           <p>
-            Bóveda KF-1 opera bajo una arquitectura de{" "}
-            <strong className="text-ink">confianza cero (Zero-Knowledge)</strong>. Esto significa que
-            ninguna credencial viaja al servidor en texto plano, en ningún momento, bajo ninguna
-            circunstancia.
+            Las credenciales que guardás se cifran en el servidor con{" "}
+            <strong className="text-ink">AES-256-GCM</strong> antes de almacenarse en la base de
+            datos. El servidor procesa el valor para cifrarlo, pero nunca lo persiste en texto
+            plano.
           </p>
           <p>
-            Ni los creadores de la aplicación pueden leer, recuperar ni restablecer las contraseñas
-            que guardás. Si perdés tu clave maestra, no hay backdoor. Esa es la garantía.
+            Los <strong className="text-ink">links de compartir son zero-knowledge</strong>: la
+            clave de descifrado viaja solo en el fragmento de URL (
+            <code className="rounded bg-gray/60 px-1 font-mono text-[10px]">#k=…</code>), que
+            el navegador nunca envía al servidor. El descifrado ocurre completamente en el
+            navegador del destinatario — el servidor almacena solo texto cifrado y no puede
+            leerlo.
           </p>
         </SectionCard>
 
         <hr className="border-border-soft" />
 
         {/* 2 — Cifrado */}
-        <SectionCard icon={<IconLock />} kicker="Arquitectura de cifrado" title="La seguridad se sella en tu pantalla">
+        <SectionCard icon={<IconLock />} kicker="Arquitectura de cifrado" title="Cifrado en reposo y en tránsito">
           <p>
-            Todo el cifrado ocurre <strong className="text-ink">del lado del cliente</strong> — en tu
-            navegador, antes de que cualquier dato salga de tu dispositivo. El servidor de Bóveda KF-1
-            solo recibe y almacena texto ya cifrado; nunca ve los valores originales.
+            Las credenciales viajan sobre <strong className="text-ink">TLS 1.3</strong> y se
+            cifran en el servidor con <strong className="text-ink">AES-256-GCM</strong> antes de
+            persistirse. La clave de cifrado (<code className="rounded bg-gray/60 px-1 font-mono text-[10px]">ENCRYPTION_KEY</code>
+            ) vive en variables de entorno del servidor, separada de la base de datos.
           </p>
 
           <div className="rounded-xl border border-border-soft bg-gray/30 p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink">Flujo end-to-end</p>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink">Flujo al guardar una credencial</p>
             <ol className="flex flex-col gap-2">
               {[
-                "Ingresás la credencial en el formulario (navegador).",
-                "JavaScript local genera una clave derivada con scrypt y cifra el valor con AES-256-GCM.",
-                "El texto cifrado (ciphertext) viaja a la base de datos — el secreto nunca sale de tu dispositivo.",
-                "Para leer la credencial, el cliente descifra en memoria usando tu clave. El servidor no participa.",
+                "Ingresás la credencial en el formulario — viaja al servidor sobre TLS 1.3.",
+                "El servidor cifra el valor con AES-256-GCM (IV aleatorio de 12 bytes + auth tag de 16 bytes).",
+                "Solo el ciphertext se persiste en la base de datos. La clave de cifrado no se almacena junto a los datos.",
+                "Para compartir: se genera una clave efímera y la clave de descifrado va solo en el fragmento de URL.",
               ].map((step, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/15 text-[10px] font-bold text-blue">
