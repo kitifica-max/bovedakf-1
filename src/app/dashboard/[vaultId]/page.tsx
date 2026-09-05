@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { emailIsVerified } from "@/lib/email-verify";
 import { getVaultRole } from "@/lib/vault-access";
+import { isAdmin } from "@/lib/admin";
 import { VaultView } from "./vault-view";
 
 export default async function VaultPage({
@@ -54,6 +55,8 @@ export default async function VaultPage({
   ]);
 
   const members = memberRows.map((m) => ({ id: m.id, email: m.user.email, role: m.role }));
+  const userEmail = me?.email ?? session?.user?.email ?? "";
+  const isAdminUser = isAdmin(userEmail);
 
   return (
     <VaultView
@@ -66,6 +69,8 @@ export default async function VaultPage({
       role={role}
       members={members}
       invites={invites}
+      userEmail={userEmail}
+      isAdminUser={isAdminUser}
     />
   );
 }
