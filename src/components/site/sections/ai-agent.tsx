@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Section } from "@/components/site/section";
 import { SectionHead, slug } from "@/components/site/section-head";
 import { CTAButton } from "@/components/site/cta-button";
@@ -7,9 +6,9 @@ export function AiAgentSection() {
   return (
     <Section aria-labelledby={slug("Acceso desde IA")}>
       <SectionHead
-        kicker="MCP"
+        kicker="Skill"
         title="Tus secretos nunca llegan al LLM"
-        lead="Conectá Claude u otro agente de IA a tu Bóveda. El agente puede listar credenciales y generar links temporales para que vos las veas. Las contraseñas NUNCA se exponen al modelo."
+        lead="Instalá la skill de KF-1 en Claude Code y pedile credenciales en lenguaje natural. Las contraseñas NUNCA se exponen al modelo — solo ves links temporales."
       />
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
         <div className="flex-1 rounded-2xl border border-border-soft bg-gray/40 p-6">
@@ -21,11 +20,15 @@ export function AiAgentSection() {
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-blue">2.</span>
-              <span>Conectá tu agente via MCP (una línea de comando)</span>
+              <span>Generá un token CLI en el dashboard</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-0.5 text-blue">3.</span>
-              <span>El agente genera un link temporal — lo abrís en tu navegador para ver la credencial</span>
+              <span>Instalá la skill con dos comandos</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 text-blue">4.</span>
+              <span>Pedile credenciales — la skill genera links temporales que vos abrís</span>
             </li>
           </ul>
         </div>
@@ -38,11 +41,11 @@ export function AiAgentSection() {
             </li>
             <li className="flex items-start gap-2">
               <span className="shrink-0 text-blue">✓</span>
-              <span>Para ver el secreto, el agente genera un link que solo vos abrís en el navegador.</span>
+              <span>Para ver el secreto, la skill genera un link que solo vos abrís en el navegador.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="shrink-0 text-blue">✓</span>
-              <span>Los links expiran en 15 minutos y la sesión del agente en 2 horas.</span>
+              <span>Los links expiran en 1 hora y el token CLI en 30 días.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="shrink-0 text-blue">✓</span>
@@ -52,33 +55,46 @@ export function AiAgentSection() {
         </div>
       </div>
 
-      {/* Diagram */}
+      {/* Install */}
       <div className="mt-8 rounded-2xl border border-border-soft bg-gray/40 p-6">
-        <h3 className="t-h3 mb-4 text-center text-ink">Flujo de seguridad</h3>
-        <div className="flex flex-col items-center gap-3 text-center text-sm text-ink-soft sm:flex-row sm:justify-center sm:gap-6 sm:text-left">
-          <div className="flex items-center gap-2">
+        <h3 className="t-h3 mb-4 text-center text-ink">Instalación</h3>
+        <div className="flex flex-col items-center gap-4 text-center text-sm text-ink-soft">
+          <div className="flex items-start gap-3 text-left">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">1</span>
-            <span>Agente pide credencial</span>
+            <div>
+              <p className="font-medium text-ink">Generá un token CLI</p>
+              <p className="text-xs">Andá a tu dashboard y creá un token</p>
+            </div>
           </div>
-          <span className="hidden text-ink-soft sm:inline">→</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-3 text-left">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">2</span>
-            <span>Servidor genera link temporal</span>
+            <div>
+              <p className="font-medium text-ink">Instalá la skill</p>
+              <code className="mt-1 block rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/
+              </code>
+            </div>
           </div>
-          <span className="hidden text-ink-soft sm:inline">→</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-3 text-left">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">3</span>
-            <span>Agente te da el link</span>
+            <div>
+              <p className="font-medium text-ink">Configurá el token</p>
+              <code className="mt-1 block rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                bash ~/.claude/skills/kf1/kf1.sh setup
+              </code>
+            </div>
           </div>
-          <span className="hidden text-ink-soft sm:inline">→</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-3 text-left">
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue text-xs font-bold text-paper">4</span>
-            <span>Vos lo abrís en el navegador</span>
+            <div>
+              <p className="font-medium text-ink">Usá la skill</p>
+              <code className="mt-1 block rounded-lg bg-gray px-3 py-2 font-mono text-[10px] text-ink">
+                /kf1 list<br/>
+                /kf1 view &lt;credential-id&gt;
+              </code>
+            </div>
           </div>
         </div>
-        <p className="mt-4 text-center text-xs text-ink-soft">
-          El secreto nunca toca el servidor ni el contexto del LLM — vive solo en el navegador.
-        </p>
       </div>
 
       <div className="mt-8">
