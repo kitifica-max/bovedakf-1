@@ -91,6 +91,13 @@ export default async function AiDashboardPage() {
             <p className="mb-2 text-xs font-medium text-ink">Configurá tu token:</p>
             <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
           </div>
+          <div className="rounded-xl bg-gray/40 p-4">
+            <p className="mb-2 text-xs font-medium text-ink">Usá la skill:</p>
+            <div className="flex flex-col gap-2">
+              <CopyCodeBlock code="/kf1 list" />
+              <CopyCodeBlock code="/kf1 view <credential-id>" />
+            </div>
+          </div>
         </div>
       </div>
 
