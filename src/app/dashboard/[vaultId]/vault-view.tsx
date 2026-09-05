@@ -413,46 +413,109 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
 };
 
 function AuditLogTable({ logs }: { logs: AuditLog[] }) {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const filtered = logs.filter((log) => {
+    if (fromDate && log.createdAt < new Date(fromDate)) return false;
+    if (toDate && log.createdAt > new Date(toDate + "T23:59:59")) return false;
+    return true;
+  });
+
+  function exportCSV() {
+    const rows = [
+      ["Cuándo", "Credencial", "Acción", "Quién", "IP"],
+      ...filtered.map((log) => [
+        log.createdAt.toLocaleString(),
+        log.credentialService ?? "",
+        AUDIT_ACTION_LABELS[log.action] ?? log.action,
+        log.actorEmail ?? "",
+        log.ipAddress ?? "",
+      ]),
+    ];
+    const csv = rows
+      .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const a = Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" })),
+      download: `auditoria-${new Date().toISOString().slice(0, 10)}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   return (
     <div className="rounded-2xl border border-border-soft bg-paper p-5">
-      <h2 className="mb-3 font-display text-lg font-semibold text-ink">Auditoría</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <caption className="sr-only">Historial de accesos y acciones sobre esta bóveda</caption>
-          <thead>
-            <tr className="border-b border-border-soft text-ink-soft">
-              <th scope="col" className="py-1.5 pr-4 font-medium">Cuándo</th>
-              <th scope="col" className="py-1.5 pr-4 font-medium">Credencial</th>
-              <th scope="col" className="py-1.5 pr-4 font-medium">Acción</th>
-              <th scope="col" className="py-1.5 pr-4 font-medium">Quién</th>
-              <th scope="col" className="py-1.5 pr-4 font-medium">IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => {
-              const denied = log.action.startsWith("link_denied");
-              return (
-                <tr key={log.id} className="border-b border-border-soft last:border-0">
-                  <td className="py-1.5 pr-4 text-ink-soft">{log.createdAt.toLocaleString()}</td>
-                  <td className="py-1.5 pr-4 font-medium text-ink">{log.credentialService ?? "—"}</td>
-                  <td className={`py-1.5 pr-4 ${denied ? "text-danger" : ""}`}>
-                    {AUDIT_ACTION_LABELS[log.action] ?? log.action}
-                  </td>
-                  <td className="py-1.5 pr-4 text-ink-soft">{log.actorEmail ?? "—"}</td>
-                  <td className="py-1.5 pr-4 text-ink-soft">{log.ipAddress ?? "—"}</td>
-                </tr>
-              );
-            })}
-            {logs.length === 0 && (
-              <tr>
-                <td className="py-2 text-ink-soft" colSpan={5}>
-                  Sin actividad todavía.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-display text-lg font-semibold text-ink">Auditoría</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            aria-label="Desde"
+            className="rounded-lg border border-border-soft bg-gray/40 px-2 py-1 text-xs text-ink outline-none focus:border-ink"
+          />
+          <span className="text-xs text-ink-soft">→</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            aria-label="Hasta"
+            className="rounded-lg border border-border-soft bg-gray/40 px-2 py-1 text-xs text-ink outline-none focus:border-ink"
+          />
+          <button
+            onClick={exportCSV}
+            className="rounded-lg border border-border-soft bg-gray/40 px-3 py-1 text-xs text-ink transition hover:bg-gray/60"
+          >
+            Exportar CSV
+          </button>
+        </div>
       </div>
+      <div className="overflow-x-auto">
+        <div className="max-h-[360px] overflow-y-auto">
+          <table className="w-full text-left text-sm">
+            <caption className="sr-only">Historial de accesos y acciones sobre esta bóveda</caption>
+            <thead className="sticky top-0 bg-paper">
+              <tr className="border-b border-border-soft text-ink-soft">
+                <th scope="col" className="py-1.5 pr-4 font-medium">Cuándo</th>
+                <th scope="col" className="py-1.5 pr-4 font-medium">Credencial</th>
+                <th scope="col" className="py-1.5 pr-4 font-medium">Acción</th>
+                <th scope="col" className="py-1.5 pr-4 font-medium">Quién</th>
+                <th scope="col" className="py-1.5 pr-4 font-medium">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((log) => {
+                const denied = log.action.startsWith("link_denied");
+                return (
+                  <tr key={log.id} className="border-b border-border-soft last:border-0">
+                    <td className="py-1.5 pr-4 text-ink-soft">{log.createdAt.toLocaleString()}</td>
+                    <td className="py-1.5 pr-4 font-medium text-ink">{log.credentialService ?? "—"}</td>
+                    <td className={`py-1.5 pr-4 ${denied ? "text-danger" : ""}`}>
+                      {AUDIT_ACTION_LABELS[log.action] ?? log.action}
+                    </td>
+                    <td className="py-1.5 pr-4 text-ink-soft">{log.actorEmail ?? "—"}</td>
+                    <td className="py-1.5 pr-4 text-ink-soft">{log.ipAddress ?? "—"}</td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td className="py-2 text-ink-soft" colSpan={5}>
+                    {logs.length === 0 ? "Sin actividad todavía." : "Sin resultados para ese rango de fechas."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {filtered.length > 0 && (
+        <p className="mt-2 text-right text-[11px] text-ink-soft">
+          {filtered.length} entrada{filtered.length !== 1 ? "s" : ""}
+        </p>
+      )}
     </div>
   );
 }
