@@ -44,6 +44,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   authenticators Authenticator[]
+  cliTokens     CliToken[]
 }
 
 // Standard Auth.js Prisma adapter schema, required for the Passkey (WebAuthn)
@@ -100,6 +101,18 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
+}
+
+model CliToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  tokenHash  String   @unique // SHA-256 hash of the plaintext token
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Vault {

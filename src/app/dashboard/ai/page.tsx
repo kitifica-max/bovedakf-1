@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheckIcon } from "@/components/icons";
+import { CliTokenManager } from "@/components/cli-token-manager";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kf1.kitifica.com";
 
@@ -139,6 +140,16 @@ print('KF-1 instalado. Reiniciá Claude Desktop.')
             </div>
           </details>
         </div>
+      </div>
+
+      {/* CLI Token */}
+      <div className="rounded-2xl border border-border-soft bg-paper p-5">
+        <h2 className="font-display text-sm font-semibold text-ink">Token CLI</h2>
+        <p className="mt-2 text-sm text-ink-soft">
+          Generá un token para usar con la skill de Claude Code. El token se almacena localmente
+          y permite acceder a tus credenciales sin OAuth.
+        </p>
+        <CliTokenManager />
       </div>
 
       {/* AI-accessible credentials */}
