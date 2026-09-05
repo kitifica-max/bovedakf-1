@@ -10,6 +10,12 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // Isolation against Spectre-style side-channel reads across origins.
+  // COEP requires every sub-resource to opt in via CORP or CORS — fonts
+  // are served with CORP: cross-origin (see netlify.toml), everything else
+  // with same-origin below.
+  { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ];
 
 const nextConfig: NextConfig = {
