@@ -11,3 +11,9 @@
   for = "/_next/static/media/*"
   [headers.values]
     Cross-Origin-Resource-Policy = "cross-origin"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/_next/static/chunks/*"
+  [headers.values]
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
