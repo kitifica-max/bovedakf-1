@@ -6,6 +6,11 @@ Gestor de credenciales con control de acceso por links temporales e integración
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue)](LICENSE)
 
+[![SSL Labs](https://img.shields.io/badge/SSL%20Labs-A%2B-brightgreen)](https://www.ssllabs.com/ssltest/analyze.html?d=kf1.kitifica.com)
+[![HTTP Observatory](https://img.shields.io/badge/HTTP%20Observatory-A%2B%20·%20120%2F100-brightgreen)](https://developer.mozilla.org/en-US/observatory/analyze?host=kf1.kitifica.com)
+[![OWASP ZAP](https://img.shields.io/badge/OWASP%20ZAP-10%2F10-brightgreen)](https://kf1.kitifica.com/seguridad)
+[![Zero-Knowledge](https://img.shields.io/badge/Share%20Links-Zero--Knowledge-blue)](https://kf1.kitifica.com/seguridad)
+
 ---
 
 ## ¿Qué es KF-1?
