@@ -37,7 +37,7 @@ export default function ConnectPage() {
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">2. Instalá la skill</p>
-                <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && cp .claude/skills/kf1/* ~/.claude/skills/kf1/" />
+                <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && curl -sL https://kf1.kitifica.com/skill/SKILL.md -o ~/.claude/skills/kf1/SKILL.md && curl -sL https://kf1.kitifica.com/skill/kf1.sh -o ~/.claude/skills/kf1/kf1.sh" />
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">3. Configurá el token</p>
