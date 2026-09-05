@@ -4,7 +4,7 @@ Gestor de credenciales con control de acceso por links temporales e integración
 
 [![Deploy](https://img.shields.io/badge/deploy-Netlify-00C7B7?logo=netlify)](https://kf1.kitifica.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
-[![License](https://img.shields.io/badge/license-TBD-lightgrey)](#license)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue)](LICENSE)
 
 ---
 
@@ -249,4 +249,6 @@ Si encontrás una discrepancia entre lo documentado y lo implementado, reportalo
 
 ## License
 
-Sin definir aún. Ver [decisiones pendientes](#decisiones-pendientes) si querés contribuir.
+[GNU Affero General Public License v3.0](LICENSE)
+
+El código es libre para auditar, modificar y usar. Si operás una versión modificada como servicio, debés publicar los cambios bajo la misma licencia. Mismo modelo que [Bitwarden](https://github.com/bitwarden/server).
