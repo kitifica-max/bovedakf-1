@@ -20,7 +20,7 @@ const jsonLd = {
   applicationCategory: "SecurityApplication",
   operatingSystem: "Web",
   description:
-    "Gestor de credenciales compartidas seguro para equipos: invitá a tu equipo por correo con rol de Editor o Lector, encriptación en cada link, expiración configurable y auditoría completa de accesos.",
+    "Bóveda de credenciales con Skill para Claude Code: tu agente IA pide credenciales en lenguaje natural y recibe un link temporal zero-knowledge. La contraseña nunca llega al modelo. Encriptación AES-256-GCM, expiración configurable y auditoría completa.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
