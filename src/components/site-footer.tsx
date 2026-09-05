@@ -12,6 +12,7 @@ const columns = [
   {
     heading: "Legal",
     links: [
+      { href: "/seguridad", label: "Seguridad" },
       { href: "/terminos", label: "Términos y condiciones" },
       { href: "/privacidad", label: "Privacidad" },
     ],
