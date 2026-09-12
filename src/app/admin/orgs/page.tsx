@@ -43,6 +43,11 @@ export default async function AdminOrgsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mb-1 flex items-center gap-2 text-xs text-ink-soft">
+        <a href="/admin" className="hover:text-ink transition-colors">Admin</a>
+        <span>/</span>
+        <span className="text-ink">Organizaciones</span>
+      </div>
       <h1 className="font-display text-2xl font-bold text-ink">
         Organizaciones
       </h1>
@@ -56,43 +61,43 @@ export default async function AdminOrgsPage() {
         <form action={createOrganization} className="mt-4 flex flex-col gap-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">
+              <label className="mb-1.5 block text-xs font-medium text-ink-soft">
                 Nombre
               </label>
               <input
                 name="name"
                 required
                 placeholder="Acme Corp"
-                className="w-full rounded-xl border border-border-soft bg-white px-3 py-2 text-sm text-ink focus:border-blue focus:outline-none"
+                className="w-full rounded-2xl border border-border-soft bg-gray/40 px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-ink placeholder:text-ink-soft/40"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">
+              <label className="mb-1.5 block text-xs font-medium text-ink-soft">
                 Dominio SSO
               </label>
               <input
                 name="domain"
                 required
                 placeholder="acme.com"
-                className="w-full rounded-xl border border-border-soft bg-white px-3 py-2 text-sm text-ink focus:border-blue focus:outline-none"
+                className="w-full rounded-2xl border border-border-soft bg-gray/40 px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-ink placeholder:text-ink-soft/40"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">
+              <label className="mb-1.5 block text-xs font-medium text-ink-soft">
                 Email primer OWNER
               </label>
               <input
                 name="firstOwnerEmail"
                 type="email"
                 placeholder="cto@acme.com"
-                className="w-full rounded-xl border border-border-soft bg-white px-3 py-2 text-sm text-ink focus:border-blue focus:outline-none"
+                className="w-full rounded-2xl border border-border-soft bg-gray/40 px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-ink placeholder:text-ink-soft/40"
               />
             </div>
           </div>
           <div className="flex justify-end">
             <button
               type="submit"
-              className="rounded-full bg-blue px-5 py-2 text-sm font-semibold text-white hover:opacity-90"
+              className="rounded-full bg-blue px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
             >
               Crear organización
             </button>

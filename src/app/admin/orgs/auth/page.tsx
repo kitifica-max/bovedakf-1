@@ -18,16 +18,16 @@ export default function OrgsSudoPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ground px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border-soft bg-paper p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-border-soft bg-paper p-8">
         <h1 className="font-display text-xl font-semibold text-ink">Confirmar identidad</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          Ingresá la contraseña de tu cuenta kitifica para continuar.
+        <p className="mt-1.5 text-sm text-ink-soft">
+          Ingresá la contraseña de tu cuenta para acceder a Organizaciones.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-ink">
+            <label htmlFor="password" className="text-xs font-medium text-ink-soft">
               Contraseña
             </label>
             <input
@@ -37,13 +37,13 @@ export default function OrgsSudoPage() {
               autoFocus
               autoComplete="current-password"
               required
-              className="rounded-xl border border-border-soft bg-ground px-3.5 py-2.5 text-sm text-ink outline-none ring-blue/40 placeholder:text-ink-soft/50 focus:border-blue focus:ring-2"
+              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-3.5 py-3 text-sm text-ink outline-none transition focus:border-ink placeholder:text-ink-soft/40"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
           )}
 
           <button
@@ -54,6 +54,10 @@ export default function OrgsSudoPage() {
             {pending ? "Verificando…" : "Continuar →"}
           </button>
         </form>
+
+        <p className="mt-5 text-center text-xs text-ink-soft">
+          <a href="/admin" className="hover:text-ink transition-colors">← Volver a Admin</a>
+        </p>
       </div>
     </div>
   );
