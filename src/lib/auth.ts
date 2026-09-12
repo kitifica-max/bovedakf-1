@@ -124,12 +124,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { id: user.id, email: user.email, companyName: user.companyName };
       },
     }),
+    Credentials({
+      id: "sso-nonce",
+      credentials: { nonce: {} },
+      authorize: async (creds) => {
+        const nonce = creds?.nonce as string | undefined;
+        if (!nonce) return null;
+
+        const record = await db.ssoNonce.findUnique({ where: { nonce } });
+        if (!record || record.expiresAt < new Date()) return null;
+
+        // Nonce de un solo uso — borrar inmediatamente
+        await db.ssoNonce.delete({ where: { nonce } });
+
+        const user = await db.user.findUnique({
+          where: { id: record.userId },
+          select: { id: true, email: true, companyName: true, orgRole: true },
+        });
+
+        if (!user) return null;
+        return {
+          id: user.id,
+          email: user.email,
+          companyName: user.companyName,
+          orgRole: user.orgRole,
+        };
+      },
+    }),
   ],
   callbacks: {
     jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.companyName = user.companyName;
+        token.orgRole = (user as { orgRole?: import("@prisma/client").OrgRole | null }).orgRole ?? null;
       }
       // Client called `update({ companyName })` after saving — refresh the cached value.
       if (trigger === "update" && session && typeof session.companyName === "string") {
@@ -141,6 +169,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.companyName = token.companyName ?? null;
+        session.user.orgRole = (token.orgRole as import("@prisma/client").OrgRole | null) ?? null;
       }
       return session;
     },
