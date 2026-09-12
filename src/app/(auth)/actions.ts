@@ -150,7 +150,6 @@ export async function resetPasswordAction(_prev: string | null, formData: FormDa
 export async function checkPasswordAction(
   formData: FormData
 ): Promise<{ ok: true; totpRequired: boolean } | { ok: false }> {
-  console.log("[checkPasswordAction] called");
   try {
     const parsed = loginSchema.safeParse({
       email: formData.get("email"),
@@ -172,7 +171,6 @@ export async function checkPasswordAction(
 
     return { ok: true, totpRequired: user.totpEnabled };
   } catch (err) {
-    console.error("[checkPasswordAction] error:", err);
     throw err;
   }
 }

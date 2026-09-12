@@ -78,7 +78,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: { email: {}, password: {}, totpCode: {} },
       authorize: async (creds) => {
-        console.log("[credentials authorize] called");
         const email = creds?.email as string | undefined;
         const password = creds?.password as string | undefined;
         const totpCode = (creds?.totpCode as string | undefined)?.trim();
@@ -95,16 +94,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        console.log("[credentials authorize] looking up user:", email);
-        let user;
-        try {
-          user = await db.user.findUnique({ where: { email } });
-        } catch (err) {
-          console.error("[credentials authorize] db.user.findUnique error:", err);
-          throw err;
-        }
+        const user = await db.user.findUnique({ where: { email } });
         if (!user) {
-          console.log("[credentials authorize] user not found");
           burnPasswordCompare(password); // constant-time: no user-enumeration via latency
           return null;
         }
