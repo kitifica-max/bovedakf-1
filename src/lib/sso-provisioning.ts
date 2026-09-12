@@ -54,37 +54,32 @@ export async function handleSsoUser(profile: Profile<DefaultCustomAttributes>): 
   const org = await db.organization.findFirst({
     where: { workosOrgId: profile.organizationId ?? undefined },
   });
-
   if (!org) throw new Error(`No org for workosOrgId: ${profile.organizationId}`);
+
+  // Case C: relogin — user already fully provisioned, no changes
+  if (profile.id) {
+    const byWorkosId = await db.user.findUnique({ where: { workosUserId: profile.id } });
+    if (byWorkosId) return byWorkosId.id;
+  }
 
   const isFirstOwner =
     !!org.firstOwnerEmail &&
     org.firstOwnerEmail.toLowerCase() === profile.email.toLowerCase();
   const orgRole = isFirstOwner ? OrgRole.OWNER : OrgRole.MEMBER;
 
-  // Buscar usuario existente — por workosUserId primero, luego por email
-  const byWorkosId = profile.id
-    ? await db.user.findUnique({ where: { workosUserId: profile.id } })
-    : null;
-
+  // Case B: account exists by email — auto-link on first SSO login
   const byEmail = await db.user.findUnique({ where: { email: profile.email } });
-
-  const existing = byWorkosId ?? byEmail;
-
-  if (existing) {
-    // Auto-link: actualizar con datos SSO
+  if (byEmail) {
     await db.user.update({
-      where: { id: existing.id },
+      where: { id: byEmail.id },
       data: { workosUserId: profile.id, organizationId: org.id, orgRole },
     });
-    await provisionOrgVaults(existing.id, org.id, orgRole);
-    return existing.id;
+    await provisionOrgVaults(byEmail.id, org.id, orgRole);
+    return byEmail.id;
   }
 
-  // Usuario nuevo — provisionar sin contraseña
-  const fullName =
-    [profile.firstName, profile.lastName].filter(Boolean).join(" ") || null;
-
+  // Case A: brand-new user
+  const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || null;
   const user = await db.user.create({
     data: {
       email: profile.email,
@@ -96,7 +91,6 @@ export async function handleSsoUser(profile: Profile<DefaultCustomAttributes>): 
       passwordSalt: "",
     },
   });
-
   await provisionOrgVaults(user.id, org.id, orgRole);
   return user.id;
 }
