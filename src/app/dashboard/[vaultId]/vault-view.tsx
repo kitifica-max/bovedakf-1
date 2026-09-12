@@ -159,6 +159,14 @@ export function VaultView({
               Admin
             </Link>
           )}
+          {isAdminUser && (
+            <Link
+              href="/admin/orgs/auth"
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all"
+            >
+              Organizaciones
+            </Link>
+          )}
         </nav>
 
         <div className="px-3 py-3 border-t border-border-soft">
@@ -229,6 +237,15 @@ export function VaultView({
                     onClick={() => setShowUserMenu(false)}
                   >
                     Admin
+                  </Link>
+                )}
+                {isAdminUser && (
+                  <Link
+                    href="/admin/orgs/auth"
+                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Organizaciones
                   </Link>
                 )}
                 <button

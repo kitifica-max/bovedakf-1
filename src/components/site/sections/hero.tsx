@@ -15,7 +15,7 @@ export function HeroSection() {
               data-reveal
               className="mb-5 inline-flex w-fit items-center gap-2 text-xs font-medium text-blue"
             >
-              <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Skill para Claude Code · Zero-knowledge
+              <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Skill para Claude Code · SSO Enterprise · Zero-knowledge
             </span>
             <h1 data-reveal className="t-display text-ink">
               Tu IA accede a tus credenciales. Sin exponer tus contraseñas.

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
+import { DomainDataState } from "@workos-inc/node";
 import { workos } from "@/lib/workos";
 
 async function requireAdmin() {
@@ -17,14 +18,18 @@ export async function createOrganization(formData: FormData) {
 
   const name = (formData.get("name") as string)?.trim();
   const domain = (formData.get("domain") as string)?.trim().toLowerCase();
-  const workosOrgId = (formData.get("workosOrgId") as string)?.trim() || null;
   const firstOwnerEmail =
     (formData.get("firstOwnerEmail") as string)?.trim().toLowerCase() || null;
 
   if (!name || !domain) throw new Error("Nombre y dominio son requeridos.");
 
+  const workosOrg = await workos.organizations.createOrganization({
+    name,
+    domainData: [{ domain, state: DomainDataState.Verified }],
+  });
+
   await db.organization.create({
-    data: { name, domain, workosOrgId, firstOwnerEmail, ssoEnabled: false },
+    data: { name, domain, workosOrgId: workosOrg.id, firstOwnerEmail, ssoEnabled: false },
   });
 
   redirect("/admin/orgs");

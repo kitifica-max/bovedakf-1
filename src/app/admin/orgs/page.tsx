@@ -1,3 +1,5 @@
+import { createHmac } from "crypto";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
@@ -13,9 +15,26 @@ export const metadata = {
   robots: { index: false },
 };
 
+function verifySudoCookie(userId: string, raw: string | undefined): boolean {
+  if (!raw) return false;
+  const parts = raw.split(":");
+  if (parts.length < 3) return false;
+  const sig = parts.pop()!;
+  const payload = parts.join(":");
+  const [cookieUserId, expStr] = parts;
+  if (cookieUserId !== userId) return false;
+  if (Date.now() > parseInt(expStr, 10)) return false;
+  const expected = createHmac("sha256", process.env.AUTH_SECRET!).update(payload).digest("hex");
+  return expected === sig;
+}
+
 export default async function AdminOrgsPage() {
   const session = await auth();
-  if (!isAdmin(session?.user?.email)) redirect("/dashboard");
+  if (!session?.user?.id || !isAdmin(session.user.email)) redirect("/dashboard");
+
+  const jar = await cookies();
+  const sudoCookie = jar.get("kf1_sudo_orgs")?.value;
+  if (!verifySudoCookie(session.user.id, sudoCookie)) redirect("/admin/orgs/auth");
 
   const orgs = await db.organization.findMany({
     include: { _count: { select: { members: true, vaults: true } } },
@@ -55,16 +74,6 @@ export default async function AdminOrgsPage() {
                 name="domain"
                 required
                 placeholder="acme.com"
-                className="w-full rounded-xl border border-border-soft bg-white px-3 py-2 text-sm text-ink focus:border-blue focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-ink-soft">
-                WorkOS Org ID
-              </label>
-              <input
-                name="workosOrgId"
-                placeholder="org_xxxxx"
                 className="w-full rounded-xl border border-border-soft bg-white px-3 py-2 text-sm text-ink focus:border-blue focus:outline-none"
               />
             </div>

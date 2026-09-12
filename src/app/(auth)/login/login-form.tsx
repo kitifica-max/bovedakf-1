@@ -21,6 +21,8 @@ export function LoginForm() {
   const [step, setStep] = useState<"password" | "totp">("password");
   const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
   const [hasPasskey, setHasPasskey] = useState(false);
+  const [ssoAvailable, setSsoAvailable] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
 
   // Auto-login cuando viene de callback SSO
   useEffect(() => {
@@ -51,6 +53,39 @@ export function LoginForm() {
     } catch {
       setPending(false);
       setError("Tu navegador no soporta passkeys, o cancelaste la solicitud.");
+    }
+  }
+
+  async function onEmailBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const email = e.target.value.trim();
+    if (!email.includes("@")) return;
+    const domain = email.split("@")[1];
+    try {
+      const res = await fetch(`/api/auth/sso/check?domain=${encodeURIComponent(domain)}`);
+      const data = await res.json();
+      setSsoAvailable(!!data.sso);
+    } catch {}
+  }
+
+  async function onSsoLogin(email: string) {
+    setSsoLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/sso/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Error al iniciar SSO.");
+        setSsoLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError("Error de conexión. Intentá de nuevo.");
+      setSsoLoading(false);
     }
   }
 
@@ -169,27 +204,63 @@ export function LoginForm() {
               autoComplete="email"
               placeholder="email@empresa.com"
               required
+              onBlur={onEmailBlur}
+              onChange={() => ssoAvailable && setSsoAvailable(false)}
               className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="sr-only">Contraseña</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Contraseña"
-              required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
-            />
-          </div>
-          {error && (
+
+          {ssoAvailable ? (
+            <div className="rounded-2xl border border-blue/25 bg-blue/5 px-4 py-4">
+              <p className="text-sm font-semibold text-ink">Tu empresa usa SSO</p>
+              <p className="mt-0.5 text-xs text-ink-soft">
+                Vas a ser redirigido a tu proveedor de identidad.
+              </p>
+              <CTAButton
+                type="button"
+                disabled={ssoLoading}
+                className="mt-3 w-full"
+                onClick={() => {
+                  const emailInput = document.getElementById("email") as HTMLInputElement;
+                  onSsoLogin(emailInput?.value ?? "");
+                }}
+              >
+                {ssoLoading ? "Redirigiendo..." : "Continuar con SSO →"}
+              </CTAButton>
+              <button
+                type="button"
+                onClick={() => setSsoAvailable(false)}
+                className="mt-2 w-full text-center text-xs text-ink-soft underline"
+              >
+                Entrar con contraseña en cambio
+              </button>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label htmlFor="password" className="sr-only">Contraseña</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Contraseña"
+                  required
+                  className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+                />
+              </div>
+              {error && (
+                <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+              )}
+              <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
+                {pending ? "Entrando..." : "Entrar"}
+              </CTAButton>
+            </>
+          )}
+
+          {error && ssoAvailable && (
             <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
           )}
-          <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
-            {pending ? "Entrando..." : "Entrar"}
-          </CTAButton>
         </form>
 
         {hasPasskey && (
@@ -214,10 +285,6 @@ export function LoginForm() {
         <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
           <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
           <Link href="/register" className="underline">Crear una bóveda nueva</Link>
-          {/* SSO link — solo se muestra, no remplaza el flujo normal */}
-          <Link href="/login/sso" className="mt-1 flex items-center gap-1 text-blue underline">
-            Entrar con SSO corporativo
-          </Link>
         </div>
       </div>
   );
