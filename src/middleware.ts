@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   const csp = [
     "default-src 'none'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.paypal.com https://www.paypalobjects.com`,
-    `style-src 'self' 'nonce-${nonce}' https://www.paypalobjects.com`,
+    `style-src 'self' 'unsafe-inline' https://www.paypalobjects.com`,
     "img-src 'self' https://www.paypalobjects.com https://checkout.paypal.com data:",
     "font-src 'self' https://www.paypalobjects.com",
     "connect-src 'self' https://api-m.paypal.com https://www.paypal.com",

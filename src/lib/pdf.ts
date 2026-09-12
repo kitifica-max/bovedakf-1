@@ -1,3 +1,4 @@
+import "server-only";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 const DARK = rgb(0.04, 0.055, 0.082);
