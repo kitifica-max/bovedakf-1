@@ -45,6 +45,10 @@ model User {
   sessions      Session[]
   authenticators Authenticator[]
   cliTokens     CliToken[]
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  orgRole         OrgRole?
+  workosUserId    String?       @unique
 }
 
 // Standard Auth.js Prisma adapter schema, required for the Passkey (WebAuthn)
@@ -124,6 +128,9 @@ model Vault {
   members     VaultMember[]
   invites     VaultInvite[]
   createdAt   DateTime     @default(now())
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  orgMinRole      OrgRole?
 }
 
 model Credential {
@@ -151,6 +158,34 @@ enum VaultRole {
   OWNER
   EDITOR
   VIEWER
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Organization {
+  id              String    @id @default(cuid())
+  name            String
+  workosOrgId     String?   @unique
+  domain          String?   @unique
+  ssoEnabled      Boolean   @default(false)
+  firstOwnerEmail String?
+  createdAt       DateTime  @default(now())
+  members         User[]
+  vaults          Vault[]
+}
+
+model SsoNonce {
+  id        String   @id @default(cuid())
+  nonce     String   @unique @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // Accepted membership. The vault owner also gets an OWNER row here (created
