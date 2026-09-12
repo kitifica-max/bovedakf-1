@@ -150,23 +150,28 @@ export async function resetPasswordAction(_prev: string | null, formData: FormDa
 export async function checkPasswordAction(
   formData: FormData
 ): Promise<{ ok: true; totpRequired: boolean } | { ok: false }> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-  if (!parsed.success) return { ok: false };
+  try {
+    const parsed = loginSchema.safeParse({
+      email: formData.get("email"),
+      password: formData.get("password"),
+    });
+    if (!parsed.success) return { ok: false };
 
-  // Throttle online password guessing / credential stuffing per IP.
-  if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return { ok: false };
+    // Throttle online password guessing / credential stuffing per IP.
+    if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return { ok: false };
 
-  const user = await db.user.findUnique({ where: { email: parsed.data.email } });
-  if (!user) {
-    burnPasswordCompare(parsed.data.password); // constant-time: no user-enumeration via latency
-    return { ok: false };
+    const user = await db.user.findUnique({ where: { email: parsed.data.email } });
+    if (!user) {
+      burnPasswordCompare(parsed.data.password); // constant-time: no user-enumeration via latency
+      return { ok: false };
+    }
+
+    const valid = verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt);
+    if (!valid) return { ok: false };
+
+    return { ok: true, totpRequired: user.totpEnabled };
+  } catch (err) {
+    console.error("[checkPasswordAction] error:", err);
+    throw err;
   }
-
-  const valid = verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt);
-  if (!valid) return { ok: false };
-
-  return { ok: true, totpRequired: user.totpEnabled };
 }
