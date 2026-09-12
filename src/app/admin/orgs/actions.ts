@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -35,6 +36,7 @@ export async function toggleSso(orgId: string, enabled: boolean) {
     where: { id: orgId },
     data: { ssoEnabled: enabled },
   });
+  revalidatePath("/admin/orgs");
 }
 
 export async function generateAdminPortalLink(orgId: string): Promise<string> {
@@ -49,5 +51,6 @@ export async function generateAdminPortalLink(orgId: string): Promise<string> {
     intent: "sso",
   });
 
+  revalidatePath("/admin/orgs");
   return link;
 }
