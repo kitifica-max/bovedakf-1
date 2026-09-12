@@ -65,7 +65,7 @@ export async function changeMemberRole(memberId: string, newRole: OrgRole) {
 }
 
 export async function createOrgVault(formData: FormData) {
-  const { orgId } = await requireOrgAdmin();
+  const { orgId, userId } = await requireOrgAdmin();
 
   const name = (formData.get("name") as string)?.trim();
   const orgMinRole = formData.get("orgMinRole") as OrgRole;
@@ -78,7 +78,7 @@ export async function createOrgVault(formData: FormData) {
   const vault = await db.vault.create({
     data: {
       name,
-      ownerId: (await auth())!.user!.id!,
+      ownerId: userId,
       organizationId: orgId,
       orgMinRole,
     },
