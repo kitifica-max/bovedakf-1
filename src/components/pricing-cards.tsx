@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 
 type Props = {
@@ -8,35 +5,6 @@ type Props = {
   teamPlanId: string;
   clientId: string;
 };
-
-function SubscribeButton({ plan, label }: { plan: string; label: string }) {
-  const [loading, setLoading] = useState(false);
-
-  async function handleClick() {
-    setLoading(true);
-    const res = await fetch("/api/paypal/create-subscription", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan }),
-    });
-    const data = await res.json() as { url?: string; error?: string };
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className="mt-6 w-full cursor-pointer rounded-full bg-blue py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-    >
-      {loading ? "Redirigiendo…" : label}
-    </button>
-  );
-}
 
 export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }: Props) {
   const check = (
@@ -81,7 +49,9 @@ export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }
             <li key={f} className="flex items-center gap-2 text-sm text-ink">{check}{f}</li>
           ))}
         </ul>
-        <SubscribeButton plan="starter" label="Suscribirse con PayPal →" />
+        <Link href="/checkout?plan=starter" className="mt-6 block w-full rounded-full bg-blue py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90">
+          Suscribirse →
+        </Link>
       </div>
 
       {/* Equipo */}
@@ -100,7 +70,9 @@ export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }
             <li key={f} className="flex items-center gap-2 text-sm text-ink">{check}{f}</li>
           ))}
         </ul>
-        <SubscribeButton plan="team" label="Suscribirse con PayPal →" />
+        <Link href="/checkout?plan=team" className="mt-6 block w-full rounded-full bg-blue py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90">
+          Suscribirse →
+        </Link>
       </div>
     </div>
   );
