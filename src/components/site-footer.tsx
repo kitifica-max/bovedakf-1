@@ -15,6 +15,7 @@ const columns = [
       { href: "/seguridad", label: "Seguridad" },
       { href: "/terminos", label: "Términos y condiciones" },
       { href: "/privacidad", label: "Privacidad" },
+      { href: "/devoluciones", label: "Devoluciones" },
     ],
   },
   {

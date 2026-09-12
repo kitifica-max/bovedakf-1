@@ -284,7 +284,7 @@ export function LoginForm() {
 
         <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
           <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
-          <Link href="/register" className="underline">Crear una bóveda nueva</Link>
+          <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="underline">Crear una bóveda nueva</Link>
         </div>
       </div>
   );

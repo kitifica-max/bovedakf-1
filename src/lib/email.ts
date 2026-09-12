@@ -5,18 +5,26 @@ const FROM = process.env.EMAIL_FROM ?? "Bóveda KF-1 <no-reply@kitifica.com>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 type SendResult = { ok: boolean; error?: string };
+type Attachment = { filename: string; content: string }; // base64
 
-export async function sendEmail(to: string, subject: string, html: string): Promise<SendResult> {
+export async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  attachments?: Attachment[],
+): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     console.warn("[email] RESEND_API_KEY not set — skipping send to", to);
     return { ok: false, error: "no api key" };
   }
   try {
+    const body: Record<string, unknown> = { from: FROM, to, subject, html };
+    if (attachments?.length) body.attachments = attachments;
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to, subject, html }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
@@ -166,6 +174,61 @@ export function inviteEmail(link: string, vaultName: string, inviterName: string
       )}</strong> como <strong>${esc(roleLabel)}</strong>. Aceptá para ver las credenciales compartidas del equipo.</p>`,
       cta: { label: "Aceptar invitación", href: link },
       footnote: "Si no esperabas esto, ignorá el mensaje. El enlace vence en 7 días.",
+    }),
+  };
+}
+
+export function paymentSuccessEmail(opts: {
+  planName: string;
+  amount: string;
+  currency: string;
+  nextBillingDate: string;
+}) {
+  return {
+    subject: `Pago recibido — Plan ${opts.planName} activado · Bóveda KF-1`,
+    html: shell({
+      preview: `Tu plan ${opts.planName} está activo. Adjuntamos tu recibo.`,
+      heading: `Plan ${opts.planName} activo`,
+      bodyHtml: `
+        <p style='margin:0 0 16px;'>Recibimos tu pago correctamente. Tu suscripción está activa y podés usar todas las funciones del plan.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#9aa2b1;">Plan</td>
+            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#edf0f4;text-align:right;font-weight:600;">${esc(opts.planName)}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#9aa2b1;">Monto</td>
+            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#edf0f4;text-align:right;font-weight:600;">${esc(opts.currency)} $${esc(opts.amount)}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 0;font-size:13px;color:#9aa2b1;">Próximo cobro</td>
+            <td style="padding:10px 0;font-size:13px;color:#edf0f4;text-align:right;">${esc(opts.nextBillingDate)}</td>
+          </tr>
+        </table>
+        <p style='margin:0;font-size:13px;color:#9aa2b1;'>El recibo en PDF va adjunto a este correo. Para cancelar o gestionar tu suscripción, entrá a tu panel de facturación.</p>`,
+      cta: { label: "Ver panel de facturación", href: `${APP_URL}/dashboard/billing` },
+      footnote: "El pago fue procesado por PayPal. Política de devoluciones: kf1.kitifica.com/devoluciones",
+    }),
+  };
+}
+
+export function paymentFailedEmail(opts: { planName: string; manageUrl: string }) {
+  return {
+    subject: `Pago no procesado — Bóveda KF-1`,
+    html: shell({
+      preview: "No pudimos procesar tu pago. Tu suscripción puede quedar suspendida.",
+      heading: "No pudimos procesar tu pago",
+      bodyHtml: `
+        <p style='margin:0 0 12px;'>Intentamos cobrar tu suscripción del plan <strong>${esc(opts.planName)}</strong> pero el pago no fue aprobado.</p>
+        <p style='margin:0 0 12px;'>Esto puede ocurrir si:</p>
+        <ul style='margin:0 0 16px;padding-left:20px;color:#c8cdd6;font-size:14px;line-height:1.7;'>
+          <li>Tu método de pago en PayPal expiró o fue rechazado</li>
+          <li>No había fondos suficientes</li>
+          <li>Tu banco bloqueó el cargo</li>
+        </ul>
+        <p style='margin:0;'>Actualizá tu método de pago en PayPal para evitar la suspensión de tu cuenta.</p>`,
+      cta: { label: "Actualizar método de pago", href: opts.manageUrl },
+      footnote: "Si el problema persiste, contactanos en contacto@kitifica.com.",
     }),
   };
 }

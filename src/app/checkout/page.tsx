@@ -38,7 +38,7 @@ export default async function CheckoutPage({
   if (!plan) redirect("/#precios");
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?from=/checkout?plan=${planKey}`);
+  if (!session?.user?.id) redirect(`/login?next=/checkout?plan=${planKey}`);
 
   const existing = await db.subscription.findUnique({
     where: { userId: session.user.id },
@@ -116,7 +116,8 @@ export default async function CheckoutPage({
             <p className="mt-4 text-center text-xs text-ink-soft">
               Al continuar serás redirigido a PayPal para aprobar el pago.
               <br />
-              Sin contratos · Cancela cuando quieras.
+              Sin contratos · Cancela cuando quieras ·{" "}
+              <Link href="/devoluciones" className="underline hover:text-ink">Política de devoluciones</Link>
             </p>
           </div>
         </div>
