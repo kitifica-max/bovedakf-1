@@ -1,4 +1,5 @@
 import { createHmac } from "crypto";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -42,21 +43,38 @@ export default async function AdminOrgsPage() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <div className="mb-1 flex items-center gap-2 text-xs text-ink-soft">
-        <a href="/admin" className="hover:text-ink transition-colors">Admin</a>
-        <span>/</span>
-        <span className="text-ink">Organizaciones</span>
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">
+      <header className="flex items-center justify-between gap-3 rounded-full bg-ink px-5 py-3 text-gray">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-on-light.svg" alt="Bóveda KF-1" className="h-5 w-auto" />
+          <span className="hidden text-sm text-gray/70 sm:inline">· Organizaciones</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin"
+            className="shrink-0 rounded-full border border-gray/25 px-3 py-1.5 text-sm transition hover:bg-gray/10"
+          >
+            Admin
+          </Link>
+          <Link
+            href="/dashboard"
+            className="shrink-0 rounded-full border border-gray/25 px-3 py-1.5 text-sm transition hover:bg-gray/10"
+          >
+            ← Bóveda
+          </Link>
+        </div>
+      </header>
+
+      <div className="px-1">
+        <h1 className="font-display text-2xl font-bold text-ink">Organizaciones</h1>
+        <p className="mt-1 text-sm text-ink-soft">
+          Administrá las organizaciones enterprise y sus conexiones SSO.
+        </p>
       </div>
-      <h1 className="font-display text-2xl font-bold text-ink">
-        Organizaciones
-      </h1>
-      <p className="mt-1 text-sm text-ink-soft">
-        Administrá las organizaciones enterprise y sus conexiones SSO.
-      </p>
 
       {/* Formulario de creación */}
-      <section className="mt-8 rounded-2xl border border-border-soft bg-paper p-6">
+      <section className="rounded-2xl border border-border-soft bg-paper p-6">
         <h2 className="font-semibold text-ink">Nueva organización</h2>
         <form action={createOrganization} className="mt-4 flex flex-col gap-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -106,7 +124,7 @@ export default async function AdminOrgsPage() {
       </section>
 
       {/* Lista de orgs */}
-      <section className="mt-8 flex flex-col gap-4">
+      <section className="flex flex-col gap-4">
         {orgs.length === 0 && (
           <p className="text-sm text-ink-soft">No hay organizaciones todavía.</p>
         )}
@@ -172,6 +190,6 @@ export default async function AdminOrgsPage() {
           </div>
         ))}
       </section>
-    </main>
+    </div>
   );
 }
