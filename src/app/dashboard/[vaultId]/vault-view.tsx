@@ -178,7 +178,7 @@ export function VaultView({
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               aria-label="Cerrar sesión"
-              className="text-ink-soft hover:text-ink transition-colors"
+              className="cursor-pointer rounded-lg p-1 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger"
             >
               <LogOutIcon className="h-4 w-4" />
             </button>
