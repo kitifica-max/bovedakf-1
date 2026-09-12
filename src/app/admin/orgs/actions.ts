@@ -51,6 +51,5 @@ export async function generateAdminPortalLink(orgId: string): Promise<string> {
     intent: "sso",
   });
 
-  revalidatePath("/admin/orgs");
-  return link;
+  redirect(link);
 }

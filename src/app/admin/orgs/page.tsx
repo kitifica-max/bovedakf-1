@@ -143,16 +143,14 @@ export default async function AdminOrgsPage() {
                 <form
                   action={async () => {
                     "use server";
-                    const link = await generateAdminPortalLink(org.id);
-                    // El link se genera server-side — copiarlo manualmente desde los logs
-                    console.log(`[Admin Portal] ${org.name}: ${link}`);
+                    await generateAdminPortalLink(org.id);
                   }}
                 >
                   <button
                     type="submit"
                     className="rounded-full border border-border-soft px-4 py-1.5 text-xs font-medium text-blue hover:bg-blue/5"
                   >
-                    Generar link Admin Portal → (ver logs)
+                    Configurar SSO en WorkOS →
                   </button>
                 </form>
               )}
