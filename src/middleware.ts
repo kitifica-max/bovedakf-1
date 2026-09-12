@@ -15,17 +15,18 @@ export function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const csp = [
     "default-src 'none'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self'",
-    "font-src 'self'",
-    "connect-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.paypal.com https://www.paypalobjects.com`,
+    `style-src 'self' 'nonce-${nonce}' https://www.paypalobjects.com`,
+    "img-src 'self' https://www.paypalobjects.com https://checkout.paypal.com data:",
+    "font-src 'self' https://www.paypalobjects.com",
+    "connect-src 'self' https://api-m.paypal.com https://www.paypal.com",
+    "frame-src https://www.paypal.com https://checkout.paypal.com",
     "manifest-src 'self'",
     "worker-src 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    "form-action 'self' https://www.paypal.com",
   ].join("; ");
 
   const requestHeaders = new Headers(request.headers);
