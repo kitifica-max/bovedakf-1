@@ -57,6 +57,8 @@ export default async function VaultPage({
   const members = memberRows.map((m) => ({ id: m.id, email: m.user.email, role: m.role }));
   const userEmail = me?.email ?? session?.user?.email ?? "";
   const isAdminUser = isAdmin(userEmail);
+  const orgRole = session?.user?.orgRole;
+  const isOrgAdmin = orgRole === "OWNER" || orgRole === "ADMIN";
 
   return (
     <VaultView
@@ -71,6 +73,7 @@ export default async function VaultPage({
       invites={invites}
       userEmail={userEmail}
       isAdminUser={isAdminUser}
+      isOrgAdmin={isOrgAdmin}
     />
   );
 }

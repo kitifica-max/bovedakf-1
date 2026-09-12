@@ -74,6 +74,7 @@ export function VaultView({
   invites,
   userEmail,
   isAdminUser,
+  isOrgAdmin,
 }: {
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
@@ -86,6 +87,7 @@ export function VaultView({
   invites: { id: string; email: string; role: Role }[];
   userEmail: string;
   isAdminUser: boolean;
+  isOrgAdmin: boolean;
 }) {
   const canEdit = role === "OWNER" || role === "EDITOR";
   const [activeTab, setActiveTab] = useState<Tab>("credenciales");
@@ -141,6 +143,14 @@ export function VaultView({
               {label}
             </button>
           ))}
+          {isOrgAdmin && (
+            <Link
+              href="/dashboard/org"
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+            >
+              Mi organización
+            </Link>
+          )}
           {isAdminUser && (
             <Link
               href="/admin"
@@ -201,6 +211,15 @@ export function VaultView({
                     onClick={() => setShowUserMenu(false)}
                   >
                     Conectar IA
+                  </Link>
+                )}
+                {isOrgAdmin && (
+                  <Link
+                    href="/dashboard/org"
+                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Mi organización
                   </Link>
                 )}
                 {isAdminUser && (
