@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { signIn as passkeySignIn } from "next-auth/webauthn";
 import { checkPasswordAction } from "../actions";
@@ -12,14 +13,21 @@ import { CTAButton } from "@/components/site/cta-button";
 
 export function LoginForm() {
   const router = useRouter();
-  const nextUrl =
-    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next");
   const dest = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [step, setStep] = useState<"password" | "totp">("password");
   const [creds, setCreds] = useState<{ email: string; password: string } | null>(null);
   const [hasPasskey, setHasPasskey] = useState(false);
+
+  // Auto-login cuando viene de callback SSO
+  useEffect(() => {
+    const nonce = searchParams.get("sso_nonce");
+    if (!nonce) return;
+    signIn("sso-nonce", { nonce, redirectTo: "/dashboard" });
+  }, [searchParams]);
 
   useEffect(() => {
     // Post-mount read of a browser-only API — no SSR value to sync against.
@@ -206,6 +214,10 @@ export function LoginForm() {
         <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
           <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
           <Link href="/register" className="underline">Crear una bóveda nueva</Link>
+          {/* SSO link — solo se muestra, no remplaza el flujo normal */}
+          <Link href="/login/sso" className="mt-1 flex items-center gap-1 text-blue underline">
+            Entrar con SSO corporativo
+          </Link>
         </div>
       </div>
   );
