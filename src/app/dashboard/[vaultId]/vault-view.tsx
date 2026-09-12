@@ -167,6 +167,12 @@ export function VaultView({
               Organizaciones
             </Link>
           )}
+          <Link
+            href="/dashboard/billing"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+          >
+            Facturación
+          </Link>
         </nav>
 
         <div className="px-3 py-3 border-t border-border-soft">
@@ -248,6 +254,13 @@ export function VaultView({
                     Organizaciones
                   </Link>
                 )}
+                <Link
+                  href="/dashboard/billing"
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Facturación
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="flex w-full items-center gap-2 px-3.5 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors border-t border-border-soft"
