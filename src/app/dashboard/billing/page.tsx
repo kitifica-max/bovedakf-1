@@ -87,12 +87,12 @@ export default async function BillingPage({
               Cambiar plan
             </Link>
             <a
-              href={`https://www.paypal.com/myaccount/autopay/`}
+              href="https://panel.wompi.sv/Recurrentes"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-full border border-border-soft px-4 py-1.5 text-xs font-medium text-ink-soft hover:bg-gray/20"
             >
-              Gestionar en PayPal →
+              Gestionar en Wompi →
             </a>
           </div>
         </section>
