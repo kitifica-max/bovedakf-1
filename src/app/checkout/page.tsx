@@ -21,7 +21,7 @@ const PLANS = {
     name: "Equipo",
     price: 29,
     seats: 25,
-    features: ["Todo lo de Starter", "25 asientos de equipo", "SSO corporativo", "Soporte prioritario"],
+    features: ["Todo lo de Starter", "25 asientos de equipo", "Acceso con email del trabajo (Okta, Azure AD, Google Workspace)", "Soporte prioritario"],
   },
 } as const;
 
@@ -39,6 +39,15 @@ export default async function CheckoutPage({
 
   const session = await auth();
   if (!session?.user?.id) redirect(`/login?next=/checkout?plan=${planKey}`);
+
+  const FREE_EMAIL_DOMAINS = new Set([
+    "gmail.com", "googlemail.com", "hotmail.com", "hotmail.es", "outlook.com",
+    "outlook.es", "live.com", "live.es", "yahoo.com", "yahoo.es", "icloud.com",
+    "me.com", "mac.com", "msn.com", "protonmail.com", "proton.me",
+  ]);
+  const emailDomain = session.user.email?.split("@")[1]?.toLowerCase() ?? "";
+  const isPersonalEmail = FREE_EMAIL_DOMAINS.has(emailDomain);
+  const requiresCorporateEmail = planKey === "team";
 
   const existing = await db.subscription.findUnique({
     where: { userId: session.user.id },
@@ -120,7 +129,20 @@ export default async function CheckoutPage({
                 para que tu suscripción se active automáticamente.
               </p>
             </div>
-            <CheckoutButton plan={planKey} />
+            {requiresCorporateEmail && isPersonalEmail ? (
+              <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/8 px-4 py-3">
+                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                  El plan Equipo requiere un email corporativo
+                </p>
+                <p className="mt-1 text-xs text-ink-soft">
+                  Tu cuenta usa <span className="font-medium">{session.user.email}</span> — un correo personal.
+                  El acceso SSO (Okta, Azure AD, Google Workspace) solo funciona con el dominio de tu empresa.
+                  Registrate con tu email del trabajo para continuar.
+                </p>
+              </div>
+            ) : (
+              <CheckoutButton plan={planKey} />
+            )}
             <p className="mt-4 text-center text-xs text-ink-soft">
               Pagá con Visa o Mastercard. Sin cuenta extra requerida.
               <br />

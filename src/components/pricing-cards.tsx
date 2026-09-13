@@ -22,7 +22,7 @@ export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }
           <span className="font-display text-4xl font-bold text-ink">$0</span>
           <span className="text-ink-soft">/mes</span>
         </div>
-        <p className="mt-1 text-sm text-ink-soft">1 usuario</p>
+        <p className="mt-1 text-sm text-ink-soft">Hasta 2 usuarios</p>
         <ul className="mt-6 flex flex-col gap-2">
           {["1 bóveda", "Hasta 10 credenciales", "Share links básicos", "Audit log"].map((f) => (
             <li key={f} className="flex items-center gap-2 text-sm text-ink">{check}{f}</li>
@@ -66,9 +66,20 @@ export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }
         </div>
         <p className="mt-1 text-sm text-ink-soft">Hasta 25 usuarios</p>
         <ul className="mt-6 flex flex-col gap-2">
-          {["Todo lo de Starter", "25 asientos de equipo", "SSO corporativo", "Soporte prioritario"].map((f) => (
+          {[
+            "Todo lo de Starter",
+            "25 asientos de equipo",
+            "Soporte prioritario",
+          ].map((f) => (
             <li key={f} className="flex items-center gap-2 text-sm text-ink">{check}{f}</li>
           ))}
+          <li className="flex items-start gap-2 text-sm text-ink">
+            {check}
+            <span>
+              Acceso con email del trabajo
+              <span className="ml-1 text-xs text-ink-soft">(Okta, Azure AD, Google Workspace)</span>
+            </span>
+          </li>
         </ul>
         <Link href="/checkout?plan=team" className="mt-6 block w-full rounded-full bg-blue py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90">
           Suscribirse →
