@@ -98,12 +98,10 @@ export default async function CheckoutPage({
           </div>
 
           {/* Current subscription warning */}
-          {(existing?.status === "ACTIVE" || existing?.status === "PENDING") && (
+          {existing?.status === "ACTIVE" && (
             <div className="border-b border-border-soft bg-yellow-500/5 px-6 py-4">
               <p className="text-sm text-yellow-400">
-                {existing.status === "PENDING"
-                  ? "Tenés una suscripción pendiente de pago. Al continuar se reemplazará."
-                  : `Ya tenés un plan ${existing.plan} activo. Al suscribirte reemplazará el anterior.`}
+                Ya tenés un plan {existing.plan === "starter" ? "Starter" : "Equipo"} activo. Al suscribirte reemplazará el anterior.
               </p>
             </div>
           )}
