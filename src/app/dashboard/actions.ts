@@ -86,6 +86,22 @@ export async function createCredentialAction(formData: FormData) {
   const { vaultId, service, username, secret, notes } = parsed.data;
   await requireVaultAccess(vaultId, "EDITOR");
 
+  // Free tier: max 10 credentials per vault (checked against vault owner's subscription).
+  const FREE_CREDENTIAL_LIMIT = 10;
+  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { ownerId: true } });
+  if (vault) {
+    const sub = await db.subscription.findUnique({
+      where: { userId: vault.ownerId },
+      select: { status: true },
+    });
+    if (!sub || sub.status !== "ACTIVE") {
+      const count = await db.credential.count({ where: { vaultId } });
+      if (count >= FREE_CREDENTIAL_LIMIT) {
+        return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
+      }
+    }
+  }
+
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
     data: { vaultId, service, username, encryptedData: encryptAtRest(payload) },

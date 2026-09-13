@@ -18,7 +18,7 @@ export type IconType = ComponentType<{ className?: string }>;
 type IllustrationType = () => React.JSX.Element;
 
 export const stats: { label: string; value: string; Icon: IconType }[] = [
-  { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
+  { label: "Credenciales gratis de libre uso por cuenta", value: "10", Icon: KeyRoundIcon },
   { label: "Rango de expiración configurable por link", value: "1h–7d", Icon: ClockIcon },
 ];
 
@@ -140,7 +140,7 @@ export const faqs: { q: string; a: string }[] = [
   },
   {
     q: "¿Es gratis?",
-    a: "Sí, hasta 20 credenciales por bóveda, sin tarjeta de crédito.",
+    a: "Sí, hasta 10 credenciales por bóveda, sin tarjeta de crédito.",
   },
   {
     q: "¿Tienen doble factor de autenticación?",
