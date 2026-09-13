@@ -38,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       options: {
         httpOnly: true,
         sameSite: "lax",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         path: "/",
       },
     },
@@ -46,7 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       options: {
         httpOnly: true,
         sameSite: "lax",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         path: "/",
       },
     },
@@ -54,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       options: {
         httpOnly: true,
         sameSite: "lax",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         path: "/",
       },
     },

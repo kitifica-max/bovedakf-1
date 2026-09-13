@@ -29,14 +29,14 @@ const silkscreen = Silkscreen({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const title = "Bóveda KF-1 — Tu IA accede a tus credenciales sin exponer contraseñas";
+const title = "Bóveda KF-1 — Credenciales seguras para tu equipo y su agente IA";
 const description =
-  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal zero-knowledge que vos abrís.";
+  "La Skill KF-1 conecta Claude Code a tu bóveda. Pedile una credencial en lenguaje natural, recibís un link temporal zero-knowledge. Las contraseñas nunca salen de la bóveda.";
 
-// Social preview leads with the AI skill differentiation.
-const ogTitle = "Tu IA accede a tus credenciales. Sin exponer tus contraseñas.";
+// Social preview leads with the team + AI agent positioning.
+const ogTitle = "Credenciales seguras para tu equipo y su agente IA.";
 const ogDescription =
-  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal que vos abrís.";
+  "La Skill KF-1 conecta Claude Code a tu bóveda sin exponer contraseñas. Tu equipo accede, audita y revoca desde el mismo lugar.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

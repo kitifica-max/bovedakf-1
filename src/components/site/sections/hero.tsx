@@ -18,11 +18,11 @@ export function HeroSection() {
               <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Skill para Claude Code · SSO Enterprise · Zero-knowledge
             </span>
             <h1 data-reveal className="t-display text-ink">
-              Tu IA accede a tus credenciales. Sin exponer tus contraseñas.
+              Credenciales seguras para tu equipo y su agente IA.
             </h1>
             <p data-reveal className="mt-5 max-w-md leading-relaxed text-ink-soft">
-              Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural.
-              La contraseña nunca llega al modelo — solo un link temporal que vos abrís.
+              La Skill KF-1 conecta Claude Code a tu bóveda. Pedile una credencial en lenguaje
+              natural, recibís un link temporal zero-knowledge. Las contraseñas nunca salen de la bóveda.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap items-center gap-3">
               <CTAButton href="/register">Crear mi bóveda gratis →</CTAButton>

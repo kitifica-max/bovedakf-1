@@ -35,6 +35,7 @@ import { TwoFactorSettings } from "@/components/two-factor-settings";
 import { PasskeySettings } from "@/components/passkey-settings";
 import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 type Tab = "credenciales" | "actividad" | "equipo" | "seguridad";
@@ -348,7 +349,9 @@ export function VaultView({
 
             {activeTab === "seguridad" && (
               <div className="flex flex-col gap-4">
-                <PasskeySettings initialPasskeys={passkeys} />
+                <ErrorBoundary>
+                  <PasskeySettings initialPasskeys={passkeys} />
+                </ErrorBoundary>
                 <TwoFactorSettings initialEnabled={totpEnabled} />
               </div>
             )}
