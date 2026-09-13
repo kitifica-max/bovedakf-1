@@ -34,6 +34,15 @@ async function wompiRequest<T>(path: string, method = "GET", body?: object): Pro
   return res.json() as Promise<T>;
 }
 
+export async function listEnlacesPagoRecurrentes() {
+  return wompiRequest<Array<{
+    idEnlace: string;
+    nombre: string;
+    urlEnlace: string;
+    estaProductivo: boolean;
+  }>>("/EnlacePagoRecurrente");
+}
+
 export async function getEnlaceSuscripciones(idEnlace: string) {
   return wompiRequest<{
     items: Array<{ email: string; nombre: string; activo: boolean }>;

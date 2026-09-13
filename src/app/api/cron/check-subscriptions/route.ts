@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getEnlaceSuscripciones } from "@/lib/wompi";
+import { listEnlacesPagoRecurrentes, getEnlaceSuscripciones } from "@/lib/wompi";
 import { sendEmail, paymentFailedEmail } from "@/lib/email";
 
 // Netlify scheduled function: runs daily at 8:00 AM UTC
@@ -13,30 +13,39 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 
-  const starterEnlaceId = process.env.WOMPI_STARTER_ENLACE_ID;
-  const teamEnlaceId = process.env.WOMPI_TEAM_ENLACE_ID;
+  // Discover our plan links dynamically from the Wompi account
+  let enlaces: Awaited<ReturnType<typeof listEnlacesPagoRecurrentes>>;
+  try {
+    enlaces = await listEnlacesPagoRecurrentes();
+  } catch (err) {
+    console.error("[cron] failed to list Wompi enlaces:", err);
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+  }
 
-  if (!starterEnlaceId || !teamEnlaceId) {
-    console.warn("[cron] WOMPI_STARTER_ENLACE_ID or WOMPI_TEAM_ENLACE_ID not set — skipping cancellation check");
+  const starterUrl = process.env.WOMPI_STARTER_URL ?? "";
+  const teamUrl = process.env.WOMPI_TEAM_URL ?? "";
+
+  // Match by short URL to identify which enlace belongs to which plan
+  const starterEnlace = enlaces.find((e) => e.urlEnlace === starterUrl || e.urlEnlace.endsWith("2222632b7I"));
+  const teamEnlace = enlaces.find((e) => e.urlEnlace === teamUrl || e.urlEnlace.endsWith("2222637FpK"));
+
+  if (!starterEnlace && !teamEnlace) {
+    console.warn("[cron] could not find plan enlaces in Wompi account");
     return NextResponse.json({ ok: true, skipped: true });
   }
 
-  // Build set of active subscriber emails per plan from Wompi
+  // Build set of active subscriber emails from Wompi
   const activeEmails = new Set<string>();
-  try {
-    const [starterData, teamData] = await Promise.all([
-      getEnlaceSuscripciones(starterEnlaceId),
-      getEnlaceSuscripciones(teamEnlaceId),
-    ]);
-    for (const s of starterData.items ?? []) {
-      if (s.activo) activeEmails.add(s.email.toLowerCase());
+  for (const enlace of [starterEnlace, teamEnlace]) {
+    if (!enlace) continue;
+    try {
+      const data = await getEnlaceSuscripciones(enlace.idEnlace);
+      for (const s of data.items ?? []) {
+        if (s.activo) activeEmails.add(s.email.toLowerCase());
+      }
+    } catch (err) {
+      console.error(`[cron] failed to get suscripciones for enlace ${enlace.idEnlace}:`, err);
     }
-    for (const s of teamData.items ?? []) {
-      if (s.activo) activeEmails.add(s.email.toLowerCase());
-    }
-  } catch (err) {
-    console.error("[cron] failed to fetch Wompi subscriptions:", err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
   }
 
   const active = await db.subscription.findMany({
