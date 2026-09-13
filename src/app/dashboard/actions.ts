@@ -297,6 +297,20 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
+  // Seat enforcement: free tier = 2 total (owner + 1), paid = sub.seats.
+  const FREE_SEATS = 2;
+  const [sub, currentCount] = await Promise.all([
+    db.subscription.findUnique({ where: { userId }, select: { seats: true, status: true } }),
+    db.vaultMember.count({ where: { vaultId } }),
+  ]);
+  const maxSeats = sub?.status === "ACTIVE" ? sub.seats : FREE_SEATS;
+  // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
+  if (currentCount + 1 >= maxSeats) {
+    return sub?.status === "ACTIVE"
+      ? `Tu plan permite hasta ${maxSeats} miembros. Upgrade para agregar más.`
+      : "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más.";
+  }
+
   // Case-insensitive: emails may be stored with mixed case from older signups.
   const already = await db.vaultMember.findFirst({
     where: { vaultId, user: { email: { equals: email, mode: "insensitive" } } },
