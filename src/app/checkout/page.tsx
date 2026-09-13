@@ -98,10 +98,12 @@ export default async function CheckoutPage({
           </div>
 
           {/* Current subscription warning */}
-          {existing?.status === "ACTIVE" && (
+          {(existing?.status === "ACTIVE" || existing?.status === "PENDING") && (
             <div className="border-b border-border-soft bg-yellow-500/5 px-6 py-4">
               <p className="text-sm text-yellow-400">
-                Ya tenés un plan <strong>{existing.plan}</strong> activo. Al suscribirte reemplazará el anterior.
+                {existing.status === "PENDING"
+                  ? "Tenés una suscripción pendiente de pago. Al continuar se reemplazará."
+                  : `Ya tenés un plan ${existing.plan} activo. Al suscribirte reemplazará el anterior.`}
               </p>
             </div>
           )}
@@ -114,7 +116,7 @@ export default async function CheckoutPage({
             </div>
             <CheckoutButton plan={planKey} />
             <p className="mt-4 text-center text-xs text-ink-soft">
-              Al continuar serás redirigido a PayPal para aprobar el pago.
+              Pagá con Visa o Mastercard. Sin cuenta extra requerida.
               <br />
               Sin contratos · Cancela cuando quieras ·{" "}
               <Link href="/devoluciones" className="underline hover:text-ink">Política de devoluciones</Link>

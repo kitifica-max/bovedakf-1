@@ -14,6 +14,7 @@ enum SubscriptionPlan {
 }
 
 enum SubscriptionStatus {
+  PENDING
   ACTIVE
   CANCELLED
   SUSPENDED
@@ -21,16 +22,16 @@ enum SubscriptionStatus {
 }
 
 model Subscription {
-  id                   String             @id @default(cuid())
-  userId               String             @unique
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan                 SubscriptionPlan
-  paypalSubscriptionId String             @unique
-  status               SubscriptionStatus
-  seats                Int
-  currentPeriodEnd     DateTime
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  id             String             @id @default(cuid())
+  userId         String             @unique
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan           SubscriptionPlan
+  wompiEnlaceId  String             @unique
+  status         SubscriptionStatus
+  seats          Int
+  currentPeriodEnd DateTime
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }
 
 model User {
