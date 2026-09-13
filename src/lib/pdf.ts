@@ -67,7 +67,7 @@ export async function generateReceipt(opts: {
 
   // Footer
   page.drawLine({ start: { x: mx, y: 100 }, end: { x: width - mx, y: 100 }, thickness: 1, color: BORDER });
-  page.drawText("Este recibo confirma el pago procesado mediante PayPal.", { x: mx, y: 82, size: 9, font, color: GRAY });
+  page.drawText("Este recibo confirma el pago procesado mediante Wompi.", { x: mx, y: 82, size: 9, font, color: GRAY });
   page.drawText("Bóveda KF-1 · kitifica.com · no-reply@kitifica.com", { x: mx, y: 68, size: 9, font, color: GRAY });
   page.drawText("Consultas o devoluciones: kf1.kitifica.com/devoluciones", { x: mx, y: 54, size: 9, font, color: GRAY });
 

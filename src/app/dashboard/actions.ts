@@ -323,7 +323,7 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
   // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
   if (currentCount + 1 >= maxSeats) {
     return sub?.status === "ACTIVE"
-      ? `Tu plan permite hasta ${maxSeats} miembros. Upgrade para agregar más.`
+      ? `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`
       : "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más.";
   }
 

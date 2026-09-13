@@ -11,14 +11,14 @@ const sections = [
   {
     h: "1. Suscripciones y facturación",
     p: [
-      "Bóveda KF-1 ofrece suscripciones mensuales procesadas mediante PayPal. Los cargos se realizan automáticamente al inicio de cada período de facturación.",
+      "Bóveda KF-1 ofrece suscripciones mensuales procesadas mediante Wompi. Los cargos se realizan automáticamente al inicio de cada período de facturación.",
       "Al suscribirte aceptás que el primer cobro se realiza de inmediato y los siguientes cada 30 días hasta que canceles.",
     ],
   },
   {
     h: "2. Cancelación",
     p: [
-      "Podés cancelar tu suscripción en cualquier momento desde tu panel de facturación en Bóveda KF-1, o directamente desde tu cuenta de PayPal en Pagos automáticos.",
+      "Podés cancelar tu suscripción en cualquier momento desde el panel de Wompi en panel.wompi.sv/Recurrentes.",
       "La cancelación es efectiva al final del período de facturación en curso. Seguirás teniendo acceso a las funciones de tu plan hasta esa fecha. No se generan cargos adicionales.",
     ],
   },
@@ -35,28 +35,21 @@ const sections = [
     ],
   },
   {
-    h: "4. Protección al comprador de PayPal",
+    h: "4. Pago no aprobado",
     p: [
-      "Los pagos procesados mediante PayPal están sujetos a la Protección al comprador de PayPal. Si considerás que un cargo es incorrecto, podés abrir una disputa directamente desde tu cuenta de PayPal.",
-      "Cualquier disputa abierta en PayPal será revisada y resuelta de acuerdo con las políticas de PayPal y las presentes condiciones.",
-    ],
-  },
-  {
-    h: "5. Pago no aprobado",
-    p: [
-      "Si un pago no puede ser procesado (saldo insuficiente, tarjeta vencida, etc.), PayPal reintentará el cobro según su propia política. Recibirás un correo de aviso desde Bóveda KF-1 para que actualices tu método de pago.",
+      "Si un pago no puede ser procesado (saldo insuficiente, tarjeta vencida, etc.), recibirás un correo de aviso desde Bóveda KF-1. Podés actualizar tu método de pago directamente en panel.wompi.sv/Recurrentes.",
       "Si el pago no se regulariza, tu suscripción puede quedar suspendida. Tus datos no se eliminan: al regularizar el pago tu acceso se restaura automáticamente.",
     ],
   },
   {
-    h: "6. Cómo solicitar un reembolso",
+    h: "5. Cómo solicitar un reembolso",
     p: [
-      "Si creés que tu caso aplica a los supuestos del punto 3, escribinos a contacto@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de PayPal.",
-      "Respondemos en un plazo máximo de 5 días hábiles. Los reembolsos aprobados se procesan a través de PayPal y pueden tardar de 3 a 7 días hábiles en reflejarse.",
+      "Si creés que tu caso aplica a los supuestos del punto 3, escribinos a contacto@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
+      "Respondemos en un plazo máximo de 5 días hábiles. Los reembolsos aprobados pueden tardar de 3 a 7 días hábiles en reflejarse según tu banco.",
     ],
   },
   {
-    h: "7. Cambios a esta política",
+    h: "6. Cambios a esta política",
     p: [
       "Nos reservamos el derecho de modificar esta política. Publicaremos los cambios en esta página con al menos 15 días de anticipación. El uso continuado del servicio implica la aceptación de la política vigente.",
     ],

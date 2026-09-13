@@ -207,7 +207,7 @@ export function paymentSuccessEmail(opts: {
         </table>
         <p style='margin:0;font-size:13px;color:#9aa2b1;'>El recibo en PDF va adjunto a este correo. Para cancelar o gestionar tu suscripción, entrá a tu panel de facturación.</p>`,
       cta: { label: "Ver panel de facturación", href: `${APP_URL}/dashboard/billing` },
-      footnote: "El pago fue procesado por PayPal. Política de devoluciones: kf1.kitifica.com/devoluciones",
+      footnote: "El pago fue procesado por Wompi. Política de devoluciones: kf1.kitifica.com/devoluciones",
     }),
   };
 }
@@ -222,11 +222,11 @@ export function paymentFailedEmail(opts: { planName: string; manageUrl: string }
         <p style='margin:0 0 12px;'>Intentamos cobrar tu suscripción del plan <strong>${esc(opts.planName)}</strong> pero el pago no fue aprobado.</p>
         <p style='margin:0 0 12px;'>Esto puede ocurrir si:</p>
         <ul style='margin:0 0 16px;padding-left:20px;color:#c8cdd6;font-size:14px;line-height:1.7;'>
-          <li>Tu método de pago en PayPal expiró o fue rechazado</li>
+          <li>Tu método de pago expiró o fue rechazado</li>
           <li>No había fondos suficientes</li>
           <li>Tu banco bloqueó el cargo</li>
         </ul>
-        <p style='margin:0;'>Actualizá tu método de pago en PayPal para evitar la suspensión de tu cuenta.</p>`,
+        <p style='margin:0;'>Actualizá tu método de pago en <a href="https://panel.wompi.sv/Recurrentes" style="color:#4f8ef7;">panel.wompi.sv/Recurrentes</a> para evitar la suspensión de tu cuenta.</p>`,
       cta: { label: "Actualizar método de pago", href: opts.manageUrl },
       footnote: "Si el problema persiste, contactanos en contacto@kitifica.com.",
     }),
