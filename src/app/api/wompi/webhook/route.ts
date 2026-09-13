@@ -22,6 +22,17 @@ type WompiWebhook = {
 
 const PLAN_PRICE: Record<string, string> = { starter: "9.00", team: "29.00" };
 const PLAN_NAME: Record<string, string> = { starter: "Starter", team: "Equipo" };
+const PLAN_SEATS: Record<string, number> = { starter: 5, team: 25 };
+
+function resolvePlan(body: WompiWebhook): "starter" | "team" | null {
+  const nombre = body.EnlacePago?.NombreProducto ?? "";
+  if (nombre.toLowerCase().includes("equipo")) return "team";
+  if (nombre.toLowerCase().includes("starter")) return "starter";
+  // Fallback: match by amount
+  if (body.Monto === 29 || body.Monto === 2900) return "team";
+  if (body.Monto === 9 || body.Monto === 900) return "starter";
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
@@ -39,44 +50,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  // Only process successful transactions
-  if (body.ResultadoTransaccion !== "ExitosaAprobada") {
-    // Payment failed — notify user if we can find them
-    const email = body.cliente?.Email;
-    if (email) {
-      const user = await db.user.findUnique({ where: { email } });
-      if (user) {
-        const sub = await db.subscription.findUnique({ where: { userId: user.id } });
-        if (sub) {
-          await db.subscription.update({ where: { id: sub.id }, data: { status: "SUSPENDED" } });
-          const planName = PLAN_NAME[sub.plan] ?? sub.plan;
-          const { subject, html } = paymentFailedEmail({ planName, manageUrl: "https://panel.wompi.sv" });
-          await sendEmail(email, subject, html);
-        }
-      }
-    }
-    return NextResponse.json({ ok: true });
-  }
-
   const email = body.cliente?.Email;
   if (!email) return NextResponse.json({ ok: true });
 
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
-    console.warn("[wompi/webhook] no user found for email:", email);
+    console.warn("[wompi/webhook] no user for email:", email);
     return NextResponse.json({ ok: true });
   }
 
-  const sub = await db.subscription.findUnique({ where: { userId: user.id } });
-  if (!sub) {
-    console.warn("[wompi/webhook] no subscription found for userId:", user.id);
+  // Payment failed — suspend if subscription exists
+  if (body.ResultadoTransaccion !== "ExitosaAprobada") {
+    const sub = await db.subscription.findUnique({ where: { userId: user.id } });
+    if (sub) {
+      await db.subscription.update({ where: { id: sub.id }, data: { status: "SUSPENDED" } });
+      const planName = PLAN_NAME[sub.plan] ?? sub.plan;
+      const { subject, html } = paymentFailedEmail({ planName, manageUrl: "https://panel.wompi.sv" });
+      await sendEmail(email, subject, html);
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // Payment succeeded — upsert subscription (handles first-time activation)
+  const plan = resolvePlan(body);
+  if (!plan) {
+    console.warn("[wompi/webhook] cannot resolve plan from webhook:", body.EnlacePago);
     return NextResponse.json({ ok: true });
   }
 
   const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  await db.subscription.update({
-    where: { id: sub.id },
-    data: { status: "ACTIVE", currentPeriodEnd: periodEnd },
+  const sub = await db.subscription.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      plan,
+      status: "ACTIVE",
+      seats: PLAN_SEATS[plan],
+      currentPeriodEnd: periodEnd,
+    },
+    update: {
+      plan,
+      status: "ACTIVE",
+      seats: PLAN_SEATS[plan],
+      currentPeriodEnd: periodEnd,
+    },
   });
 
   // Send receipt email
@@ -92,7 +109,7 @@ export async function POST(req: NextRequest) {
       amount,
       currency: "USD",
       transactionId: body.IdTransaccion,
-      subscriptionId: sub.wompiEnlaceId,
+      subscriptionId: String(body.EnlacePago?.Id ?? ""),
       date: new Date(),
     });
     pdfAttachment = [{ filename: "recibo-kf1.pdf", content: pdfBuffer.toString("base64") }];

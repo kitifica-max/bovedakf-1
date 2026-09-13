@@ -34,26 +34,6 @@ async function wompiRequest<T>(path: string, method = "GET", body?: object): Pro
   return res.json() as Promise<T>;
 }
 
-export async function createEnlacePagoRecurrente(opts: {
-  plan: "starter" | "team";
-  monto: number;
-  diaDePago: number;
-}) {
-  const planName = opts.plan === "starter" ? "Starter" : "Equipo";
-  return wompiRequest<{
-    idEnlace: string;
-    urlEnlaceLargo: string;
-    urlEnlace: string;
-    estaProductivo: boolean;
-  }>("/EnlacePagoRecurrente", "POST", {
-    diaDePago: opts.diaDePago,
-    nombre: `Bóveda KF-1 — Plan ${planName}`,
-    idAplicativo: process.env.WOMPI_APP_ID,
-    monto: opts.monto,
-    descripcionProducto: `Suscripción mensual al plan ${planName} de Bóveda KF-1`,
-  });
-}
-
 export async function getEnlaceSuscripciones(idEnlace: string) {
   return wompiRequest<{
     items: Array<{ email: string; nombre: string; activo: boolean }>;

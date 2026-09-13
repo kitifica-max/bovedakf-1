@@ -110,9 +110,17 @@ export default async function CheckoutPage({
 
           {/* Total + CTA */}
           <div className="p-6">
-            <div className="mb-5 flex items-center justify-between text-sm">
+            <div className="mb-4 flex items-center justify-between text-sm">
               <span className="text-ink-soft">Total hoy</span>
               <span className="font-semibold text-ink">${plan.price} USD</span>
+            </div>
+            {/* Email notice — Wompi matches user by email to activate subscription */}
+            <div className="mb-5 rounded-xl border border-blue/20 bg-blue/5 px-4 py-3">
+              <p className="text-xs text-ink-soft">
+                Al pagar, usá el email{" "}
+                <span className="font-semibold text-ink">{session.user.email}</span>{" "}
+                para que tu suscripción se active automáticamente.
+              </p>
             </div>
             <CheckoutButton plan={planKey} />
             <p className="mt-4 text-center text-xs text-ink-soft">
