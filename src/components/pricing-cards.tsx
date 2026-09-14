@@ -1,12 +1,6 @@
 import Link from "next/link";
 
-type Props = {
-  starterPlanId: string;
-  teamPlanId: string;
-  clientId: string;
-};
-
-export function PricingCards({ starterPlanId: _s, teamPlanId: _t, clientId: _c }: Props) {
+export function PricingCards() {
   const check = (
     <svg className="h-4 w-4 shrink-0 text-blue" viewBox="0 0 16 16" fill="none">
       <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

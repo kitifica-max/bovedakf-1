@@ -13,11 +13,7 @@ export function PreciosSection() {
         </p>
       </div>
       <div className="mt-10">
-        <PricingCards
-          starterPlanId={process.env.PAYPAL_PLAN_STARTER_ID ?? ""}
-          teamPlanId={process.env.PAYPAL_PLAN_TEAM_ID ?? ""}
-          clientId={process.env.PAYPAL_CLIENT_ID ?? ""}
-        />
+        <PricingCards />
       </div>
     </section>
   );

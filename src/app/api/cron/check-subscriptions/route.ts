@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
     if (!activeEmails.has(email.toLowerCase())) {
       await db.subscription.update({
         where: { id: sub.id },
-        data: { status: "CANCELLED" },
+        data: { status: "SUSPENDED" },
       });
       suspended++;
 

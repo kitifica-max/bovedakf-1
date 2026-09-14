@@ -46,7 +46,7 @@ export async function listEnlacesPagoRecurrentes() {
 export async function getEnlaceSuscripciones(idEnlace: string) {
   return wompiRequest<{
     items: Array<{ email: string; nombre: string; activo: boolean }>;
-  }>(`/EnlacePagoRecurrente/${idEnlace}/suscrpciones`);
+  }>(`/EnlacePagoRecurrente/${idEnlace}/suscripciones`);
 }
 
 export function validateWebhookSignature(rawBody: string, signature: string): boolean {

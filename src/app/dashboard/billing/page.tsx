@@ -65,7 +65,7 @@ export default async function BillingPage({
               <p className="mt-1 text-xs text-ink-soft">
                 {sub.status === "ACTIVE"
                   ? `Próximo cobro: ${sub.currentPeriodEnd.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`
-                  : `Estado: ${{ SUSPENDED: "Suspendido", CANCELLED: "Cancelado" }[sub.status] ?? sub.status}`}
+                  : `Estado: ${{ SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}`}
               </p>
             </div>
             <span
@@ -75,7 +75,7 @@ export default async function BillingPage({
                   : "bg-gray/40 text-ink-soft"
               }`}
             >
-              {sub.status === "ACTIVE" ? "Activo" : { SUSPENDED: "Suspendido", CANCELLED: "Cancelado" }[sub.status] ?? sub.status}
+              {sub.status === "ACTIVE" ? "Activo" : { SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}
             </span>
           </div>
 
