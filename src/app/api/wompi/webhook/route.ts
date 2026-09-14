@@ -38,7 +38,12 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature = req.headers.get("wompi_hash") ?? "";
 
-  if (signature && !validateWebhookSignature(rawBody, signature)) {
+  if (process.env.NODE_ENV === "production") {
+    if (!signature || !validateWebhookSignature(rawBody, signature)) {
+      console.warn("[wompi/webhook] missing or invalid signature");
+      return NextResponse.json({ ok: false }, { status: 401 });
+    }
+  } else if (signature && !validateWebhookSignature(rawBody, signature)) {
     console.warn("[wompi/webhook] invalid signature");
     return NextResponse.json({ ok: false }, { status: 401 });
   }

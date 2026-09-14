@@ -55,18 +55,27 @@ export function SharedCredentialView() {
       .then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? "No se pudo cargar el link.");
+          setState({
+            status: "error",
+            message: (body.error as string) ?? "No se pudo cargar el link.",
+          });
+          return;
         }
-        return res.json();
-      })
-      .then(async (body: { payload: string; permission: "READ" | "DOWNLOAD" }) => {
-        const data = await decryptPayload(body.payload, key);
-        setState({ status: "ready", data, permission: body.permission });
+        const body = (await res.json()) as { payload: string; permission: "READ" | "DOWNLOAD" };
+        try {
+          const data = await decryptPayload(body.payload, key);
+          setState({ status: "ready", data, permission: body.permission });
+        } catch {
+          setState({
+            status: "error",
+            message: "No se pudo descifrar el contenido. Verifica que el enlace esté completo.",
+          });
+        }
       })
       .catch(() =>
         setState({
           status: "error",
-          message: "No se pudo descifrar el contenido. Verifica que el enlace esté completo.",
+          message: "Error de red. Verifica tu conexión e inténtalo de nuevo.",
         })
       );
   }, [publicId]);
