@@ -403,12 +403,17 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         setPending(true);
         setError(null);
         const formData = new FormData(e.currentTarget);
-        const result = await createCredentialAction(formData);
-        setPending(false);
-        if (result) {
-          setError(result);
-          return;
+        try {
+          const result = await createCredentialAction(formData);
+          if (result) {
+            setError(result);
+            setPending(false);
+            return;
+          }
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
         }
+        setPending(false);
         (e.target as HTMLFormElement).reset();
         onDone?.();
       }}
@@ -499,8 +504,12 @@ function CredentialRow({
               aria-expanded={!!revealed}
               onClick={async () => {
                 if (revealed) return setRevealed(null);
-                const data = await revealCredentialAction(vaultId, credential.id);
-                setRevealed(data);
+                try {
+                  const data = await revealCredentialAction(vaultId, credential.id);
+                  setRevealed(data);
+                } catch {
+                  /* session expired — page will redirect */
+                }
               }}
             >
               {revealed ? (
@@ -554,12 +563,16 @@ function CredentialRow({
                 setShareError(null);
                 const formData = new FormData(e.currentTarget);
                 formData.set("credentialId", credential.id);
-                const result = await createShareLinkAction(vaultId, formData);
-                if (typeof result === "string") {
-                  setShareError(result);
-                  return;
+                try {
+                  const result = await createShareLinkAction(vaultId, formData);
+                  if (typeof result === "string") {
+                    setShareError(result);
+                    return;
+                  }
+                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                } catch {
+                  setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
                 }
-                setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
               }}
             >
               <div className="flex flex-wrap items-center gap-2">
@@ -660,16 +673,20 @@ function CredentialRow({
                                 Math.max(1, Math.ceil((l.expiresAt.getTime() - Date.now()) / 3_600_000))
                               );
                               fd.set("expiresInHours", String(hrs));
-                              const result = await createShareLinkAction(vaultId, fd);
-                              if (typeof result !== "string") {
-                                setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                              try {
+                                const result = await createShareLinkAction(vaultId, fd);
+                                if (typeof result !== "string") {
+                                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                                }
+                              } catch {
+                                setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
                               }
                             }}
                           >
                             <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
                             Nuevo link
                           </button>
-                          <button className={dangerLinkBtnCls} onClick={() => revokeShareLinkAction(vaultId, l.id)}>
+                          <button className={dangerLinkBtnCls} onClick={async () => { try { await revokeShareLinkAction(vaultId, l.id); } catch { /* session expired — page will redirect */ } }}>
                             <XCircleIcon aria-hidden="true" className="h-3.5 w-3.5" />
                             Revocar
                           </button>
