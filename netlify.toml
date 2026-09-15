@@ -7,6 +7,10 @@
   schedule = "0 8 * * *"
   path = "/api/cron/check-subscriptions"
 
+[[edge_functions]]
+  function = "waf"
+  path = "/*"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
