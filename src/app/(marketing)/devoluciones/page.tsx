@@ -44,7 +44,7 @@ const sections = [
   {
     h: "5. Cómo solicitar un reembolso",
     p: [
-      "Si creés que tu caso aplica a los supuestos del punto 3, escribinos a contacto@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
+      "Si creés que tu caso aplica a los supuestos del punto 3, escribinos a hola@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
       "Respondemos en un plazo máximo de 5 días hábiles. Los reembolsos aprobados pueden tardar de 3 a 7 días hábiles en reflejarse según tu banco.",
     ],
   },
@@ -84,7 +84,7 @@ export default function DevolucionesPage() {
         <p className="text-sm font-medium text-ink">¿Necesitás ayuda?</p>
         <p className="mt-1 text-sm text-ink-soft">
           Escribinos a{" "}
-          <a href="mailto:contacto@kitifica.com" className="text-blue underline">contacto@kitifica.com</a>
+          <a href="mailto:hola@kitifica.com" className="text-blue underline">hola@kitifica.com</a>
           {" "}o visitá nuestra{" "}
           <Link href="/contacto" className="text-blue underline">página de contacto</Link>.
         </p>
