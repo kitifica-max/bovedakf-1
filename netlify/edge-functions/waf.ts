@@ -5,7 +5,7 @@ import {
   BLOCKED_UA_PATTERNS,
   ALLOWED_BOT_PATTERNS,
   getRouteCategory,
-} from "./waf-config.ts";
+} from "../lib/waf-config.ts";
 
 function getClientIp(request: Request): string {
   return (
