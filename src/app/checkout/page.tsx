@@ -38,7 +38,7 @@ export default async function CheckoutPage({
   if (!plan) redirect("/#precios");
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?next=/checkout?plan=${planKey}`);
+  if (!session?.user?.id) redirect(`/register?next=/checkout?plan=${planKey}`);
 
   const FREE_EMAIL_DOMAINS = new Set([
     "gmail.com", "googlemail.com", "hotmail.com", "hotmail.es", "outlook.com",
