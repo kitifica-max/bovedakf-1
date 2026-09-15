@@ -12,14 +12,17 @@ const AUTH_ROUTES: RegExp[] = [
   /^\/login/,
   /^\/register/,
   /^\/verify/,
-  /^\/reset\//,
-  /^\/api\/auth\//,
+  /^\/reset/,          // covers /reset and /reset/anything
+  /^\/invite\//,       // invite token route (brute-forceable)
+  /^\/api\/auth/,      // covers /api/auth exactly and /api/auth/…
 ];
 
 const SENSITIVE_ROUTES: RegExp[] = [
   /^\/api\/share\//,
+  /^\/s\//,                    // public share link viewer — brute-forceable publicId
   /^\/checkout/,
-  /^\/api\/credentials\//,
+  /^\/api\/cli\/credentials/,
+  /^\/api\/mcp/,
 ];
 
 export function getRouteCategory(path: string): RouteCategory {

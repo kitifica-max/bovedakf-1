@@ -10,6 +10,7 @@
 [[edge_functions]]
   function = "waf"
   path = "/*"
+  excludedPath = ["/_next/static/*", "/_next/image*", "/favicon.ico"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

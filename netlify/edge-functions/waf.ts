@@ -15,14 +15,17 @@ function getClientIp(request: Request): string {
   );
 }
 
-function getBlockedIps(): Set<string> {
-  const raw = Deno.env.get("WAF_BLOCKED_IPS") ?? "";
-  return new Set(raw.split(",").map((s) => s.trim()).filter(Boolean));
-}
+// Parse blocked IPs once at module level — avoids re-parsing on every request
+const BLOCKED_IPS: Set<string> = new Set(
+  (Deno.env.get("WAF_BLOCKED_IPS") ?? "").split(",").map((s) => s.trim()).filter(Boolean)
+);
+
+// Machine-to-machine routes exempt from UA check (webhooks, OAuth discovery, MCP/CLI)
+const UA_EXEMPT_PATHS = [/^\/api\/wompi\//, /^\/.well-known\//, /^\/api\/mcp/, /^\/api\/cli\//];
 
 function logBlock(reason: string, ip: string, ua: string, path: string): void {
   console.error(
-    `[WAF BLOCK] reason=${reason} ip=${ip} ua="${ua}" path=${path} ts=${new Date().toISOString()}`
+    `[WAF BLOCK] reason=${reason} ip=${ip} ua=${JSON.stringify(ua)} path=${path} ts=${new Date().toISOString()}`
   );
 }
 
@@ -36,7 +39,10 @@ async function checkRateLimit(
   const redisUrl = Deno.env.get("UPSTASH_REDIS_REST_URL");
   const redisToken = Deno.env.get("UPSTASH_REDIS_REST_TOKEN");
 
-  if (!redisUrl || !redisToken) return true; // fail open — not configured
+  if (!redisUrl || !redisToken) {
+    console.error("[WAF ERROR] Upstash not configured — rate limiting disabled");
+    return true; // fail open
+  }
 
   try {
     const resp = await fetch(`${redisUrl}/pipeline`, {
@@ -47,7 +53,7 @@ async function checkRateLimit(
       },
       body: JSON.stringify([
         ["INCR", key],
-        ["EXPIRE", key, windowSec],
+        ["EXPIRE", key, windowSec, "NX"],
       ]),
     });
 
@@ -74,14 +80,16 @@ export default async function waf(
   const path = new URL(request.url).pathname;
 
   // 1. IP blocklist — fastest check, no async
-  if (getBlockedIps().has(ip)) {
+  if (BLOCKED_IPS.has(ip)) {
     logBlock("blocked_ip", ip, ua, path);
     return new Response("Forbidden", { status: 403 });
   }
 
-  // 2. User-agent check — allowlist beats blocklist
+  // 2. User-agent check — allowlist beats blocklist; exempt M2M paths
   const isAllowedBot = ALLOWED_BOT_PATTERNS.some((p) => p.test(ua));
-  if (!isAllowedBot) {
+  const isUAExempt = UA_EXEMPT_PATHS.some((p) => p.test(path));
+
+  if (!isAllowedBot && !isUAExempt) {
     const isBadUA = ua === "" || BLOCKED_UA_PATTERNS.some((p) => p.test(ua));
     if (isBadUA) {
       logBlock("blocked_ua", ip, ua, path);
