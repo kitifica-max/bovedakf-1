@@ -36,7 +36,7 @@ export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = updateCompanyNameSchema.safeParse({ companyName: formData.get("companyName") });
+  const parsed = updateCompanyNameSchema.safeParse({ companyName: formData.get("companyName") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   await db.user.update({
@@ -51,7 +51,7 @@ export async function submitSurveyAnswerAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = dashboardSurveySchema.safeParse({ answer: formData.get("answer") });
+  const parsed = dashboardSurveySchema.safeParse({ answer: formData.get("answer") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   await db.user.update({
@@ -75,10 +75,10 @@ export async function dismissSurveyAction() {
 
 export async function createCredentialAction(formData: FormData) {
   const parsed = credentialSchema.safeParse({
-    vaultId: formData.get("vaultId"),
-    service: formData.get("service"),
-    username: formData.get("username"),
-    secret: formData.get("secret"),
+    vaultId: formData.get("vaultId") ?? "",
+    service: formData.get("service") ?? "",
+    username: formData.get("username") ?? "",
+    secret: formData.get("secret") ?? "",
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) return parsed.error.issues[0].message;
@@ -137,9 +137,9 @@ export async function deleteCredentialAction(vaultId: string, credentialId: stri
 
 export async function createShareLinkAction(vaultId: string, formData: FormData) {
   const parsed = shareLinkSchema.safeParse({
-    credentialId: formData.get("credentialId"),
-    permission: formData.get("permission"),
-    expiresInHours: formData.get("expiresInHours"),
+    credentialId: formData.get("credentialId") ?? "",
+    permission: formData.get("permission") ?? "",
+    expiresInHours: formData.get("expiresInHours") ?? "",
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -243,7 +243,7 @@ export async function confirmTotpEnrollmentAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
@@ -261,7 +261,7 @@ export async function disableTotpAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
@@ -307,7 +307,7 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function inviteMemberAction(vaultId: string, formData: FormData): Promise<string | null> {
   const { userId, email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
-  const parsed = inviteSchema.safeParse({ email: formData.get("email"), role: formData.get("role") });
+  const parsed = inviteSchema.safeParse({ email: formData.get("email") ?? "", role: formData.get("role") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
   const { email, role } = parsed.data;
 

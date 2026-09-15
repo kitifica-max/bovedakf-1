@@ -26,12 +26,12 @@ async function sendVerification(email: string) {
 
 export async function registerAction(_prev: string | null, formData: FormData) {
   const parsed = registerSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    companyName: formData.get("companyName"),
-    industry: formData.get("industry"),
-    bottleneck: formData.get("bottleneck"),
-    currentSolution: formData.get("currentSolution"),
+    email: formData.get("email") ?? "",
+    password: formData.get("password") ?? "",
+    companyName: formData.get("companyName") ?? "",
+    industry: formData.get("industry") ?? "",
+    bottleneck: formData.get("bottleneck") ?? "",
+    currentSolution: formData.get("currentSolution") ?? "",
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -119,9 +119,9 @@ export async function requestPasswordResetAction(_prev: string | null, formData:
 
 export async function resetPasswordAction(_prev: string | null, formData: FormData) {
   const parsed = resetPasswordSchema.safeParse({
-    email: formData.get("email"),
-    token: formData.get("token"),
-    password: formData.get("password"),
+    email: formData.get("email") ?? "",
+    token: formData.get("token") ?? "",
+    password: formData.get("password") ?? "",
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
