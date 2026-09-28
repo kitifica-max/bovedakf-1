@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
+// ponytail: personal uses the starter link (same Wompi link, repriced to $3)
 const PLAN_URLS: Record<string, string | undefined> = {
-  personal: process.env.WOMPI_PERSONAL_URL,
+  personal: process.env.WOMPI_PERSONAL_URL ?? process.env.WOMPI_STARTER_URL,
   team: process.env.WOMPI_TEAM_URL,
-  // ponytail: starter kept for legacy; new signups use personal
   starter: process.env.WOMPI_STARTER_URL,
 };
 
