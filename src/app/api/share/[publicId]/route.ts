@@ -15,6 +15,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
   const rawIp = clientIp(req.headers);
   const ip = anonymizeIp(rawIp); // what we persist; rate limit still uses rawIp
 
+  // publicId is base64url(24 bytes) = 32 chars; reject anything longer before hitting the DB
+  if (!publicId || publicId.length > 64) {
+    return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
+  }
+
   try {
     const { success } = await rateLimit(`share:${rawIp}`);
     if (!success) {
