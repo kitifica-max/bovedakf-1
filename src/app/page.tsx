@@ -5,6 +5,7 @@ import { ProblemaSection } from "@/components/site/sections/problema";
 import { ComoFuncionaSection } from "@/components/site/sections/como-funciona";
 import { ParaEquiposSection } from "@/components/site/sections/para-equipos";
 import { SeguridadSection } from "@/components/site/sections/seguridad";
+import { PentestSection } from "@/components/site/sections/pentest";
 import { AiAgentSection } from "@/components/site/sections/ai-agent";
 import { YAdemasSection } from "@/components/site/sections/y-ademas";
 import { PreciosSection } from "@/components/site/sections/precios";
@@ -41,6 +42,7 @@ export default async function HomePage() {
       <ComoFuncionaSection />
       <ParaEquiposSection />
       <SeguridadSection />
+      <PentestSection />
       <YAdemasSection />
       <PreciosSection />
       <FaqSection />
