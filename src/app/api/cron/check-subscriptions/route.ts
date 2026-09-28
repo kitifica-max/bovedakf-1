@@ -22,21 +22,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
   }
 
+  const personalUrl = process.env.WOMPI_PERSONAL_URL ?? "";
   const starterUrl = process.env.WOMPI_STARTER_URL ?? "";
   const teamUrl = process.env.WOMPI_TEAM_URL ?? "";
 
   // Match by short URL to identify which enlace belongs to which plan
-  const starterEnlace = enlaces.find((e) => e.urlEnlace === starterUrl || e.urlEnlace.endsWith("2222632b7I"));
-  const teamEnlace = enlaces.find((e) => e.urlEnlace === teamUrl || e.urlEnlace.endsWith("2222637FpK"));
+  const personalEnlace = personalUrl ? enlaces.find((e) => e.urlEnlace === personalUrl) : undefined;
+  const starterEnlace = starterUrl ? enlaces.find((e) => e.urlEnlace === starterUrl || e.urlEnlace.endsWith("2222632b7I")) : undefined;
+  const teamEnlace = teamUrl ? enlaces.find((e) => e.urlEnlace === teamUrl || e.urlEnlace.endsWith("2222637FpK")) : undefined;
 
-  if (!starterEnlace && !teamEnlace) {
+  if (!personalEnlace && !starterEnlace && !teamEnlace) {
     console.warn("[cron] could not find plan enlaces in Wompi account");
     return NextResponse.json({ ok: true, skipped: true });
   }
 
   // Build set of active subscriber emails from Wompi
   const activeEmails = new Set<string>();
-  for (const enlace of [starterEnlace, teamEnlace]) {
+  for (const enlace of [personalEnlace, starterEnlace, teamEnlace]) {
     if (!enlace) continue;
     try {
       const data = await getEnlaceSuscripciones(enlace.idEnlace);
@@ -65,7 +67,8 @@ export async function GET(req: NextRequest) {
       });
       suspended++;
 
-      const planName = sub.plan === "starter" ? "Starter" : "Equipo";
+      const PLAN_NAMES: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
+      const planName = PLAN_NAMES[sub.plan] ?? sub.plan;
       const { subject, html } = paymentFailedEmail({ planName, manageUrl: "https://panel.wompi.sv" });
       await sendEmail(email, subject, html);
     }

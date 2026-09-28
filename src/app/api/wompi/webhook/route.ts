@@ -20,15 +20,19 @@ type WompiWebhook = {
   };
 };
 
-const PLAN_PRICE: Record<string, string> = { starter: "9.00", team: "29.00" };
-const PLAN_NAME: Record<string, string> = { starter: "Starter", team: "Equipo" };
-const PLAN_SEATS: Record<string, number> = { starter: 5, team: 25 };
+const PLAN_PRICE: Record<string, string> = { personal: "3.00", starter: "9.00", team: "20.00" };
+const PLAN_NAME: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
+const PLAN_SEATS: Record<string, number> = { personal: 1, starter: 5, team: 10 };
 
-function resolvePlan(body: WompiWebhook): "starter" | "team" | null {
+function resolvePlan(body: WompiWebhook): "personal" | "starter" | "team" | null {
   const nombre = body.EnlacePago?.NombreProducto ?? "";
   if (nombre.toLowerCase().includes("equipo")) return "team";
+  if (nombre.toLowerCase().includes("personal")) return "personal";
   if (nombre.toLowerCase().includes("starter")) return "starter";
   // Fallback: match by amount
+  if (body.Monto === 20 || body.Monto === 2000) return "team";
+  if (body.Monto === 3 || body.Monto === 300) return "personal";
+  // Legacy: old $29 team and $9 starter links
   if (body.Monto === 29 || body.Monto === 2900) return "team";
   if (body.Monto === 9 || body.Monto === 900) return "starter";
   return null;

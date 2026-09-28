@@ -11,19 +11,21 @@ export const metadata: Metadata = {
 };
 
 const PLANS = {
-  starter: {
-    name: "Starter",
-    price: 9,
-    seats: 5,
-    features: ["Bóvedas ilimitadas", "Credenciales ilimitadas", "Share links con expiración", "Audit log completo"],
+  personal: {
+    name: "Personal",
+    price: 3,
+    seats: 1,
+    features: ["1 usuario", "Credenciales ilimitadas", "Share links ilimitados", "Audit log completo"],
   },
   team: {
     name: "Equipo",
-    price: 29,
-    seats: 25,
-    features: ["Todo lo de Starter", "25 asientos de equipo", "Acceso con email del trabajo (Okta, Azure AD, Google Workspace)", "Soporte prioritario"],
+    price: 20,
+    seats: 10,
+    features: ["10 usuarios", "Todo lo de Personal", "Email corporativo (SSO)", "Soporte prioritario"],
   },
 } as const;
+
+const PLAN_DISPLAY: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
 
 type Plan = keyof typeof PLANS;
 
@@ -76,7 +78,7 @@ export default async function CheckoutPage({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-blue">Plan {plan.name}</p>
-                <p className="mt-1 text-sm text-ink-soft">Hasta {plan.seats} usuarios · Facturación mensual</p>
+                <p className="mt-1 text-sm text-ink-soft">{plan.seats === 1 ? "1 usuario" : `Hasta ${plan.seats} usuarios`} · Facturación mensual</p>
               </div>
               <div className="text-right">
                 <p className="font-display text-3xl font-bold text-ink">${plan.price}</p>
@@ -110,7 +112,7 @@ export default async function CheckoutPage({
           {existing?.status === "ACTIVE" && (
             <div className="border-b border-border-soft bg-yellow-500/5 px-6 py-4">
               <p className="text-sm text-yellow-400">
-                Ya tenés un plan {existing.plan === "starter" ? "Starter" : "Equipo"} activo. Al suscribirte reemplazará el anterior.
+                Ya tenés un plan {PLAN_DISPLAY[existing.plan] ?? existing.plan} activo. Al suscribirte reemplazará el anterior.
               </p>
             </div>
           )}

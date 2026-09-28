@@ -23,8 +23,8 @@ export default async function BillingPage({
     where: { userId: session.user.id },
   });
 
-  const planLabels = { starter: "Starter", team: "Equipo" };
-  const planPrices = { starter: "$9/mes", team: "$29/mes" };
+  const planLabels: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
+  const planPrices: Record<string, string> = { personal: "$3/mes", starter: "$9/mes", team: "$20/mes" };
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-4 p-4 sm:p-6">

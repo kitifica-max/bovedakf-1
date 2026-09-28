@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 const PLAN_URLS: Record<string, string | undefined> = {
-  starter: process.env.WOMPI_STARTER_URL,
+  personal: process.env.WOMPI_PERSONAL_URL,
   team: process.env.WOMPI_TEAM_URL,
+  // ponytail: starter kept for legacy; new signups use personal
+  starter: process.env.WOMPI_STARTER_URL,
 };
 
 export async function POST(req: NextRequest) {
