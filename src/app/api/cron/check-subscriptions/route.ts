@@ -9,7 +9,10 @@ import { sendEmail, paymentFailedEmail } from "@/lib/email";
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret");
-  if (secret !== process.env.CRON_SECRET) {
+  // Netlify scheduled functions hit the path directly without query params
+  // but include the x-netlify-event: schedule header as proof of origin.
+  const isNetlifyScheduled = req.headers.get("x-netlify-event") === "schedule";
+  if (!isNetlifyScheduled && secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 

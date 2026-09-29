@@ -26,12 +26,12 @@ async function sendVerification(email: string) {
 
 export async function registerAction(_prev: string | null, formData: FormData) {
   const parsed = registerSchema.safeParse({
-    email: formData.get("email") ?? "",
-    password: formData.get("password") ?? "",
-    companyName: formData.get("companyName") ?? "",
-    industry: formData.get("industry") ?? "",
-    bottleneck: formData.get("bottleneck") ?? "",
-    currentSolution: formData.get("currentSolution") ?? "",
+    email: formData.get("email"),
+    password: formData.get("password"),
+    companyName: formData.get("companyName"),
+    industry: formData.get("industry"),
+    bottleneck: formData.get("bottleneck"),
+    currentSolution: formData.get("currentSolution"),
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -119,9 +119,9 @@ export async function requestPasswordResetAction(_prev: string | null, formData:
 
 export async function resetPasswordAction(_prev: string | null, formData: FormData) {
   const parsed = resetPasswordSchema.safeParse({
-    email: formData.get("email") ?? "",
-    token: formData.get("token") ?? "",
-    password: formData.get("password") ?? "",
+    email: formData.get("email"),
+    token: formData.get("token"),
+    password: formData.get("password"),
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -150,27 +150,23 @@ export async function resetPasswordAction(_prev: string | null, formData: FormDa
 export async function checkPasswordAction(
   formData: FormData
 ): Promise<{ ok: true; totpRequired: boolean } | { ok: false }> {
-  try {
-    const parsed = loginSchema.safeParse({
-      email: formData.get("email"),
-      password: formData.get("password"),
-    });
-    if (!parsed.success) return { ok: false };
+  const parsed = loginSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  if (!parsed.success) return { ok: false };
 
-    // Throttle online password guessing / credential stuffing per IP.
-    if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return { ok: false };
+  // Throttle online password guessing / credential stuffing per IP.
+  if (!(await rateLimit(`login:${clientIp(await headers())}`, 10)).success) return { ok: false };
 
-    const user = await db.user.findUnique({ where: { email: parsed.data.email } });
-    if (!user) {
-      burnPasswordCompare(parsed.data.password); // constant-time: no user-enumeration via latency
-      return { ok: false };
-    }
-
-    const valid = verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt);
-    if (!valid) return { ok: false };
-
-    return { ok: true, totpRequired: user.totpEnabled };
-  } catch (err) {
-    throw err;
+  const user = await db.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) {
+    burnPasswordCompare(parsed.data.password); // constant-time: no user-enumeration via latency
+    return { ok: false };
   }
+
+  const valid = verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt);
+  if (!valid) return { ok: false };
+
+  return { ok: true, totpRequired: user.totpEnabled };
 }

@@ -7,6 +7,7 @@ const columns = [
     links: [
       { href: "/register", label: "Crear bóveda" },
       { href: "/login", label: "Entrar" },
+      { href: "/extension", label: "Extensión Chrome" },
     ],
   },
   {
