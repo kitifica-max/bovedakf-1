@@ -8,6 +8,10 @@ import {
   SearchXIcon,
   ShieldAlertIcon,
   KeyRoundIcon,
+<<<<<<< HEAD
+  BuildingIcon,
+=======
+>>>>>>> origin/develop
 } from "@/components/icons";
 import { StepSaveIllustration } from "@/components/illustrations/step-save";
 import { StepShareIllustration } from "@/components/illustrations/step-share";
@@ -17,7 +21,11 @@ export type IconType = ComponentType<{ className?: string }>;
 type IllustrationType = () => React.JSX.Element;
 
 export const stats: { label: string; value: string; Icon: IconType }[] = [
+<<<<<<< HEAD
+  { label: "Credenciales gratis de libre uso por cuenta", value: "10", Icon: KeyRoundIcon },
+=======
   { label: "Credenciales gratis de libre uso por cuenta", value: "20", Icon: KeyRoundIcon },
+>>>>>>> origin/develop
   { label: "Rango de expiración configurable por link", value: "1h–7d", Icon: ClockIcon },
 ];
 
@@ -108,6 +116,15 @@ export const features: { title: string; body: string; Icon: IconType; wide?: boo
     body: "2 minutos sin actividad y te preguntamos si seguís ahí, antes de cerrar la sesión.",
     Icon: LogOutIcon,
   },
+<<<<<<< HEAD
+  {
+    title: "SSO Corporativo",
+    body: "Conectá Okta, Azure AD o Google Workspace. Tu equipo entra con su cuenta de empresa — sin contraseñas nuevas que recordar.",
+    Icon: BuildingIcon,
+    wide: true,
+  },
+=======
+>>>>>>> origin/develop
 ];
 
 export const faqs: { q: string; a: string }[] = [
@@ -133,12 +150,23 @@ export const faqs: { q: string; a: string }[] = [
   },
   {
     q: "¿Es gratis?",
+<<<<<<< HEAD
+    a: "Sí, hasta 10 credenciales por bóveda, sin tarjeta de crédito.",
+=======
     a: "Sí, hasta 20 credenciales por bóveda, sin tarjeta de crédito.",
+>>>>>>> origin/develop
   },
   {
     q: "¿Tienen doble factor de autenticación?",
     a: "Sí. Podés activar 2FA con app de autenticación (TOTP) o entrar directo con una passkey — Face ID, Touch ID o Windows Hello, sin contraseña. Además, si te quedás inactivo 2 minutos, te avisamos antes de cerrar la sesión sola.",
   },
+<<<<<<< HEAD
+  {
+    q: "¿Mi empresa usa Okta, Azure AD o Google Workspace?",
+    a: "Tenemos soporte para SSO corporativo con SAML. Al escribir tu email corporativo en el login, KF-1 detecta automáticamente si tu empresa tiene SSO configurado y te redirige a tu proveedor de identidad — sin contraseñas nuevas. Para conectar tu IdP, pedile a tu equipo de IT que contacte al administrador de KF-1.",
+  },
+=======
+>>>>>>> origin/develop
 ];
 
 export const securitySpec: { label: string; items: { claim: string; plain: string }[] }[] = [
@@ -161,6 +189,10 @@ export const securitySpec: { label: string; items: { claim: string; plain: strin
     label: "Cuenta",
     items: [
       { claim: "Passkeys y 2FA", plain: "Entrá con huella, cara o PIN, o con código de una app de autenticación." },
+<<<<<<< HEAD
+      { claim: "SSO Corporativo (SAML)", plain: "Conectá Okta, Azure AD o Google Workspace. Al escribir tu email, KF-1 detecta si tu empresa tiene SSO y te redirige automáticamente." },
+=======
+>>>>>>> origin/develop
       { claim: "Sesión que expira", plain: "Si te quedás inactivo, te avisamos antes de cerrar la sesión." },
       { claim: "Anti-fuerza bruta", plain: "Límite de intentos en el login por IP." },
     ],

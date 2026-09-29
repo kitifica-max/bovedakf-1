@@ -4,6 +4,10 @@ import { Illustration } from "@/components/site/illustration";
 import { CTAButton } from "@/components/site/cta-button";
 import { IllustrationLoop } from "@/components/illustrations/illustration-loop";
 import { RolesIllustration } from "@/components/illustrations/roles";
+<<<<<<< HEAD
+import { BuildingIcon } from "@/components/icons";
+=======
+>>>>>>> origin/develop
 import { teamSteps } from "@/content/landing";
 
 export function ParaEquiposSection() {
@@ -32,6 +36,23 @@ export function ParaEquiposSection() {
       <div className="mt-10" data-reveal>
         <CTAButton href="/register" variant="secondary">Crear mi bóveda</CTAButton>
       </div>
+<<<<<<< HEAD
+
+      {/* Enterprise SSO callout */}
+      <div
+        data-reveal
+        className="mt-10 flex items-start gap-4 rounded-2xl border border-blue/20 bg-blue/5 px-6 py-5"
+      >
+        <BuildingIcon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-blue" />
+        <div>
+          <p className="font-semibold text-ink">¿Tu empresa usa Okta, Azure AD o Google Workspace?</p>
+          <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+            Conectá tu proveedor de identidad con SSO corporativo. Tu equipo entra con su cuenta de empresa — sin contraseñas nuevas — y el acceso se revoca automáticamente cuando alguien sale de la organización.
+          </p>
+        </div>
+      </div>
+=======
+>>>>>>> origin/develop
     </Section>
   );
 }

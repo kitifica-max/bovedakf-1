@@ -29,14 +29,13 @@ const silkscreen = Silkscreen({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const title = "Bóveda KF-1 — Tu IA accede a tus credenciales sin exponer contraseñas";
+const title = "Bóveda KF-1 — Links temporales para compartir credenciales de forma segura";
 const description =
-  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal zero-knowledge que vos abrís.";
+  "Generá un link seguro para compartir tus credenciales. La otra persona accede sin necesitar cuenta — vos controlás el tiempo y revocás cuando terminás. AES-256, audit log incluido.";
 
-// Social preview leads with the AI skill differentiation.
-const ogTitle = "Tu IA accede a tus credenciales. Sin exponer tus contraseñas.";
+const ogTitle = "Necesitás compartir una credencial. Generá el link. Revocás cuando termines.";
 const ogDescription =
-  "Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural. La contraseña nunca llega al modelo — solo un link temporal que vos abrís.";
+  "Links temporales con encriptación AES-256 para compartir acceso a tus credenciales. Sin vault compartido, sin exponer contraseñas, sin que el destinatario necesite cuenta.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -59,15 +58,16 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   keywords: [
-    "skill claude code credenciales",
-    "AI accede a contraseñas sin verlas",
-    "gestor de credenciales para agentes IA",
-    "zero-knowledge credential vault",
-    "compartir contraseñas de forma segura",
-    "encriptación AES-256",
-    "links temporales de credenciales",
-    "vault de contraseñas para equipos",
-    "KF-1 skill",
+    "compartir credenciales de forma segura",
+    "links temporales para compartir contraseñas",
+    "dar acceso temporal a credenciales",
+    "compartir credenciales sin exponer contraseña",
+    "zero-knowledge credential sharing",
+    "acceso temporal revocable a contraseñas",
+    "compartir acceso AWS GitHub seguro",
+    "vault compartir credenciales equipo",
+    "AES-256 compartir contraseñas",
+    "audit log acceso credenciales",
   ],
   authors: [{ name: "Kitifica", url: "https://www.kitifica.com" }],
   category: "technology",

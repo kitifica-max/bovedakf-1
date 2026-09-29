@@ -15,17 +15,17 @@ export function HeroSection() {
               data-reveal
               className="mb-5 inline-flex w-fit items-center gap-2 text-xs font-medium text-blue"
             >
-              <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Skill para Claude Code · Zero-knowledge
+              <LockIcon aria-hidden="true" className="h-3.5 w-3.5" /> Skill para Claude Code · SSO Enterprise · Zero-knowledge
             </span>
             <h1 data-reveal className="t-display text-ink">
-              Tu IA accede a tus credenciales. Sin exponer tus contraseñas.
+              Necesitás compartir una credencial. Generá el link. Revocás cuando termines.
             </h1>
             <p data-reveal className="mt-5 max-w-md leading-relaxed text-ink-soft">
-              Conectá la Skill KF-1 a Claude Code y pedile credenciales en lenguaje natural.
-              La contraseña nunca llega al modelo — solo un link temporal que vos abrís.
+              Compartí acceso sin agregar a nadie a tu vault.
+              El destinatario accede sin necesitar cuenta — vos controlás el tiempo y revocás en un click.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap items-center gap-3">
-              <CTAButton href="/register">Crear mi bóveda gratis →</CTAButton>
+              <CTAButton href="/register">Crear bóveda del equipo — gratis →</CTAButton>
               <CTAButton href="/login" variant="secondary">Ya tengo cuenta</CTAButton>
             </div>
             <div data-reveal className="mt-8 grid grid-cols-1 gap-5 border-t border-border-soft pt-5 sm:grid-cols-2 sm:gap-6">

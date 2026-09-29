@@ -2,6 +2,16 @@
   command = "npm run build"
   publish = ".next"
 
+[[scheduled-functions]]
+  name = "check-subscriptions"
+  schedule = "0 8 * * *"
+  path = "/api/cron/check-subscriptions"
+
+[[edge_functions]]
+  function = "waf"
+  path = "/*"
+  excludedPath = ["/_next/static/*", "/_next/image*", "/favicon.ico"]
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
@@ -17,3 +27,8 @@
   for = "/_next/static/chunks/*"
   [headers.values]
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"

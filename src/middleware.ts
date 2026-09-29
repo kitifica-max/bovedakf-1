@@ -16,8 +16,13 @@ export function middleware(request: NextRequest) {
   const csp = [
     "default-src 'none'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+<<<<<<< HEAD
+    `style-src 'self' 'unsafe-inline'`,
+    "img-src 'self' data:",
+=======
     `style-src 'self' 'nonce-${nonce}'`,
     "img-src 'self'",
+>>>>>>> origin/develop
     "font-src 'self'",
     "connect-src 'self'",
     "manifest-src 'self'",
@@ -34,6 +39,10 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+<<<<<<< HEAD
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+=======
+>>>>>>> origin/develop
   return response;
 }
 

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Bóveda KF-1",
+  "version": "1.0.0",
+  "description": "Autofill credentials from your KF-1 vault directly into login forms.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://kf1.kitifica.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Bóveda KF-1"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

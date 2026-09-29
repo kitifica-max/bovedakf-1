@@ -1,14 +1,16 @@
-"use client";
+"use client"; // nav
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/connect", label: "Skill", mobileHidden: true },
-  { href: "/seguridad", label: "Seguridad", mobileHidden: true },
-  { href: "/contacto", label: "Contacto", mobileHidden: true },
-  { href: "/login", label: "Entrar", mobileHidden: false },
-];
+  { href: "/connect", label: "Skill", show: "sm" },
+  { href: "/seguridad", label: "Seguridad", show: "sm" },
+  { href: "/#precios", label: "Precios", show: "sm" },
+  { href: "/extension", label: "Extensión", show: "lg" },
+  { href: "/contacto", label: "Contacto", show: "sm" },
+  { href: "/login", label: "Entrar", show: null },
+] as const;
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -27,7 +29,7 @@ export function SiteHeader() {
             key={l.href}
             href={l.href}
             aria-current={active(l.href) ? "page" : undefined}
-            className={`${l.mobileHidden ? "hidden sm:inline " : ""}whitespace-nowrap rounded-full px-3 py-1.5 transition ${
+            className={`${l.show === "sm" ? "hidden sm:inline " : l.show === "lg" ? "hidden lg:inline " : ""}whitespace-nowrap rounded-full px-3 py-1.5 transition ${
               active(l.href) ? "bg-blue-soft font-medium text-ink-reverse" : "text-gray/80 hover:text-gray"
             }`}
           >

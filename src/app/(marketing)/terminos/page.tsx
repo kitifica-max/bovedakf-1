@@ -16,7 +16,7 @@ const sections = [
   {
     h: "2. Qué es Bóveda KF-1",
     p: [
-      "Bóveda KF-1 es un gestor de credenciales compartidas: te permite guardar accesos de equipo de forma encriptada y compartirlos mediante links con expiración configurable. El plan gratuito incluye hasta 20 credenciales por bóveda.",
+      "Bóveda KF-1 es un gestor de credenciales compartidas: te permite guardar accesos de equipo de forma encriptada y compartirlos mediante links con expiración configurable. El plan gratuito incluye hasta 10 credenciales por bóveda.",
     ],
   },
   {
