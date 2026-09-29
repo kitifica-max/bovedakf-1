@@ -11,9 +11,10 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   // Isolation against Spectre-style side-channel reads across origins.
-  // credentialless gives the same memory isolation as require-corp but
-  // loads third-party resources (PayPal SDK, etc.) without needing CORP headers.
-  { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+  // COEP requires every sub-resource to opt in via CORP or CORS — fonts
+  // are served with CORP: cross-origin (see netlify.toml), everything else
+  // with same-origin below.
+  { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ];
 
