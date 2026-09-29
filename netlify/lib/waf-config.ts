@@ -1,9 +1,11 @@
 // netlify/edge-functions/waf-config.ts
 
+// general must absorb normal browsing: one page view fans out into RSC
+// prefetches for every visible <Link> plus NextAuth's /api/auth/session poll.
 export const RATE_LIMITS = {
-  auth:      { max: 10, windowSec: 60 },
-  sensitive: { max: 20, windowSec: 60 },
-  general:   { max: 60, windowSec: 60 },
+  auth:      { max: 20, windowSec: 60 },
+  sensitive: { max: 30, windowSec: 60 },
+  general:   { max: 300, windowSec: 60 },
 } as const;
 
 export type RouteCategory = keyof typeof RATE_LIMITS;
@@ -25,11 +27,19 @@ const SENSITIVE_ROUTES: RegExp[] = [
   /^\/api\/mcp/,
 ];
 
-export function getRouteCategory(path: string): RouteCategory {
-  if (AUTH_ROUTES.some((r) => r.test(path))) return "auth";
+// Brute force only happens on submits (sign-in callback, server actions are
+// POSTs to the page path). GETs of auth pages — page loads, RSC prefetches,
+// /api/auth/session and /csrf — share the general budget; counting them as
+// "auth" locked real users out mid-session. Server actions keep their own
+// per-IP limits in src/lib/rate-limit.ts as a second layer.
+export function getRouteCategory(path: string, method = "GET"): RouteCategory {
+  if (method === "POST" && AUTH_ROUTES.some((r) => r.test(path))) return "auth";
   if (SENSITIVE_ROUTES.some((r) => r.test(path))) return "sensitive";
   return "general";
 }
+
+// Public files served as-is; never worth a Redis round-trip or a 429.
+export const STATIC_FILE = /\.(?:svg|png|jpe?g|webp|gif|ico|txt|xml|webmanifest|mp4|webm|zip|woff2?)$|^\/(?:manifest\.json|sw\.js)$/;
 
 // Checked AFTER allowlist — a bot in both lists passes through.
 export const BLOCKED_UA_PATTERNS: RegExp[] = [

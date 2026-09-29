@@ -7,11 +7,49 @@ import { exportMyCredentialsAction, switchToFreeAction } from "@/app/dashboard/a
 // OWASP CSV-injection guard: a leading = + - @ tab/CR makes spreadsheets run the cell as a formula.
 const cell = (v: string) => `"${(/^[=+\-@\t\r]/.test(v) ? `'${v}` : v).replace(/"/g, '""')}"`;
 
-export function PlanBannerActions() {
+const secondary =
+  "rounded-full border border-border-soft px-4 py-2 text-sm font-semibold text-ink transition hover:bg-ink/5 disabled:opacity-50";
+
+export function SwitchToFreeButton() {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [confirmFree, setConfirmFree] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+
+  function switchToFree() {
+    start(async () => {
+      setError(null);
+      const err = await switchToFreeAction();
+      if (err) return setError(err);
+      router.refresh();
+    });
+  }
+
+  return (
+    <>
+      {confirm ? (
+        <span className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
+          Plan gratis: 10 credenciales, 1 miembro extra. Conservás todo lo que ya tenés.
+          <button type="button" onClick={switchToFree} disabled={pending} className={secondary}>
+            Confirmar
+          </button>
+          <button type="button" onClick={() => setConfirm(false)} disabled={pending} className="text-sm underline">
+            Cancelar
+          </button>
+        </span>
+      ) : (
+        <button type="button" onClick={() => setConfirm(true)} disabled={pending} className={secondary}>
+          Pasarme al plan gratis
+        </button>
+      )}
+      {error && <p role="alert" className="w-full text-sm text-danger">{error}</p>}
+    </>
+  );
+}
+
+export function PlanBannerActions() {
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   function exportCsv() {
     start(async () => {
@@ -33,35 +71,9 @@ export function PlanBannerActions() {
     });
   }
 
-  function switchToFree() {
-    start(async () => {
-      setError(null);
-      const err = await switchToFreeAction();
-      if (err) return setError(err);
-      router.refresh();
-    });
-  }
-
-  const secondary =
-    "rounded-full border border-border-soft px-4 py-2 text-sm font-semibold text-ink transition hover:bg-ink/5 disabled:opacity-50";
-
   return (
     <>
-      {confirmFree ? (
-        <span className="flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-          Plan gratis: 10 credenciales, 1 miembro extra. Conservás todo lo que ya tenés.
-          <button type="button" onClick={switchToFree} disabled={pending} className={secondary}>
-            Confirmar
-          </button>
-          <button type="button" onClick={() => setConfirmFree(false)} disabled={pending} className="text-sm underline">
-            Cancelar
-          </button>
-        </span>
-      ) : (
-        <button type="button" onClick={() => setConfirmFree(true)} disabled={pending} className={secondary}>
-          Pasarme al plan gratis
-        </button>
-      )}
+      <SwitchToFreeButton />
       <button type="button" onClick={exportCsv} disabled={pending} className={secondary}>
         Exportar credenciales (CSV)
       </button>

@@ -5,6 +5,7 @@ import {
   BLOCKED_UA_PATTERNS,
   ALLOWED_BOT_PATTERNS,
   getRouteCategory,
+  STATIC_FILE,
 } from "../lib/waf-config.ts";
 
 function getClientIp(request: Request): string {
@@ -98,7 +99,8 @@ export default async function waf(
   }
 
   // 3. Rate limiting via Upstash Redis
-  const category = getRouteCategory(path);
+  if (STATIC_FILE.test(path)) return context.next();
+  const category = getRouteCategory(path, request.method);
   const allowed = await checkRateLimit(ip, category);
   if (!allowed) {
     logBlock("rate_limit", ip, ua, path);
