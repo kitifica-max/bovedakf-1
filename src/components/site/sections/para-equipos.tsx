@@ -4,10 +4,7 @@ import { Illustration } from "@/components/site/illustration";
 import { CTAButton } from "@/components/site/cta-button";
 import { IllustrationLoop } from "@/components/illustrations/illustration-loop";
 import { RolesIllustration } from "@/components/illustrations/roles";
-<<<<<<< HEAD
 import { BuildingIcon } from "@/components/icons";
-=======
->>>>>>> origin/develop
 import { teamSteps } from "@/content/landing";
 
 export function ParaEquiposSection() {
@@ -36,7 +33,6 @@ export function ParaEquiposSection() {
       <div className="mt-10" data-reveal>
         <CTAButton href="/register" variant="secondary">Crear mi bóveda</CTAButton>
       </div>
-<<<<<<< HEAD
 
       {/* Enterprise SSO callout */}
       <div
@@ -51,8 +47,6 @@ export function ParaEquiposSection() {
           </p>
         </div>
       </div>
-=======
->>>>>>> origin/develop
     </Section>
   );
 }

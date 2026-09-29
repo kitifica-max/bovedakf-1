@@ -23,6 +23,7 @@
         "npm:@types/react@19",
         "npm:@upstash/ratelimit@^2.0.8",
         "npm:@upstash/redis@^1.38.4",
+        "npm:@workos-inc/node@^10.13.0",
         "npm:eslint-config-next@16.3.3",
         "npm:eslint@9",
         "npm:gsap@^3.15.0",

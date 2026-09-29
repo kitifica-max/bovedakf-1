@@ -36,7 +36,7 @@ export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = updateCompanyNameSchema.safeParse({ companyName: formData.get("companyName") });
+  const parsed = updateCompanyNameSchema.safeParse({ companyName: formData.get("companyName") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   await db.user.update({
@@ -51,7 +51,7 @@ export async function submitSurveyAnswerAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = dashboardSurveySchema.safeParse({ answer: formData.get("answer") });
+  const parsed = dashboardSurveySchema.safeParse({ answer: formData.get("answer") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   await db.user.update({
@@ -75,16 +75,32 @@ export async function dismissSurveyAction() {
 
 export async function createCredentialAction(formData: FormData) {
   const parsed = credentialSchema.safeParse({
-    vaultId: formData.get("vaultId"),
-    service: formData.get("service"),
-    username: formData.get("username"),
-    secret: formData.get("secret"),
+    vaultId: formData.get("vaultId") ?? "",
+    service: formData.get("service") ?? "",
+    username: formData.get("username") ?? "",
+    secret: formData.get("secret") ?? "",
     notes: formData.get("notes") || undefined,
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { vaultId, service, username, secret, notes } = parsed.data;
   await requireVaultAccess(vaultId, "EDITOR");
+
+  // Free tier: max 10 credentials per vault (checked against vault owner's subscription).
+  const FREE_CREDENTIAL_LIMIT = 10;
+  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { ownerId: true } });
+  if (vault) {
+    const sub = await db.subscription.findUnique({
+      where: { userId: vault.ownerId },
+      select: { status: true },
+    });
+    if (!sub || sub.status !== "ACTIVE") {
+      const count = await db.credential.count({ where: { vaultId } });
+      if (count >= FREE_CREDENTIAL_LIMIT) {
+        return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
+      }
+    }
+  }
 
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
@@ -121,9 +137,9 @@ export async function deleteCredentialAction(vaultId: string, credentialId: stri
 
 export async function createShareLinkAction(vaultId: string, formData: FormData) {
   const parsed = shareLinkSchema.safeParse({
-    credentialId: formData.get("credentialId"),
-    permission: formData.get("permission"),
-    expiresInHours: formData.get("expiresInHours"),
+    credentialId: formData.get("credentialId") ?? "",
+    permission: formData.get("permission") ?? "",
+    expiresInHours: formData.get("expiresInHours") ?? "",
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
@@ -227,7 +243,7 @@ export async function confirmTotpEnrollmentAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
@@ -245,7 +261,7 @@ export async function disableTotpAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return "No autenticado";
 
-  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = totpCodeSchema.safeParse({ code: formData.get("code") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
@@ -291,11 +307,25 @@ const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function inviteMemberAction(vaultId: string, formData: FormData): Promise<string | null> {
   const { userId, email: actorEmail } = await requireVaultAccess(vaultId, "OWNER");
-  const parsed = inviteSchema.safeParse({ email: formData.get("email"), role: formData.get("role") });
+  const parsed = inviteSchema.safeParse({ email: formData.get("email") ?? "", role: formData.get("role") ?? "" });
   if (!parsed.success) return parsed.error.issues[0].message;
   const { email, role } = parsed.data;
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
+
+  // Seat enforcement: free tier = 2 total (owner + 1), paid = sub.seats.
+  const FREE_SEATS = 2;
+  const [sub, currentCount] = await Promise.all([
+    db.subscription.findUnique({ where: { userId }, select: { seats: true, status: true } }),
+    db.vaultMember.count({ where: { vaultId } }),
+  ]);
+  const maxSeats = sub?.status === "ACTIVE" ? sub.seats : FREE_SEATS;
+  // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
+  if (currentCount + 1 >= maxSeats) {
+    return sub?.status === "ACTIVE"
+      ? `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`
+      : "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más.";
+  }
 
   // Case-insensitive: emails may be stored with mixed case from older signups.
   const already = await db.vaultMember.findFirst({
