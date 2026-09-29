@@ -1,5 +1,6 @@
+-- Idempotent: production already had TRIALING from an earlier schema.
 -- AlterEnum
-ALTER TYPE "SubscriptionStatus" ADD VALUE 'TRIALING';
+ALTER TYPE "SubscriptionStatus" ADD VALUE IF NOT EXISTS 'TRIALING';
 
 -- AlterTable
-ALTER TABLE "Subscription" ADD COLUMN "remindersSent" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "remindersSent" INTEGER NOT NULL DEFAULT 0;
