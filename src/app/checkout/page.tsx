@@ -4,6 +4,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CheckoutButton } from "./checkout-button";
+import { isPersonalEmail } from "@/lib/email-domains";
 
 export const metadata: Metadata = {
   title: "Checkout — Bóveda KF-1",
@@ -42,13 +43,7 @@ export default async function CheckoutPage({
   const session = await auth();
   if (!session?.user?.id) redirect(`/register?next=/checkout?plan=${planKey}`);
 
-  const FREE_EMAIL_DOMAINS = new Set([
-    "gmail.com", "googlemail.com", "hotmail.com", "hotmail.es", "outlook.com",
-    "outlook.es", "live.com", "live.es", "yahoo.com", "yahoo.es", "icloud.com",
-    "me.com", "mac.com", "msn.com", "protonmail.com", "proton.me",
-  ]);
-  const emailDomain = session.user.email?.split("@")[1]?.toLowerCase() ?? "";
-  const isPersonalEmail = FREE_EMAIL_DOMAINS.has(emailDomain);
+  const personalEmail = isPersonalEmail(session.user.email);
   const requiresCorporateEmail = planKey === "team";
 
   const existing = await db.subscription.findUnique({
@@ -108,6 +103,16 @@ export default async function CheckoutPage({
             </div>
           </div>
 
+          {existing?.status === "TRIALING" && (
+            <div className="border-b border-border-soft bg-blue/5 px-6 py-4">
+              <p className="text-sm text-ink-soft">
+                {existing.currentPeriodEnd > new Date()
+                  ? `Tu prueba termina el ${existing.currentPeriodEnd.toLocaleDateString("es-ES", { day: "numeric", month: "long" })}. Al pagar, el plan se activa de inmediato.`
+                  : "Tu prueba terminó. Al pagar, tu bóveda se desbloquea de inmediato y conservás todos tus datos."}
+              </p>
+            </div>
+          )}
+
           {/* Current subscription warning */}
           {existing?.status === "ACTIVE" && (
             <div className="border-b border-border-soft bg-yellow-500/5 px-6 py-4">
@@ -131,7 +136,7 @@ export default async function CheckoutPage({
                 para que tu suscripción se active automáticamente.
               </p>
             </div>
-            {requiresCorporateEmail && isPersonalEmail ? (
+            {requiresCorporateEmail && personalEmail ? (
               <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/8 px-4 py-3">
                 <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
                   El plan Equipo requiere un email corporativo

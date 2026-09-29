@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/register" },
 };
 
-export default function RegisterPage() {
-  return <RegisterForm />;
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; email?: string }>;
+}) {
+  const { next, email } = await searchParams;
+  return <RegisterForm nextUrl={next} prefillEmail={email ?? ""} />;
 }

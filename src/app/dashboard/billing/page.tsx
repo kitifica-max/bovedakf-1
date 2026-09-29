@@ -61,11 +61,13 @@ export default async function BillingPage({
               <p className="font-semibold text-ink">
                 Plan {planLabels[sub.plan]} · {planPrices[sub.plan]}
               </p>
-              <p className="mt-0.5 text-sm text-ink-soft">{sub.seats} asientos incluidos</p>
+              <p className="mt-0.5 text-sm text-ink-soft">{sub.seats === 1 ? "1 asiento incluido" : `${sub.seats} asientos incluidos`}</p>
               <p className="mt-1 text-xs text-ink-soft">
                 {sub.status === "ACTIVE"
                   ? `Próximo cobro: ${sub.currentPeriodEnd.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`
-                  : `Estado: ${{ SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}`}
+                  : sub.status === "TRIALING"
+                    ? `Prueba gratis hasta el ${sub.currentPeriodEnd.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`
+                    : `Estado: ${{ SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}`}
               </p>
             </div>
             <span
@@ -75,7 +77,7 @@ export default async function BillingPage({
                   : "bg-gray/40 text-ink-soft"
               }`}
             >
-              {sub.status === "ACTIVE" ? "Activo" : { SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}
+              {sub.status === "ACTIVE" ? "Activo" : { TRIALING: "Prueba", SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}
             </span>
           </div>
 

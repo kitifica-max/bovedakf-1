@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
+import { vaultOwnerPlan } from "@/lib/plan";
+import { GRACE_ERROR } from "@/lib/plan-state";
 
 export async function POST(
   req: NextRequest,
@@ -38,6 +40,9 @@ export async function POST(
 
   if (!credential) {
     return NextResponse.json({ error: "Credencial no encontrada" }, { status: 404 });
+  }
+  if ((await vaultOwnerPlan(credential.vaultId)).kind === "grace") {
+    return NextResponse.json({ error: GRACE_ERROR }, { status: 402 });
   }
 
   const plaintext = JSON.stringify({

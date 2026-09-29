@@ -1,7 +1,8 @@
-// ponytail: cache only static assets (JS/CSS/fonts/images), never HTML.
-// Navigation always goes to network so a deploy never serves a stale 500.
-const CACHE = "securevault-shell-v3";
-const STATIC_EXTS = /\.(?:js|css|woff2?|ttf|otf|png|svg|ico|webp|jpg|jpeg)(\?|$)/;
+// ponytail: cache-first only for /_next/static/ — Next content-hashes those in
+// production, so a cached copy can never be stale. Everything else (HTML,
+// /public files like the logo) always hits the network. Bump CACHE to evict.
+const CACHE = "securevault-shell-v4";
+const IS_DEV = self.location.hostname === "localhost" || self.location.hostname === "127.0.0.1";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => {
@@ -15,13 +16,11 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-  if (request.method !== "GET") return;
+  // Dev chunk names aren't hashed, so caching them serves old code.
+  if (IS_DEV || request.method !== "GET" || request.mode === "navigate") return;
 
-  // Never cache navigation (HTML) — always hit the network.
-  if (request.mode === "navigate") return;
-
-  // Only cache static assets.
-  if (!STATIC_EXTS.test(new URL(request.url).pathname)) return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || !url.pathname.startsWith("/_next/static/")) return;
 
   event.respondWith(
     caches.match(request).then(

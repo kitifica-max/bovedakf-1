@@ -26,6 +26,8 @@ const ALLOWLIST = {
     "access is proven by the invite token + session email match, not prior membership — a first-time joiner has none yet",
   acceptInviteAsNewUserAction:
     "same as acceptInviteAction, for the not-yet-registered signup path",
+  exportMyCredentialsAction:
+    "takes no vaultId from the client — queries only vaults whose ownerId is the session user; vaultId appears only in the audit rows it writes",
 };
 
 const src = readFileSync(FILE, "utf8");
