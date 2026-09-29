@@ -174,6 +174,12 @@ export function VaultView({
           >
             Facturación
           </Link>
+          <Link
+            href="/extension"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+          >
+            Extensión Chrome
+          </Link>
         </nav>
 
         <div className="px-3 py-3 border-t border-border-soft">
@@ -261,6 +267,13 @@ export function VaultView({
                   onClick={() => setShowUserMenu(false)}
                 >
                   Facturación
+                </Link>
+                <Link
+                  href="/extension"
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Extensión Chrome
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
