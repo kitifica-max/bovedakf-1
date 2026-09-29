@@ -38,6 +38,7 @@ const sections = [
     h: "Cuánto tiempo guardamos tus datos",
     p: [
       "Mientras tu cuenta exista. Los links compartidos y su registro de auditoría se conservan aunque el link haya expirado, como historial de acceso.",
+      "Excepción: si tu prueba de un plan de pago termina y no elegís un plan dentro de los 15 días siguientes, eliminamos tus credenciales de forma permanente (ver Términos, sección 2). Tu cuenta y el registro de auditoría se conservan.",
     ],
   },
   {
@@ -56,7 +57,7 @@ export default function PrivacyPage() {
   return (
     <div>
       <h1 className="t-display text-ink">Privacidad</h1>
-      <p className="mt-2 text-sm text-ink-soft">Última actualización: 26 de agosto de 2026.</p>
+      <p className="mt-2 text-sm text-ink-soft">Última actualización: 29 de septiembre de 2026.</p>
 
       <div className="mt-8 flex flex-col gap-6">
         {sections.map((s) => (

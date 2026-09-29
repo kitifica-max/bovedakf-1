@@ -68,10 +68,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // Payment failed — suspend if subscription exists
+  // Payment failed — suspend only a paid plan; a declined first charge must not end a trial.
   if (body.ResultadoTransaccion !== "ExitosaAprobada") {
     const sub = await db.subscription.findUnique({ where: { userId: user.id } });
-    if (sub) {
+    if (sub?.status === "ACTIVE") {
       await db.subscription.update({ where: { id: sub.id }, data: { status: "SUSPENDED" } });
       const planName = PLAN_NAME[sub.plan] ?? sub.plan;
       const { subject, html } = paymentFailedEmail({ planName, manageUrl: "https://panel.wompi.sv" });

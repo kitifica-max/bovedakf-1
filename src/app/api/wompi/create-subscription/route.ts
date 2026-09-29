@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isPersonalEmail, TEAM_NEEDS_CORPORATE_EMAIL } from "@/lib/email-domains";
 
 // ponytail: personal uses the starter link (same Wompi link, repriced to $3)
 const PLAN_URLS: Record<string, string | undefined> = {
@@ -18,6 +19,9 @@ export async function POST(req: NextRequest) {
   const url = PLAN_URLS[plan];
   if (!url) {
     return NextResponse.json({ error: "Plan inválido" }, { status: 400 });
+  }
+  if (plan === "team" && isPersonalEmail(session.user.email)) {
+    return NextResponse.json({ error: TEAM_NEEDS_CORPORATE_EMAIL }, { status: 400 });
   }
 
   return NextResponse.json({ url });

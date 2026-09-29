@@ -24,20 +24,27 @@ export function SuccessPoller() {
     return (
       <div className="w-full max-w-sm rounded-2xl border border-border-soft bg-paper p-8 text-center">
         <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-blue/10">
-          <svg className="h-6 w-6 text-blue" viewBox="0 0 24 24" fill="none">
-            <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <svg className="h-6 w-6 text-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+            <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </div>
-        <p className="font-display text-lg font-semibold text-ink">Pago recibido</p>
+        <p className="font-display text-lg font-semibold text-ink">Todavía no recibimos la confirmación</p>
         <p className="mt-2 text-sm text-ink-soft">
-          Tu suscripción se activará en unos minutos. Revisá tu email para la confirmación.
+          Si el pago se aprobó, tu plan se activa en unos minutos y te llega el recibo por email.
+          Si fue rechazado, no se hizo ningún cobro y podés intentarlo de nuevo.
         </p>
-        <Link
-          href="/dashboard/billing"
-          className="mt-6 inline-block rounded-full bg-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          Ir a facturación →
-        </Link>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <Link
+            href="/dashboard/billing"
+            className="inline-block rounded-full bg-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Ir a facturación →
+          </Link>
+          <Link href="/#precios" className="text-sm text-ink-soft underline hover:text-ink">
+            Intentar el pago de nuevo
+          </Link>
+        </div>
       </div>
     );
   }

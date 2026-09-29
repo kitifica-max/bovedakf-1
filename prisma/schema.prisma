@@ -16,6 +16,7 @@ enum SubscriptionPlan {
 
 enum SubscriptionStatus {
   PENDING
+  TRIALING
   ACTIVE
   CANCELLED
   SUSPENDED
@@ -29,7 +30,9 @@ model Subscription {
   plan             SubscriptionPlan
   status           SubscriptionStatus
   seats            Int
+  // For TRIALING: when the trial ends. Grace (read-only) runs GRACE_DAYS after it.
   currentPeriodEnd DateTime
+  remindersSent    Int                @default(0)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 }

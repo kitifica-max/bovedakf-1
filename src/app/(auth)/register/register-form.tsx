@@ -19,12 +19,11 @@ const INDUSTRIES = [
   "Otro",
 ];
 
-export function RegisterForm() {
+export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; prefillEmail: string }) {
   const router = useRouter();
-  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const nextUrl = params?.get("next");
-  const dest = nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
-  const prefillEmail = params?.get("email") ?? "";
+  // /checkout?plan=X → start that plan's trial and skip checkout; pay later from the dashboard.
+  const trialPlan = nextUrl?.match(/^\/checkout\?plan=(personal|team)$/)?.[1] ?? null;
+  const dest = trialPlan ? "/dashboard" : nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -54,8 +53,13 @@ export function RegisterForm() {
         <h1 className="t-display text-ink">
           Crear bóveda
         </h1>
-        <p className="mt-1 text-sm text-ink-soft">Un espacio encriptado para tu equipo.</p>
+        <p className="mt-1 text-sm text-ink-soft">
+          {trialPlan
+            ? `Empezás con 30 días gratis del plan ${trialPlan === "team" ? "Equipo" : "Personal"}. Sin tarjeta.`
+            : "Un espacio encriptado para tu equipo."}
+        </p>
         <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
+          {trialPlan && <input type="hidden" name="plan" value={trialPlan} />}
           <div>
             <label htmlFor="companyName" className="sr-only">Nombre de la empresa</label>
             <input
