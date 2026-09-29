@@ -31,6 +31,9 @@ import {
   updateCompanyNameSchema,
 } from "@/lib/validation";
 import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
+import { userPlan, vaultOwnerPlan } from "@/lib/plan";
+import { FREE_CREDENTIAL_LIMIT, FREE_SEATS, GRACE_ERROR } from "@/lib/plan-state";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function updateCompanyNameAction(formData: FormData) {
   const session = await auth();
@@ -86,19 +89,12 @@ export async function createCredentialAction(formData: FormData) {
   const { vaultId, service, username, secret, notes } = parsed.data;
   await requireVaultAccess(vaultId, "EDITOR");
 
-  // Free tier: max 10 credentials per vault (checked against vault owner's subscription).
-  const FREE_CREDENTIAL_LIMIT = 10;
-  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { ownerId: true } });
-  if (vault) {
-    const sub = await db.subscription.findUnique({
-      where: { userId: vault.ownerId },
-      select: { status: true },
-    });
-    if (!sub || sub.status !== "ACTIVE") {
-      const count = await db.credential.count({ where: { vaultId } });
-      if (count >= FREE_CREDENTIAL_LIMIT) {
-        return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
-      }
+  const plan = await vaultOwnerPlan(vaultId);
+  if (plan.kind === "grace") return GRACE_ERROR;
+  if (plan.kind === "free") {
+    const count = await db.credential.count({ where: { vaultId } });
+    if (count >= FREE_CREDENTIAL_LIMIT) {
+      return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
     }
   }
 
@@ -144,6 +140,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
+  if ((await vaultOwnerPlan(vaultId)).kind === "grace") return GRACE_ERROR;
   const { credentialId, permission, expiresInHours } = parsed.data;
 
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -313,18 +310,18 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
-  // Seat enforcement: free tier = 2 total (owner + 1), paid = sub.seats.
-  const FREE_SEATS = 2;
-  const [sub, currentCount] = await Promise.all([
-    db.subscription.findUnique({ where: { userId }, select: { seats: true, status: true } }),
+  // Seat enforcement: free tier = 2 total (owner + 1), paid/trial = sub.seats.
+  const [plan, currentCount] = await Promise.all([
+    userPlan(userId),
     db.vaultMember.count({ where: { vaultId } }),
   ]);
-  const maxSeats = sub?.status === "ACTIVE" ? sub.seats : FREE_SEATS;
+  if (plan.kind === "grace") return GRACE_ERROR;
+  const maxSeats = plan.kind === "free" ? FREE_SEATS : plan.seats;
   // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
   if (currentCount + 1 >= maxSeats) {
-    return sub?.status === "ACTIVE"
-      ? `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`
-      : "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más.";
+    return plan.kind === "free"
+      ? "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más."
+      : `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`;
   }
 
   // Case-insensitive: emails may be stored with mixed case from older signups.
@@ -485,6 +482,45 @@ export async function acceptInviteAction(
   });
   revalidatePath(`/dashboard/${invite.vaultId}`);
   return { ok: true, vaultId: invite.vaultId };
+}
+
+// ── Trial ────────────────────────────────────────────────────────────
+
+// Ends a trial (or grace) and keeps all data on the free plan. Free limits
+// then block new credentials/invites until the vault is back under them.
+export async function switchToFreeAction(): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return "No autenticado";
+  await db.subscription.deleteMany({ where: { userId: session.user.id, status: "TRIALING" } });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+// Plaintext export of every credential in vaults the caller OWNS — lets a
+// user in grace take their data before it's purged. Audited per vault.
+export async function exportMyCredentialsAction(): Promise<
+  { error: string } | { error: null; rows: { vault: string; service: string; username: string; secret: string; notes: string }[] }
+> {
+  const session = await auth();
+  if (!session?.user?.id || !session.user.email) return { error: "No autenticado" };
+  if (!(await rateLimit(`export:${session.user.id}`, 3)).success) {
+    return { error: "Demasiados intentos. Esperá un minuto." };
+  }
+
+  const vaults = await db.vault.findMany({
+    where: { ownerId: session.user.id },
+    select: { id: true, name: true, credentials: { orderBy: { service: "asc" } } },
+  });
+  const rows = vaults.flatMap((v) =>
+    v.credentials.map((c) => {
+      const { secret, notes } = JSON.parse(decryptAtRest(c.encryptedData)) as { secret: string; notes: string };
+      return { vault: v.name, service: c.service, username: c.username, secret, notes };
+    }),
+  );
+  await db.auditLog.createMany({
+    data: vaults.map((v) => ({ vaultId: v.id, action: "vault_exported", actorEmail: session.user!.email! })),
+  });
+  return { error: null, rows };
 }
 
 // ── AI Access (MCP) ──────────────────────────────────────────────────

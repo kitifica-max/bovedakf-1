@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-export function PricingCards() {
+// The trial only starts at signup, so an existing account goes straight to payment.
+export function PricingCards({ loggedIn }: { loggedIn: boolean }) {
+  const paidCta = loggedIn ? "Suscribirse →" : "Probar 30 días gratis →";
   const check = (
     <svg className="h-4 w-4 shrink-0 text-blue" viewBox="0 0 16 16" fill="none">
       <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,7 +46,7 @@ export function PricingCards() {
           ))}
         </ul>
         <Link href="/checkout?plan=personal" className="mt-6 block w-full rounded-full bg-blue py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90">
-          Suscribirse →
+          {paidCta}
         </Link>
       </div>
 
@@ -65,7 +67,7 @@ export function PricingCards() {
           ))}
         </ul>
         <Link href="/checkout?plan=team" className="mt-6 block w-full rounded-full bg-blue py-2.5 text-center text-sm font-semibold text-white transition-opacity hover:opacity-90">
-          Suscribirse →
+          {paidCta}
         </Link>
       </div>
 

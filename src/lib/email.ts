@@ -212,6 +212,25 @@ export function paymentSuccessEmail(opts: {
   };
 }
 
+export function trialReminderEmail(opts: { n: number; planName: string; deleteDate: string; checkoutUrl: string }) {
+  const last = opts.n >= 3;
+  return {
+    subject: last
+      ? `Último aviso: tus credenciales se eliminan el ${opts.deleteDate} · Bóveda KF-1`
+      : `Tu prueba terminó — elegí un plan para conservar tus datos · Bóveda KF-1`,
+    html: shell({
+      preview: `Tu bóveda está en solo lectura. Tus credenciales se eliminan el ${opts.deleteDate}.`,
+      heading: last ? "Último aviso antes de eliminar tus datos" : "Tu prueba terminó",
+      bodyHtml: `
+        <p style='margin:0 0 12px;'>Tu prueba del plan <strong>${esc(opts.planName)}</strong> terminó y tu bóveda quedó en solo lectura.</p>
+        <p style='margin:0 0 12px;'>Si no elegís un plan, tus credenciales se eliminan de forma permanente el <strong>${esc(opts.deleteDate)}</strong>.</p>
+        <p style='margin:0;'>Para conservarlas podés suscribirte, pasarte al plan gratis (hasta 10 credenciales) o exportarlas desde tu panel.</p>`,
+      cta: { label: `Suscribirme al plan ${opts.planName}`, href: opts.checkoutUrl },
+      footnote: `Aviso ${opts.n} de 3. ¿Dudas? Escribinos a hola@kitifica.com.`,
+    }),
+  };
+}
+
 export function paymentFailedEmail(opts: { planName: string; manageUrl: string }) {
   return {
     subject: `Pago no procesado — Bóveda KF-1`,

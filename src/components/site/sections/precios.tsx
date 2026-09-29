@@ -1,6 +1,8 @@
 import { PricingCards } from "@/components/pricing-cards";
+import { auth } from "@/lib/auth";
 
-export function PreciosSection() {
+export async function PreciosSection() {
+  const loggedIn = !!(await auth())?.user;
   return (
     <section id="precios" className="w-full max-w-5xl scroll-mt-24">
       <div className="text-center">
@@ -13,7 +15,7 @@ export function PreciosSection() {
         </p>
       </div>
       <div className="mt-10">
-        <PricingCards />
+        <PricingCards loggedIn={loggedIn} />
       </div>
     </section>
   );

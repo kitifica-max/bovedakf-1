@@ -16,6 +16,8 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
 import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
 import { validateToken, hasScope, type McpTokenPayload } from "@/lib/mcp-auth";
+import { vaultOwnerPlan } from "@/lib/plan";
+import { GRACE_ERROR } from "@/lib/plan-state";
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -95,6 +97,9 @@ async function handleGetCredential(token: McpTokenPayload, vaultId: string, cred
 
   if (!credential) {
     return { error: "Credential not found or AI access not enabled" };
+  }
+  if ((await vaultOwnerPlan(vaultId)).kind === "grace") {
+    return { error: GRACE_ERROR };
   }
 
   // Decrypt and re-encrypt with a one-time key (same pattern as share links)
