@@ -15,72 +15,85 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ publ
   const rawIp = clientIp(req.headers);
   const ip = anonymizeIp(rawIp); // what we persist; rate limit still uses rawIp
 
-  const { success } = await rateLimit(`share:${rawIp}`);
-  if (!success) {
-    return NextResponse.json(
-      { error: "Demasiadas solicitudes, intenta más tarde." },
-      { status: 429, headers: NO_STORE }
-    );
+  // publicId is base64url(24 bytes) = 32 chars; reject anything longer before hitting the DB
+  if (!publicId || publicId.length > 64) {
+    return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
   }
 
-  const link = await db.shareLink.findUnique({
-    where: { publicId },
-    include: {
-      credential: {
-        select: {
-          vaultId: true,
-          service: true,
-          vault: { select: { owner: { select: { email: true } } } },
+  try {
+    const { success } = await rateLimit(`share:${rawIp}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes, intenta más tarde." },
+        { status: 429, headers: NO_STORE }
+      );
+    }
+
+    const link = await db.shareLink.findUnique({
+      where: { publicId },
+      include: {
+        credential: {
+          select: {
+            vaultId: true,
+            service: true,
+            vault: { select: { owner: { select: { email: true } } } },
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!link || link.revokedAt || link.expiresAt < new Date()) {
+    if (!link || link.revokedAt || link.expiresAt < new Date()) {
+      await db.auditLog.create({
+        data: {
+          shareLinkId: link?.id,
+          vaultId: link?.credential.vaultId,
+          action: link ? "link_denied_expired_or_revoked" : "link_denied_not_found",
+          credentialService: link?.credential.service,
+          ipAddress: ip,
+          userAgent: req.headers.get("user-agent") ?? undefined,
+        },
+      });
+      return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
+    }
+
+    // First view? Tell the owner (once — later views are in the audit log only).
+    const priorView = await db.auditLog.findFirst({
+      where: { shareLinkId: link.id, action: "link_viewed" },
+      select: { id: true },
+    });
+
     await db.auditLog.create({
       data: {
-        shareLinkId: link?.id,
-        vaultId: link?.credential.vaultId,
-        action: link ? "link_denied_expired_or_revoked" : "link_denied_not_found",
-        credentialService: link?.credential.service,
+        shareLinkId: link.id,
+        vaultId: link.credential.vaultId,
+        action: "link_viewed",
+        credentialService: link.credential.service,
         ipAddress: ip,
         userAgent: req.headers.get("user-agent") ?? undefined,
       },
     });
-    return NextResponse.json({ error: "Link inválido o expirado." }, { status: 410, headers: NO_STORE });
+
+    if (!priorView) {
+      const ownerEmail = link.credential.vault.owner.email;
+      const { subject, html } = linkOpenedEmail(link.credential.service, APP_URL);
+      await sendEmail(ownerEmail, subject, html);
+    }
+
+    await maybePurgeOldAuditLogs();
+
+    return NextResponse.json(
+      {
+        payload: link.payload,
+        permission: link.permission,
+        expiresAt: link.expiresAt,
+      },
+      { headers: NO_STORE }
+    );
+  } catch (err) {
+    console.error("[share] unexpected error for publicId", publicId, err);
+    return NextResponse.json(
+      { error: "Error interno. Intenta de nuevo en unos segundos." },
+      { status: 500, headers: NO_STORE }
+    );
   }
-
-  // First view? Tell the owner (once — later views are in the audit log only).
-  const priorView = await db.auditLog.findFirst({
-    where: { shareLinkId: link.id, action: "link_viewed" },
-    select: { id: true },
-  });
-
-  await db.auditLog.create({
-    data: {
-      shareLinkId: link.id,
-      vaultId: link.credential.vaultId,
-      action: "link_viewed",
-      credentialService: link.credential.service,
-      ipAddress: ip,
-      userAgent: req.headers.get("user-agent") ?? undefined,
-    },
-  });
-
-  if (!priorView) {
-    const ownerEmail = link.credential.vault.owner.email;
-    const { subject, html } = linkOpenedEmail(link.credential.service, APP_URL);
-    await sendEmail(ownerEmail, subject, html);
-  }
-
-  await maybePurgeOldAuditLogs();
-
-  return NextResponse.json(
-    {
-      payload: link.payload,
-      permission: link.permission,
-      expiresAt: link.expiresAt,
-    },
-    { headers: NO_STORE }
-  );
 }

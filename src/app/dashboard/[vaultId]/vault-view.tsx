@@ -35,6 +35,7 @@ import { TwoFactorSettings } from "@/components/two-factor-settings";
 import { PasskeySettings } from "@/components/passkey-settings";
 import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 type Tab = "credenciales" | "actividad" | "equipo" | "seguridad";
@@ -159,6 +160,26 @@ export function VaultView({
               Admin
             </Link>
           )}
+          {isAdminUser && (
+            <Link
+              href="/admin/orgs/auth"
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all"
+            >
+              Organizaciones
+            </Link>
+          )}
+          <Link
+            href="/dashboard/billing"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+          >
+            Facturación
+          </Link>
+          <Link
+            href="/extension"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+          >
+            Extensión Chrome
+          </Link>
         </nav>
 
         <div className="px-3 py-3 border-t border-border-soft">
@@ -170,7 +191,7 @@ export function VaultView({
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               aria-label="Cerrar sesión"
-              className="text-ink-soft hover:text-ink transition-colors"
+              className="cursor-pointer rounded-lg p-1 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger"
             >
               <LogOutIcon className="h-4 w-4" />
             </button>
@@ -231,6 +252,29 @@ export function VaultView({
                     Admin
                   </Link>
                 )}
+                {isAdminUser && (
+                  <Link
+                    href="/admin/orgs/auth"
+                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Organizaciones
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard/billing"
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Facturación
+                </Link>
+                <Link
+                  href="/extension"
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Extensión Chrome
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="flex w-full items-center gap-2 px-3.5 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors border-t border-border-soft"
@@ -318,7 +362,9 @@ export function VaultView({
 
             {activeTab === "seguridad" && (
               <div className="flex flex-col gap-4">
-                <PasskeySettings initialPasskeys={passkeys} />
+                <ErrorBoundary>
+                  <PasskeySettings initialPasskeys={passkeys} />
+                </ErrorBoundary>
                 <TwoFactorSettings initialEnabled={totpEnabled} />
               </div>
             )}
@@ -370,12 +416,17 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         setPending(true);
         setError(null);
         const formData = new FormData(e.currentTarget);
-        const result = await createCredentialAction(formData);
-        setPending(false);
-        if (result) {
-          setError(result);
-          return;
+        try {
+          const result = await createCredentialAction(formData);
+          if (result) {
+            setError(result);
+            setPending(false);
+            return;
+          }
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
         }
+        setPending(false);
         (e.target as HTMLFormElement).reset();
         onDone?.();
       }}
@@ -466,8 +517,12 @@ function CredentialRow({
               aria-expanded={!!revealed}
               onClick={async () => {
                 if (revealed) return setRevealed(null);
-                const data = await revealCredentialAction(vaultId, credential.id);
-                setRevealed(data);
+                try {
+                  const data = await revealCredentialAction(vaultId, credential.id);
+                  setRevealed(data);
+                } catch {
+                  /* session expired — page will redirect */
+                }
               }}
             >
               {revealed ? (
@@ -521,12 +576,16 @@ function CredentialRow({
                 setShareError(null);
                 const formData = new FormData(e.currentTarget);
                 formData.set("credentialId", credential.id);
-                const result = await createShareLinkAction(vaultId, formData);
-                if (typeof result === "string") {
-                  setShareError(result);
-                  return;
+                try {
+                  const result = await createShareLinkAction(vaultId, formData);
+                  if (typeof result === "string") {
+                    setShareError(result);
+                    return;
+                  }
+                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                } catch {
+                  setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
                 }
-                setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
               }}
             >
               <div className="flex flex-wrap items-center gap-2">
@@ -627,16 +686,20 @@ function CredentialRow({
                                 Math.max(1, Math.ceil((l.expiresAt.getTime() - Date.now()) / 3_600_000))
                               );
                               fd.set("expiresInHours", String(hrs));
-                              const result = await createShareLinkAction(vaultId, fd);
-                              if (typeof result !== "string") {
-                                setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                              try {
+                                const result = await createShareLinkAction(vaultId, fd);
+                                if (typeof result !== "string") {
+                                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+                                }
+                              } catch {
+                                setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
                               }
                             }}
                           >
                             <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
                             Nuevo link
                           </button>
-                          <button className={dangerLinkBtnCls} onClick={() => revokeShareLinkAction(vaultId, l.id)}>
+                          <button className={dangerLinkBtnCls} onClick={async () => { try { await revokeShareLinkAction(vaultId, l.id); } catch { /* session expired — page will redirect */ } }}>
                             <XCircleIcon aria-hidden="true" className="h-3.5 w-3.5" />
                             Revocar
                           </button>

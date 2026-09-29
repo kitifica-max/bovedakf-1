@@ -177,7 +177,6 @@ export function inviteEmail(link: string, vaultName: string, inviterName: string
     }),
   };
 }
-<<<<<<< HEAD
 
 export function paymentSuccessEmail(opts: {
   planName: string;
@@ -233,5 +232,3 @@ export function paymentFailedEmail(opts: { planName: string; manageUrl: string }
     }),
   };
 }
-=======
->>>>>>> origin/develop
