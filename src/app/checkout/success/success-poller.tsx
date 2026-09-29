@@ -41,7 +41,7 @@ export function SuccessPoller() {
           >
             Ir a facturación →
           </Link>
-          <Link href="/#precios" className="text-sm text-ink-soft underline hover:text-ink">
+          <Link href="/dashboard/plans" className="text-sm text-ink-soft underline hover:text-ink">
             Intentar el pago de nuevo
           </Link>
         </div>

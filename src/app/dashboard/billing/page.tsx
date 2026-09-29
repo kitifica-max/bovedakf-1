@@ -83,7 +83,7 @@ export default async function BillingPage({
 
           <div className="mt-5 flex flex-wrap gap-2 border-t border-border-soft pt-5">
             <Link
-              href="/pricing"
+              href="/dashboard/plans"
               className="rounded-full border border-border-soft px-4 py-1.5 text-xs font-medium text-ink hover:bg-gray/20"
             >
               Cambiar plan
@@ -105,7 +105,7 @@ export default async function BillingPage({
             Suscribite para agregar miembros a tu equipo y acceder a funciones avanzadas.
           </p>
           <Link
-            href="/pricing"
+            href="/dashboard/plans"
             className="mt-5 inline-block rounded-full bg-blue px-6 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             Ver planes →

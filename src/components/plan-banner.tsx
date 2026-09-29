@@ -40,7 +40,7 @@ export async function PlanBanner({ userId }: { userId: string }) {
   if (plan.kind !== "trial" && plan.kind !== "grace") return null;
 
   const name = PLAN_NAME[plan.plan] ?? plan.plan;
-  const checkoutHref = `/checkout?plan=${plan.plan === "team" ? "team" : "personal"}`;
+  const checkoutHref = "/dashboard/plans";
 
   if (plan.kind === "trial") {
     const daysLeft = Math.max(1, Math.ceil((plan.endsAt.getTime() - Date.now()) / DAY_MS));
@@ -71,7 +71,7 @@ export async function PlanBanner({ userId }: { userId: string }) {
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <Link href={checkoutHref} className="rounded-full bg-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90">
-            Suscribirme al plan {name}
+            Elegir un plan
           </Link>
           <PlanBannerActions />
         </div>
