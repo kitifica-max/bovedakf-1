@@ -5,30 +5,12 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CheckoutButton } from "./checkout-button";
 import { isPersonalEmail } from "@/lib/email-domains";
+import { PAID_PLANS, PLAN_DISPLAY, type PaidPlan } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Checkout — Bóveda KF-1",
   robots: { index: false },
 };
-
-const PLANS = {
-  personal: {
-    name: "Personal",
-    price: 3,
-    seats: 1,
-    features: ["1 usuario", "Credenciales ilimitadas", "Share links ilimitados", "Audit log completo"],
-  },
-  team: {
-    name: "Equipo",
-    price: 20,
-    seats: 10,
-    features: ["10 usuarios", "Todo lo de Personal", "Email corporativo (SSO)", "Soporte prioritario"],
-  },
-} as const;
-
-const PLAN_DISPLAY: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
-
-type Plan = keyof typeof PLANS;
 
 export default async function CheckoutPage({
   searchParams,
@@ -36,9 +18,9 @@ export default async function CheckoutPage({
   searchParams: Promise<{ plan?: string }>;
 }) {
   const params = await searchParams;
-  const planKey = params.plan as Plan;
-  const plan = PLANS[planKey];
-  if (!plan) redirect("/#precios");
+  const planKey = params.plan as PaidPlan;
+  const plan = PAID_PLANS[planKey];
+  if (!plan) redirect("/dashboard/plans");
 
   const session = await auth();
   if (!session?.user?.id) redirect(`/register?next=/checkout?plan=${planKey}`);
@@ -60,7 +42,7 @@ export default async function CheckoutPage({
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
         {/* Header */}
-        <Link href="/#precios" className="mb-8 flex items-center gap-2 text-sm text-ink-soft transition hover:text-ink">
+        <Link href="/dashboard/plans" className="mb-8 flex items-center gap-2 text-sm text-ink-soft transition hover:text-ink">
           <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
             <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

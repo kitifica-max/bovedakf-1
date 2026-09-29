@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { auth } from "@/lib/auth";
 import { InstallPrompt } from "@/components/install-prompt";
 
 const bodySans = IBM_Plex_Sans({
@@ -97,13 +98,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // middleware.ts minted for this request — required for the strict,
   // 'unsafe-inline'-free script-src in that middleware's CSP.
   await headers();
+  const session = await auth();
   return (
     <html
       lang="es"
       className={`${bodySans.variable} ${geistMono.variable} ${archivo.variable} ${silkscreen.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
         {/* Kitifica "App Directa" install prompt — marketing pages only; the
             overlay has no dismiss control, so it must never cover auth, the
             dashboard, the shared-link viewer, or an email-link landing. */}

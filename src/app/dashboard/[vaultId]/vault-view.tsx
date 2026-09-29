@@ -169,6 +169,12 @@ export function VaultView({
             </Link>
           )}
           <Link
+            href="/dashboard/plans"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
+          >
+            Planes
+          </Link>
+          <Link
             href="/dashboard/billing"
             className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
           >
@@ -261,6 +267,13 @@ export function VaultView({
                     Organizaciones
                   </Link>
                 )}
+                <Link
+                  href="/dashboard/plans"
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Planes
+                </Link>
                 <Link
                   href="/dashboard/billing"
                   className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
