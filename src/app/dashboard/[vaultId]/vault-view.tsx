@@ -10,7 +10,11 @@ import {
   revokeShareLinkAction,
   setTotpAction,
   totpCodeAction,
+  updateCredentialAction,
+  updateClientAction,
+  deleteClientAction,
 } from "../actions";
+import { ConfirmDialog } from "@/components/brand/confirm-dialog";
 import { ChevronDownIcon } from "@/components/icons";
 import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
@@ -19,7 +23,7 @@ import { VerifyResult } from "@/components/verify-result";
 import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
 import { PlatformIcon } from "@/components/brand/platform-icon";
-import { PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
+import { CLIENT_COLORS, PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 type Tab = "cuentas" | "actividad" | "equipo";
@@ -78,6 +82,8 @@ export function VaultView({
   const canEdit = role === "OWNER" || role === "EDITOR";
   const [activeTab, setActiveTab] = useState<Tab>("cuentas");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingClient, setEditingClient] = useState(false);
+  const [deletingClient, setDeletingClient] = useState(false);
   const color = clientColor(vault.color);
   const count = vault.credentials.length;
   // Grouped in catalog order; platforms without credentials are skipped.
@@ -106,12 +112,40 @@ export function VaultView({
             </span>
           </div>
         </div>
-        {canEdit && activeTab === "cuentas" && (
-          <button type="button" className={pillLine} aria-expanded={showAddForm} onClick={() => setShowAddForm((v) => !v)}>
-            + CUENTA
-          </button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {role === "OWNER" && (
+            <button type="button" className={pillLine} aria-expanded={editingClient} onClick={() => setEditingClient((v) => !v)}>
+              EDITAR CLIENTE
+            </button>
+          )}
+          {canEdit && activeTab === "cuentas" && (
+            <button type="button" className={pillFill} aria-expanded={showAddForm} onClick={() => setShowAddForm((v) => !v)}>
+              + CUENTA
+            </button>
+          )}
+        </div>
       </div>
+
+      {editingClient && (
+        <EditClientForm
+          vaultId={vault.id}
+          name={vault.name}
+          color={vault.color}
+          onDone={() => setEditingClient(false)}
+          onDelete={() => setDeletingClient(true)}
+        />
+      )}
+      <ConfirmDialog
+        open={deletingClient}
+        title="Eliminar cliente"
+        confirmLabel="ELIMINAR CLIENTE"
+        requireText={vault.name}
+        onClose={() => setDeletingClient(false)}
+        onConfirm={(typed) => deleteClientAction(vault.id, typed)}
+      >
+        Se borran para siempre sus {count === 1 ? "1 cuenta" : `${count} cuentas`}, códigos 2FA, links compartidos y auditoría, y el
+        acceso de su equipo. No se puede deshacer.
+      </ConfirmDialog>
 
       <nav aria-label="Secciones del cliente" className="flex flex-wrap gap-2">
         {TABS.map(({ id, label }) => (
@@ -214,7 +248,7 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         </div>
         <div>
           <label htmlFor={`${idPrefix}-service`} className="sr-only">Nombre de la cuenta</label>
-          <input id={`${idPrefix}-service`} name="service" placeholder="Nombre (ej. Instagram principal)" required className={inputCls} />
+          <input id={`${idPrefix}-service`} name="service" placeholder="Nombre" required className={inputCls} />
         </div>
         <div>
           <label htmlFor={`${idPrefix}-username`} className="sr-only">Usuario</label>
@@ -227,11 +261,11 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
       </div>
       <div>
         <label htmlFor={`${idPrefix}-loginUrl`} className="sr-only">URL de login</label>
-        <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login (opcional, https://…)" className={inputCls} />
+        <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login" className={inputCls} />
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${idPrefix}-totp`} className="sr-only">Clave 2FA</label>
-        <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA (opcional)" className={`${inputCls} font-mono`} />
+        <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA" className={`${inputCls} font-mono`} />
         <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
       </div>
       <div>
@@ -269,6 +303,8 @@ function CredentialRow({
   const [shareError, setShareError] = useState<string | null>(null);
   const idPrefix = useId();
   const [now] = useState(() => Date.now());
+  const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const activeLinks = credential.shareLinks.filter((l) => !l.revokedAt && l.expiresAt.getTime() > now);
 
   async function reveal() {
@@ -338,17 +374,32 @@ function CredentialRow({
           {revealed ? "Ocultar contraseña" : "Ver contraseña"}
         </button>
         {canEdit && (
+          <button type="button" className={quietBtn} aria-expanded={editing} onClick={() => setEditing((v) => !v)}>
+            Editar
+          </button>
+        )}
+        {canEdit && (
           <button
             type="button"
             className={`${quietBtn} text-kf-carmesi hover:text-kf-carmesi-hondo`}
-            onClick={() => {
-              if (confirm(`¿Eliminar ${credential.service}? No se puede deshacer.`)) deleteCredentialAction(vaultId, credential.id);
-            }}
+            onClick={() => setConfirmDelete(true)}
           >
             Eliminar
           </button>
         )}
       </div>
+
+      {canEdit && editing && <EditCredentialForm vaultId={vaultId} credential={credential} onDone={() => setEditing(false)} />}
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Eliminar ${credential.service}`}
+        confirmLabel="ELIMINAR CUENTA"
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => deleteCredentialAction(vaultId, credential.id)}
+      >
+        Se borran la contraseña{credential.hasTotp ? ", el código 2FA" : ""} y sus links compartidos. Queda registrado en la
+        auditoría. No se puede deshacer.
+      </ConfirmDialog>
 
       {revealed && (
         <div className="flex flex-col gap-2 rounded-[20px] bg-white p-4 text-sm">
@@ -457,6 +508,158 @@ function CredentialRow({
         <AiAccessPanel credentialId={credential.id} credentialService={credential.service} initialAiAccessible={credential.aiAccessible} />
       )}
     </li>
+  );
+}
+
+function EditCredentialForm({
+  vaultId,
+  credential,
+  onDone,
+}: {
+  vaultId: string;
+  credential: CredentialWithLinks;
+  onDone: () => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+
+  return (
+    <form
+      className="flex flex-col gap-3 rounded-[20px] bg-white p-4"
+      noValidate
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setPending(true);
+        setError(null);
+        try {
+          const result = await updateCredentialAction(vaultId, credential.id, new FormData(e.currentTarget));
+          if (result) setError(result);
+          else return onDone();
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+    >
+      <p className={kicker}>EDITAR CUENTA</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="relative">
+          <label htmlFor={`${id}-platform`} className="sr-only">Plataforma</label>
+          <select id={`${id}-platform`} name="platform" defaultValue={platformOf(credential.platform).id} className={`${inputCls} cursor-pointer appearance-none pr-11`}>
+            {PLATFORMS.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+          <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
+        </div>
+        <div>
+          <label htmlFor={`${id}-service`} className="sr-only">Nombre de la cuenta</label>
+          <input id={`${id}-service`} name="service" defaultValue={credential.service} required className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor={`${id}-username`} className="sr-only">Usuario</label>
+          <input id={`${id}-username`} name="username" defaultValue={credential.username} required className={inputCls} />
+        </div>
+        <div>
+          <label htmlFor={`${id}-secret`} className="sr-only">Contraseña nueva</label>
+          <input id={`${id}-secret`} name="secret" autoComplete="off" placeholder="Clave nueva" className={inputCls} />
+        </div>
+      </div>
+      <div>
+        <label htmlFor={`${id}-loginUrl`} className="sr-only">URL de login</label>
+        <input id={`${id}-loginUrl`} name="loginUrl" type="url" defaultValue={credential.loginUrl ?? ""} placeholder="URL de login" className={inputCls} />
+      </div>
+      <div>
+        <label htmlFor={`${id}-notes`} className="sr-only">Notas nuevas</label>
+        <textarea
+          id={`${id}-notes`}
+          name="notes"
+          placeholder="Notas nuevas (opcional; reemplazan las actuales)"
+          className="min-h-20 w-full rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
+        />
+      </div>
+      <p className="m-0 px-1 text-xs font-semibold text-kf-tinta-suave">Lo que dejes vacío en contraseña y notas no cambia.</p>
+      {credential.hasTotp && (
+        <label className="flex cursor-pointer items-center gap-2.5 px-1 text-sm font-bold text-kf-carmesi-hondo">
+          <input type="checkbox" name="removeTotp" className="h-5 w-5 accent-kf-carmesi" />
+          Quitar el código 2FA de esta cuenta
+        </label>
+      )}
+      {error && <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR CAMBIOS"}</button>
+        <button type="button" onClick={onDone} className={quietBtn}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function EditClientForm({
+  vaultId,
+  name,
+  color,
+  onDone,
+  onDelete,
+}: {
+  vaultId: string;
+  name: string;
+  color: string | null;
+  onDone: () => void;
+  onDelete: () => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+  const current = clientColor(color).id;
+
+  return (
+    <form
+      className="flex flex-col gap-4 rounded-[28px] bg-kf-niebla p-5"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setPending(true);
+        setError(null);
+        try {
+          const result = await updateClientAction(vaultId, new FormData(e.currentTarget));
+          if (result) setError(result);
+          else return onDone();
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+    >
+      <p className={kicker}>EDITAR CLIENTE</p>
+      <div>
+        <label htmlFor={`${id}-name`} className="sr-only">Nombre del cliente</label>
+        <input id={`${id}-name`} name="name" required maxLength={60} defaultValue={name} className={inputCls} />
+      </div>
+      <fieldset className="m-0 flex flex-wrap gap-2.5 border-0 p-0">
+        <legend className={`${kicker} mb-1.5`}>COLOR</legend>
+        {CLIENT_COLORS.map((c) => (
+          <label key={c.id} className="cursor-pointer" title={c.label}>
+            <input type="radio" name="color" value={c.id} defaultChecked={c.id === current} className="peer sr-only" />
+            <span
+              style={{ background: c.bg, color: c.ink }}
+              className="grid h-11 w-11 place-items-center rounded-full font-brand text-lg font-extrabold ring-kf-tinta ring-offset-2 peer-checked:ring-3 peer-focus-visible:ring-3"
+              aria-hidden="true"
+            >
+              Aa
+            </span>
+            <span className="sr-only">{c.label}</span>
+          </label>
+        ))}
+      </fieldset>
+      {error && <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR"}</button>
+        <button type="button" onClick={onDone} className={quietBtn}>Cancelar</button>
+        <button type="button" onClick={onDelete} className={`${quietBtn} ml-auto text-kf-carmesi hover:text-kf-carmesi-hondo`}>
+          Eliminar cliente
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -585,6 +788,9 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   link_denied_not_found: "Acceso denegado (link inexistente)",
   credential_viewed: "Credencial vista",
   totp_added: "2FA agregado",
+  credential_updated: "Cuenta editada",
+  credential_updated_totp_removed: "Cuenta editada (2FA quitado)",
+  credential_deleted: "Cuenta eliminada",
   totp_code_viewed: "Código 2FA visto",
   ai_access_enabled: "Acceso AI habilitado",
   ai_access_disabled: "Acceso AI deshabilitado",

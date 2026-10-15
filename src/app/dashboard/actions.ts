@@ -2,6 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -28,6 +29,7 @@ import {
 import {
   clientSchema,
   credentialSchema,
+  credentialUpdateSchema,
   dashboardSurveySchema,
   shareLinkSchema,
   totpCodeSchema,
@@ -38,7 +40,7 @@ import { spendShareLink, userPlan } from "@/lib/plan";
 import { FREE_SEATS } from "@/lib/plan-state";
 import { findPack } from "@/lib/packs";
 import { createEnlacePago } from "@/lib/wompi";
-import { readShareable, readTotp, withTotp, writePayload } from "@/lib/credential-payload";
+import { patchPayload, readShareable, readTotp, withTotp, writePayload } from "@/lib/credential-payload";
 
 const NO_LINKS_ERROR = "Te quedaste sin links para compartir. Recargá desde Planes para seguir.";
 import { rateLimit } from "@/lib/rate-limit";
@@ -195,9 +197,76 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
 }
 
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultAccess(vaultId, "EDITOR");
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId }, select: { service: true } });
+  if (!credential) return;
   await db.credential.deleteMany({ where: { id: credentialId, vaultId } });
+  await db.auditLog.create({
+    data: { vaultId, action: "credential_deleted", credentialService: credential.service, actorEmail: email },
+  });
   revalidatePath(`/dashboard/${vaultId}`);
+}
+
+// Edit an account. Blank secret/notes keep the stored values; the 2FA seed is kept unless removed.
+export async function updateCredentialAction(vaultId: string, credentialId: string, formData: FormData) {
+  const parsed = credentialUpdateSchema.safeParse({
+    service: formData.get("service") ?? "",
+    username: formData.get("username") ?? "",
+    secret: formData.get("secret") || undefined,
+    notes: formData.get("notes") || undefined,
+    platform: formData.get("platform") || undefined,
+    loginUrl: formData.get("loginUrl") || undefined,
+    removeTotp: formData.get("removeTotp") === "on",
+  });
+  if (!parsed.success) return parsed.error.issues[0].message;
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!credential) return "Cuenta no encontrada";
+
+  const { service, username, platform, loginUrl, secret, notes, removeTotp } = parsed.data;
+  await db.credential.update({
+    where: { id: credential.id },
+    data: {
+      service,
+      username,
+      platform,
+      loginUrl: loginUrl ?? null,
+      ...(removeTotp ? { hasTotp: false } : {}),
+      encryptedData: patchPayload(credential.encryptedData, { secret, notes, ...(removeTotp ? { totp: null } : {}) }),
+    },
+  });
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: removeTotp && credential.hasTotp ? "credential_updated_totp_removed" : "credential_updated",
+      credentialService: service,
+      actorEmail: email,
+    },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+// Rename / recolor a client (vault). Owner only.
+export async function updateClientAction(vaultId: string, formData: FormData) {
+  const parsed = clientSchema.safeParse({ name: formData.get("name") ?? "", color: formData.get("color") ?? "" });
+  if (!parsed.success) return parsed.error.issues[0].message;
+  await requireVaultAccess(vaultId, "OWNER");
+  await db.vault.update({ where: { id: vaultId }, data: parsed.data });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+// Deletes a client with all its accounts, links, members and audit (schema cascades). Owner only;
+// the typed name must match so a stray click can't do it.
+export async function deleteClientAction(vaultId: string, confirmName: string) {
+  await requireVaultAccess(vaultId, "OWNER");
+  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { name: true } });
+  if (!vault) return "Cliente no encontrado";
+  if (confirmName.trim().toLowerCase() !== vault.name.trim().toLowerCase()) return "El nombre no coincide";
+  await db.vault.delete({ where: { id: vaultId } });
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard");
 }
 
 export async function createShareLinkAction(vaultId: string, formData: FormData) {

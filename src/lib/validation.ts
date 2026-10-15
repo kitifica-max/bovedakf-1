@@ -79,3 +79,11 @@ export const deleteAccountSchema = z.object({
   password: z.string().min(1, "Ingresá tu contraseña"),
   confirmEmail: z.string().trim().toLowerCase().email("Escribí tu email para confirmar"),
 });
+
+// Edit form: secret and notes are optional — left blank, the stored (encrypted) values stay.
+export const credentialUpdateSchema = credentialSchema
+  .omit({ vaultId: true, secret: true, totp: true })
+  .extend({
+    secret: z.string().optional(),
+    removeTotp: z.boolean().default(false),
+  });

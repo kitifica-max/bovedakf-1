@@ -18,3 +18,13 @@ export function readShareable(encrypted: string) {
 export const readTotp = (encrypted: string) => read(encrypted).totp ?? null;
 
 export const withTotp = (encrypted: string, totp: SharedTotp) => writePayload({ ...read(encrypted), totp });
+
+// Partial update of the encrypted payload: only the given fields change; `totp: null` removes the 2FA seed.
+export function patchPayload(encrypted: string, patch: { secret?: string; notes?: string; totp?: null }) {
+  const current = read(encrypted);
+  const next = { ...current };
+  if (patch.secret) next.secret = patch.secret;
+  if (patch.notes !== undefined) next.notes = patch.notes;
+  if (patch.totp === null) delete next.totp;
+  return writePayload(next);
+}
