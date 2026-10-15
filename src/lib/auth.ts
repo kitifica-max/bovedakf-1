@@ -121,7 +121,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        return { id: user.id, email: user.email, companyName: user.companyName };
+        // orgRole rides in the JWT like on SSO logins, so org owners/admins see /dashboard/org.
+        return { id: user.id, email: user.email, companyName: user.companyName, orgRole: user.orgRole };
       },
     }),
     Credentials({

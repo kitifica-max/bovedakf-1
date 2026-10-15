@@ -110,7 +110,7 @@ export default async function OrgDashboardPage() {
         )}
         <form action={createOrgVault} className="flex flex-wrap gap-2.5 rounded-[28px] bg-kf-niebla p-4">
           <label className="sr-only" htmlFor="org-vault-name">Nombre de la bóveda</label>
-          <input id="org-vault-name" name="name" required placeholder="Nombre de la bóveda" className={`${fieldCls} min-w-0 flex-[1_1_200px]`} />
+          <input id="org-vault-name" name="name" required placeholder="Nueva bóveda" className={`${fieldCls} min-w-0 flex-[1_1_200px]`} />
           <label className="sr-only" htmlFor="org-vault-role">Quién accede</label>
           <select id="org-vault-role" name="orgMinRole" className={`${fieldCls} w-auto cursor-pointer`}>
             <option value={OrgRole.MEMBER}>Todos</option>
