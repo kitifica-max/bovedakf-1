@@ -186,14 +186,14 @@ export function linkOpenedEmail(service: string, appUrl: string) {
     // Service name stays out of the subject and preheader — both surface in
     // lock-screen / notification previews, which is exactly the leak the
     // product exists to avoid. It only appears inside the email body.
-    subject: "Abrieron un link compartido de tu bóveda",
+    subject: "Abrieron un link que compartiste",
     html: shell({
       hero: "opened",
       preview: "Uno de tus links compartidos se abrió por primera vez.",
       heading: "Abrieron tu link compartido",
       bodyHtml: `<p style='margin:0 0 12px;'>El link que compartiste para <strong>${esc(
         service
-      )}</strong> se abrió por primera vez. Podés ver el detalle (fecha, IP aproximada) en el registro de auditoría de tu bóveda.</p><p style='margin:0;'>Si ya no querés que sea accesible, revocá el link desde el panel.</p>`,
+      )}</strong> se abrió por primera vez. El detalle (fecha e IP aproximada) está en la auditoría del cliente.</p><p style='margin:0;'>Si ya no querés que sea accesible, revocalo desde la ficha de la cuenta.</p>`,
       cta: { label: "Ver auditoría", href: `${appUrl}/dashboard` },
     }),
   };
@@ -201,73 +201,92 @@ export function linkOpenedEmail(service: string, appUrl: string) {
 
 export function inviteEmail(link: string, vaultName: string, inviterName: string, roleLabel: string) {
   return {
-    subject: `${inviterName} te invitó a una bóveda en KF-1`,
+    subject: `${inviterName} te sumó a un cliente en KF-1`,
     html: shell({
       hero: "invite",
       preview: `Te sumaron a "${vaultName}" como ${roleLabel}.`,
-      heading: "Te invitaron a una bóveda",
-      bodyHtml: `<p style='margin:0 0 12px;'><strong>${esc(inviterName)}</strong> te sumó a la bóveda <strong>${esc(
+      heading: "Te sumaron a un cliente",
+      bodyHtml: `<p style='margin:0 0 12px;'><strong>${esc(inviterName)}</strong> te sumó al cliente <strong>${esc(
         vaultName
-      )}</strong> como <strong>${esc(roleLabel)}</strong>. Aceptá para ver las credenciales compartidas del equipo.</p>`,
+      )}</strong> como <strong>${esc(roleLabel)}</strong>. Aceptá para ver sus cuentas, contraseñas y códigos 2FA.</p>`,
       cta: { label: "Aceptar invitación", href: link },
       footnote: "Si no esperabas esto, ignorá el mensaje. El enlace vence en 7 días.",
     }),
   };
 }
 
-export function paymentSuccessEmail(opts: {
-  planName: string;
-  amount: string;
-  currency: string;
-  nextBillingDate: string;
-}) {
+// Two-column summary rows (label · value) for receipts.
+function summary(rows: [string, string][]) {
+  const cell = "padding:10px 0;font-family:" + SANS + ";font-size:13px;";
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">${rows
+    .map(
+      ([label, value], i) => `<tr>
+        <td style="${cell}color:${INK_SOFT};${i < rows.length - 1 ? `border-bottom:2px solid ${LINE};` : ""}">${esc(label)}</td>
+        <td style="${cell}color:${INK};font-weight:800;text-align:right;${i < rows.length - 1 ? `border-bottom:2px solid ${LINE};` : ""}">${esc(value)}</td>
+      </tr>`
+    )
+    .join("")}</table>`;
+}
+
+const plural = (n: number) => `${n} link${n === 1 ? "" : "s"}`;
+
+// Prepaid model: receipt for a one-time link pack (sent once, when the purchase flips to PAID).
+export function linkPackPaidEmail(opts: { links: number; amount: string; balance: number }) {
   return {
-    subject: `Pago recibido — Plan ${opts.planName} activado · Bóveda KF-1`,
+    subject: `Recarga acreditada: +${plural(opts.links)} · Bóveda KF-1`,
     html: shell({
       hero: "paid",
-      preview: `Tu plan ${opts.planName} está activo. Adjuntamos tu recibo.`,
-      heading: `Plan ${opts.planName} activo`,
+      preview: `Sumamos ${plural(opts.links)} a tu saldo. Adjuntamos tu recibo.`,
+      heading: `+${plural(opts.links)} en tu saldo`,
       bodyHtml: `
-        <p style='margin:0 0 16px;'>Recibimos tu pago correctamente. Tu suscripción está activa y podés usar todas las funciones del plan.</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">
-          <tr>
-            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#5b6383;">Plan</td>
-            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#1b2340;text-align:right;font-weight:600;">${esc(opts.planName)}</td>
-          </tr>
-          <tr>
-            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#5b6383;">Monto</td>
-            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#1b2340;text-align:right;font-weight:600;">${esc(opts.currency)} $${esc(opts.amount)}</td>
-          </tr>
-          <tr>
-            <td style="padding:10px 0;font-size:13px;color:#5b6383;">Próximo cobro</td>
-            <td style="padding:10px 0;font-size:13px;color:#1b2340;text-align:right;">${esc(opts.nextBillingDate)}</td>
-          </tr>
-        </table>
-        <p style='margin:0;font-size:13px;color:#5b6383;'>El recibo en PDF va adjunto a este correo. Para cancelar o gestionar tu suscripción, entrá a tu panel de facturación.</p>`,
-      cta: { label: "Ver panel de facturación", href: `${APP_URL}/dashboard/billing` },
+        <p style='margin:0 0 16px;'>Recibimos tu pago y ya acreditamos la recarga.</p>
+        ${summary([
+          ["Recarga", plural(opts.links)],
+          ["Monto", `USD $${opts.amount} · pago único`],
+          ["Saldo actual", plural(opts.balance)],
+        ])}
+        <p style='margin:0;font-size:13px;color:${INK_SOFT};'>Sin suscripción ni cobros automáticos. Cada link que compartís con alguien de afuera descuenta 1; ver contraseñas y códigos 2FA dentro de tu equipo es gratis. El recibo en PDF va adjunto.</p>`,
+      cta: { label: "Ver mis links", href: `${APP_URL}/dashboard/plans` },
       footnote: "El pago fue procesado por Wompi. Política de devoluciones: kf1.kitifica.com/devoluciones",
     }),
   };
 }
 
-export function paymentFailedEmail(opts: { planName: string; manageUrl: string }) {
+// Legacy monthly plans (sold before the prepaid model). Only renewals of existing subscribers reach these.
+export function legacyPlanPaidEmail(opts: { planName: string; amount: string; nextBillingDate: string }) {
   return {
-    subject: `Pago no procesado — Bóveda KF-1`,
+    subject: `Pago recibido de tu plan ${opts.planName} · Bóveda KF-1`,
+    html: shell({
+      hero: "verify",
+      preview: `Cobramos tu plan ${opts.planName}. Adjuntamos tu recibo.`,
+      heading: "Pago de tu plan recibido",
+      bodyHtml: `
+        <p style='margin:0 0 16px;'>Recibimos el cobro mensual de tu plan <strong>${esc(opts.planName)}</strong>, que contrataste antes del cambio a recargas. Sigue activo, con links ilimitados.</p>
+        ${summary([
+          ["Plan", `${opts.planName} · mensual`],
+          ["Monto", `USD $${opts.amount}`],
+          ["Próximo cobro", opts.nextBillingDate],
+        ])}
+        <p style='margin:0;font-size:13px;color:${INK_SOFT};'>¿Preferís no pagar todos los meses? Cancelalo en <a href="https://panel.wompi.sv/Recurrentes" style="color:${AZUL};font-weight:700;">panel.wompi.sv/Recurrentes</a>: tu cuenta sigue gratis y compartís con recargas de links. El recibo en PDF va adjunto.</p>`,
+      cta: { label: "Ver facturación", href: `${APP_URL}/dashboard/billing` },
+      footnote: "El pago fue procesado por Wompi. Política de devoluciones: kf1.kitifica.com/devoluciones",
+    }),
+  };
+}
+
+export function legacyPlanPausedEmail(opts: { planName: string }) {
+  return {
+    subject: "Tu plan mensual quedó en pausa · Bóveda KF-1",
     html: shell({
       hero: "failed",
-      preview: "No pudimos procesar tu pago. Tu suscripción puede quedar suspendida.",
-      heading: "No pudimos procesar tu pago",
+      preview: "No pudimos cobrar tu plan. Tu cuenta sigue funcionando gratis.",
+      heading: "Tu plan quedó en pausa",
       bodyHtml: `
-        <p style='margin:0 0 12px;'>Intentamos cobrar tu suscripción del plan <strong>${esc(opts.planName)}</strong> pero el pago no fue aprobado.</p>
-        <p style='margin:0 0 12px;'>Esto puede ocurrir si:</p>
-        <ul style='margin:0 0 16px;padding-left:20px;color:#1b2340;font-size:14px;line-height:1.7;'>
-          <li>Tu método de pago expiró o fue rechazado</li>
-          <li>No había fondos suficientes</li>
-          <li>Tu banco bloqueó el cargo</li>
-        </ul>
-        <p style='margin:0;'>Actualizá tu método de pago en <a href="https://panel.wompi.sv/Recurrentes" style="color:#1f6fb2;">panel.wompi.sv/Recurrentes</a> para evitar la suspensión de tu cuenta.</p>`,
-      cta: { label: "Actualizar pago", href: opts.manageUrl },
-      footnote: "Si el problema persiste, contactanos en contacto@kitifica.com.",
+        <p style='margin:0 0 12px;'>No pudimos cobrar tu plan <strong>${esc(opts.planName)}</strong>. No perdés nada: tu cuenta sigue funcionando gratis, con tus clientes, contraseñas y códigos 2FA.</p>
+        <p style='margin:0 0 12px;'>Para compartir con alguien de afuera usás tu saldo de links, que podés recargar cuando quieras con un pago único.</p>
+        <p style='margin:0;'>¿Querés retomar el plan? Actualizá tu tarjeta en <a href="https://panel.wompi.sv/Recurrentes" style="color:${AZUL};font-weight:700;">panel.wompi.sv/Recurrentes</a>.</p>`,
+      cta: { label: "Ver mis links", href: `${APP_URL}/dashboard/plans` },
+      footnote: "¿Dudas? Escribinos a hola@kitifica.com.",
     }),
   };
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { listEnlacesPagoRecurrentes, getEnlaceSuscripciones } from "@/lib/wompi";
-import { sendEmail, paymentFailedEmail } from "@/lib/email";
+import { sendEmail, legacyPlanPausedEmail } from "@/lib/email";
 
 // Netlify scheduled function: runs daily at 8:00 AM UTC
 // netlify.toml → [[scheduled-functions]] schedule = "0 8 * * *"
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
 
       const PLAN_NAMES: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
       const planName = PLAN_NAMES[sub.plan] ?? sub.plan;
-      const { subject, html } = paymentFailedEmail({ planName, manageUrl: "https://panel.wompi.sv" });
+      const { subject, html } = legacyPlanPausedEmail({ planName });
       await sendEmail(email, subject, html);
     }
   }
