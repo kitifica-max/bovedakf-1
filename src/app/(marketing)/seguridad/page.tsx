@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PAIRS, PageHero, pageCard, type PairName } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Seguridad — Bóveda KF-1",
@@ -65,7 +66,9 @@ function SectionCard({
   kicker,
   title,
   children,
+  pair,
 }: {
+  pair: PairName;
   icon: React.ReactNode;
   kicker: string;
   title: string;
@@ -74,15 +77,15 @@ function SectionCard({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue/10 text-blue">
+        <span style={{ background: PAIRS[pair].bg, color: PAIRS[pair].ink }} className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px]">
           {icon}
         </span>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-blue">{kicker}</p>
+        <div className="min-w-0">
+          <p className="m-0 text-[11px] font-extrabold tracking-[0.18em] text-kf-tinta-suave uppercase">{kicker}</p>
           <h2 className="t-h2 text-ink">{title}</h2>
         </div>
       </div>
-      <div className="ml-12 flex flex-col gap-3 text-sm leading-relaxed text-ink-soft">
+      <div className="flex flex-col gap-3 text-sm leading-relaxed text-ink-soft sm:ml-15">
         {children}
       </div>
     </section>
@@ -91,20 +94,24 @@ function SectionCard({
 
 // ── Badge component ───────────────────────────────────────────────────────────
 
-function Badge({ grade, label, sub, href }: { grade: string; label: string; sub: string; href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3 transition hover:border-blue/30 hover:bg-blue/5"
-    >
-      <span className="font-display text-2xl font-bold text-blue group-hover:text-blue/80">{grade}</span>
-      <div>
-        <p className="text-xs font-semibold text-ink">{label}</p>
-        <p className="text-[11px] text-ink-soft">{sub}</p>
-      </div>
+function Badge({ pair, grade, label, sub, href }: { pair: PairName; grade: string; label: string; sub: string; href?: string }) {
+  const body = (
+    <>
+      <span className="font-brand text-5xl leading-none font-extrabold">{grade}</span>
+      <p className="m-0 text-sm font-extrabold break-words">{label}</p>
+      <p className="m-0 text-xs font-semibold break-words opacity-90">{sub}</p>
+    </>
+  );
+  const style = { background: PAIRS[pair].bg, color: PAIRS[pair].ink };
+  const cls = "flex min-w-0 flex-col gap-1 rounded-[28px] px-5 py-5 no-underline";
+  return href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={style} className={`${cls} transition hover:-translate-y-0.5`}>
+      {body}
     </a>
+  ) : (
+    <div style={style} className={cls}>
+      {body}
+    </div>
   );
 }
 
@@ -112,46 +119,34 @@ function Badge({ grade, label, sub, href }: { grade: string; label: string; sub:
 
 export default function SecurityPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">Seguridad</h1>
-      <p className="mt-2 text-sm text-ink-soft">
-        Cómo protegemos tus credenciales — con especificaciones técnicas verificables.
-      </p>
+    <>
+      <PageHero pair="bosque" icon="shield" kicker="Seguridad" title="Seguridad nivel banco" lead="Cómo protegemos las cuentas de tus clientes, con especificaciones técnicas verificables." />
+      <div className={pageCard}>
 
       {/* Badges */}
-      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
         <Badge
+          pair="azul"
           grade="A+"
           label="SSL Labs"
           sub="TLS 1.3 · HSTS · OCSP Stapling"
           href="https://www.ssllabs.com/ssltest/analyze.html?d=kf1.kitifica.com"
         />
         <Badge
+          pair="durazno"
           grade="A+"
           label="HTTP Observatory"
           sub="120 / 100 · 12 / 12 tests"
           href="https://developer.mozilla.org/en-US/observatory/analyze?host=kf1.kitifica.com"
         />
-        <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
-          <span className="font-display text-2xl font-bold text-blue">ZK</span>
-          <div>
-            <p className="text-xs font-semibold text-ink">Zero-Knowledge Links</p>
-            <p className="text-[11px] text-ink-soft">Clave nunca toca el servidor</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
-          <span className="font-display text-2xl font-bold text-blue">10/10</span>
-          <div>
-            <p className="text-xs font-semibold text-ink">OWASP ZAP</p>
-            <p className="text-[11px] text-ink-soft">0 críticos · 0 altos · scan pasivo</p>
-          </div>
-        </div>
+        <Badge pair="carmesi" grade="ZK" label="Zero-Knowledge Links" sub="La clave nunca toca el servidor" />
+        <Badge pair="amarillo" grade="10/10" label="OWASP ZAP" sub="0 críticos · 0 altos · scan pasivo" />
       </div>
 
       <div className="mt-10 flex flex-col gap-10">
 
         {/* 1 — Promesa */}
-        <SectionCard icon={<IconShield />} kicker="Privacidad y cifrado" title="Cómo protegemos tus credenciales">
+        <SectionCard pair="carmesi" icon={<IconShield />} kicker="Privacidad y cifrado" title="Cómo protegemos tus credenciales">
           <p>
             Las credenciales que guardás se cifran en el servidor con{" "}
             <strong className="text-ink">AES-256-GCM</strong> antes de almacenarse en la base de
@@ -171,7 +166,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 2 — Cifrado */}
-        <SectionCard icon={<IconLock />} kicker="Arquitectura de cifrado" title="Cifrado en reposo y en tránsito">
+        <SectionCard pair="bosque" icon={<IconLock />} kicker="Arquitectura de cifrado" title="Cifrado en reposo y en tránsito">
           <p>
             Las credenciales viajan sobre <strong className="text-ink">TLS 1.3</strong> y se
             cifran en el servidor con <strong className="text-ink">AES-256-GCM</strong> antes de
@@ -216,7 +211,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 3 — Links dinámicos */}
-        <SectionCard icon={<IconLink />} kicker="Compartir sin riesgos" title="Links a prueba de intrusos">
+        <SectionCard pair="durazno" icon={<IconLink />} kicker="Compartir sin riesgos" title="Links a prueba de intrusos">
           <p>
             Cuando compartís una credencial — con un compañero o con un asistente de IA — Bóveda KF-1
             nunca expone la contraseña en texto plano. En su lugar, genera un{" "}
@@ -259,7 +254,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 4 — Auditoría */}
-        <SectionCard icon={<IconClipboard />} kicker="Control y auditoría" title="Control total desde tu panel">
+        <SectionCard pair="lavanda" icon={<IconClipboard />} kicker="Control y auditoría" title="Control total desde tu panel">
           <p>
             Cada acción sobre una credencial compartida queda registrada en el audit log. El
             dashboard te muestra exactamente qué pasó, quién lo hizo, y desde dónde.
@@ -291,7 +286,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 5 — Transparencia técnica */}
-        <SectionCard icon={<IconCode />} kicker="Para usuarios avanzados" title="Transparencia tecnológica">
+        <SectionCard pair="azul" icon={<IconCode />} kicker="Para usuarios avanzados" title="Transparencia tecnológica">
           <p>
             El sistema opera sin infraestructuras intermedias innecesarias. No hay proxies
             propietarios, no hay servicios de terceros con acceso a tus datos cifrados.
@@ -350,6 +345,7 @@ export default function SecurityPage() {
           Política de privacidad
         </Link>
       </p>
-    </div>
+      </div>
+    </>
   );
 }

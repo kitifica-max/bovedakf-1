@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHero, StarDot, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Política de devoluciones — Bóveda KF-1",
@@ -59,13 +60,13 @@ const sections = [
 export default function DevolucionesPage() {
   return (
     <>
-      <h1 className="font-display text-3xl font-bold text-ink">Política de devoluciones</h1>
-      <p className="mt-3 text-sm text-ink-soft">Última actualización: septiembre de 2026</p>
+      <PageHero pair="durazno" icon="refund" kicker="Última actualización: septiembre de 2026" title="Devoluciones" />
+      <div className={pageCard}>
 
       <div className="mt-8 flex flex-col gap-8">
-        {sections.map((s) => (
+        {sections.map((s, si) => (
           <div key={s.h}>
-            <h2 className="text-base font-semibold text-ink">{s.h}</h2>
+            <h2 className="t-h2 flex items-center gap-3"><StarDot i={si} />{s.h}</h2>
             {s.p.map((p, i) => (
               <p key={i} className="mt-2 text-sm leading-relaxed text-ink-soft">{p}</p>
             ))}
@@ -88,6 +89,7 @@ export default function DevolucionesPage() {
           {" "}o visitá nuestra{" "}
           <Link href="/contacto" className="text-blue underline">página de contacto</Link>.
         </p>
+      </div>
       </div>
     </>
   );

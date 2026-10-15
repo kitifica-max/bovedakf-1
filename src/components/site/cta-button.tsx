@@ -1,11 +1,12 @@
 import Link from "next/link";
 
+// Agencies brand pills (auth forms are the only users).
 const BASE =
-  "inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-medium transition active:scale-[0.98]";
+  "inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 text-xs font-extrabold tracking-[0.14em] uppercase transition active:scale-[0.98]";
 const VARIANT = {
-  primary: "bg-ink text-gray hover:bg-ink/90",
-  secondary: "border border-border-soft text-ink hover:bg-paper",
-  dark: "bg-ink-reverse text-ink hover:bg-ink-reverse/90",
+  primary: "bg-kf-azul text-white hover:opacity-90",
+  secondary: "border-2 border-kf-azul bg-white text-kf-azul hover:bg-kf-azul hover:text-white",
+  dark: "bg-kf-tinta text-white hover:opacity-90",
 } as const;
 
 type Common = {

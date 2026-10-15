@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { DownloadIcon, EyeIcon, EyeOffIcon } from "@/components/icons";
 import { CopyButton } from "@/components/copy-button";
 import { KitificaCredit } from "@/components/kitifica-credit";
+import { LogoBadge } from "@/components/brand/logo-badge";
 
 type Payload = { service: string; username: string; secret: string; notes?: string };
 
@@ -81,27 +82,30 @@ export function SharedCredentialView() {
   }, [publicId]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <div className="glass w-full max-w-md rounded-2xl p-8">
-        {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG, not photographic content */}
-        <img src="/logo-on-dark.svg" alt="Bóveda KF-1" className="mb-5 h-6 w-auto" />
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
-          Credencial compartida
-        </h1>
+    <main className="kf-app flex min-h-dvh items-center justify-center p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-[40px] border-2 border-kf-borde bg-white">
+        {/* Seal on its own row so the condensed title gets the full width at any screen size. */}
+        <div className="flex flex-col gap-3 bg-kf-azul px-6 py-7 text-white sm:px-10">
+          <LogoBadge id="kf-ring-share" title="Bóveda KF-1" ink="#ffffff" center="var(--kf-manteca)" className="h-20 w-20 shrink-0 self-end" />
+          <h1 className="m-0 font-brand text-[clamp(36px,11vw,48px)] leading-[1.04] font-extrabold break-words uppercase">
+            Te compartieron una cuenta
+          </h1>
+        </div>
+        <div className="p-6 sm:p-10">
 
         <div aria-live="polite">
           {state.status === "loading" && (
-            <p className="mt-4 text-sm text-ink-soft">Descifrando en tu navegador…</p>
+            <p className="m-0 text-sm font-semibold text-kf-tinta-suave">Descifrando en tu navegador…</p>
           )}
           {state.status === "error" && (
-            <p role="alert" className="mt-4 rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
+            <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-3 text-sm font-semibold text-kf-carmesi-hondo">
               {state.message}
             </p>
           )}
         </div>
 
         {state.status === "ready" && (
-          <div className="mt-5 flex flex-col gap-1.5 rounded-2xl bg-gray/60 p-4 text-sm">
+          <div className="flex flex-col gap-2.5 rounded-[28px] bg-kf-niebla p-5 text-sm font-semibold">
             <div className="flex items-center justify-between gap-2">
               <p><span className="text-ink-soft">Servicio:</span> {state.data.service}</p>
               <CopyButton value={state.data.service} label="Copiar servicio" />
@@ -113,7 +117,7 @@ export function SharedCredentialView() {
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-1.5">
                 <span className="text-ink-soft">Secreto:</span>{" "}
-                <code className="rounded bg-paper px-1.5 py-0.5 select-all">
+                <code className="rounded-lg bg-white px-2 py-1 font-mono text-base select-all">
                   {secretVisible ? state.data.secret : "•".repeat(Math.min(state.data.secret.length, 14))}
                 </code>
               </p>
@@ -142,7 +146,7 @@ export function SharedCredentialView() {
 
             {state.permission === "DOWNLOAD" && (
               <button
-                className="mt-3 flex cursor-pointer items-center gap-1.5 self-start rounded-full bg-ink px-4 py-2 text-sm font-medium text-gray transition hover:bg-ink/90"
+                className="mt-3 flex h-11 cursor-pointer items-center gap-1.5 self-start rounded-full bg-kf-azul px-5 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90"
                 onClick={() => {
                   const blob = new Blob(
                     [
@@ -165,14 +169,15 @@ export function SharedCredentialView() {
           </div>
         )}
 
-        <div className="mt-6 flex flex-col items-center gap-2 border-t border-border-soft pt-5 text-center">
+        <div className="mt-6 flex flex-col items-center gap-2 border-t-2 border-kf-borde pt-5 text-center">
           <p className="text-xs text-ink-soft">
             ¿Recibiste esto por chat o email antes?{" "}
-            <Link href="/" className="text-ink underline decoration-border-soft underline-offset-4 hover:decoration-ink">
+            <Link href="/" className="font-bold text-kf-azul underline decoration-2 underline-offset-4">
               Compartí credenciales seguras con Bóveda KF-1
             </Link>
           </p>
           <KitificaCredit />
+        </div>
         </div>
       </div>
     </main>

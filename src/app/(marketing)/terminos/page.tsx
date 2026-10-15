@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero, StarDot, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Términos y condiciones",
@@ -72,20 +73,18 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">
-        Términos y condiciones
-      </h1>
-      <p className="mt-2 text-sm text-ink-soft">Última actualización: 29 de septiembre de 2026.</p>
+    <>
+      <PageHero pair="rosa" icon="doc" kicker="Última actualización: 29 de septiembre de 2026" title="Términos y condiciones" />
+      <div className={pageCard}>
       <p className="mt-4 bg-blue/10 px-4 py-3 text-sm text-ink-soft">
         Bóveda KF-1 está en etapa temprana. Este documento es un marco general de uso — si tu
         organización necesita un acuerdo formal (DPA, SLA), escribinos.
       </p>
 
       <div className="mt-8 flex flex-col gap-6">
-        {sections.map((s) => (
+        {sections.map((s, si) => (
           <section key={s.h}>
-            <h2 className="t-h2 text-ink">{s.h}</h2>
+            <h2 className="t-h2 flex items-center gap-3"><StarDot i={si} />{s.h}</h2>
             {s.p.map((para, i) => (
               <p key={i} className="mt-2 text-sm text-ink-soft">
                 {para}
@@ -94,6 +93,7 @@ export default function TermsPage() {
           </section>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

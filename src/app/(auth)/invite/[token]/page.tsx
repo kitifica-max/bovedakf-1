@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 // Rendered inside (auth)/layout.tsx — which already provides the branded
 // header, footer, and centered wrapper.
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="glass w-full max-w-sm rounded-2xl p-8 text-sm">{children}</div>;
+  return <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10 text-sm">{children}</div>;
 }
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {

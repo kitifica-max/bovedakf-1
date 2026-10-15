@@ -107,6 +107,26 @@ body::before {
   font-family: var(--font-montserrat), "Helvetica Neue", Helvetica, sans-serif;
 }
 .kf-app .glass { background: #ffffff; border-color: var(--kf-borde); }
+/* Legacy type roles on brand pages: condensed uppercase headings (line-height ≥ 1.04 so
+   Spanish accents on a second line never touch the line above), Montserrat kickers. */
+.kf-app .t-display,
+.kf-app .t-h2 {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 1.04;
+  color: var(--kf-azul);
+}
+.kf-app .t-display { font-size: clamp(48px, 6vw, 84px); }
+.kf-app .t-h2 { font-size: clamp(28px, 3vw, 40px); color: var(--kf-azul-hondo); }
+.kf-app .t-h3 { font-family: var(--font-montserrat), sans-serif; font-weight: 700; }
+.kf-app .t-kicker {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--kf-tinta-suave);
+}
 
 /* Glassmorphism — used sparingly, on a handful of cards, not the whole site. */
 .glass {

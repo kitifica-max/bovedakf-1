@@ -49,9 +49,9 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
   }
 
   return (
-      <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="t-display text-ink">
-          Crear bóveda
+      <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
+        <h1 className="font-brand text-5xl leading-[1.04] font-extrabold text-kf-azul uppercase">
+          Crear cuenta
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
           Gratis para tu equipo, con {GIFT_LINKS} links de regalo para compartir.
@@ -67,7 +67,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="Nombre de la empresa"
               required
               maxLength={120}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
           </div>
           <div>
@@ -80,7 +80,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="email@empresa.com"
               defaultValue={prefillEmail}
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
           </div>
           <div>
@@ -90,10 +90,10 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               name="password"
               type="password"
               autoComplete="new-password"
-              placeholder="Contraseña (mín. 10 caracteres)"
+              placeholder="Contraseña (mín. 10)"
               required
               minLength={10}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
           </div>
           <div className="relative">
@@ -103,9 +103,9 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               name="industry"
               required
               defaultValue=""
-              className="w-full cursor-pointer appearance-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 pr-10 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full cursor-pointer appearance-none pr-11 rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             >
-              <option value="" disabled>¿En qué rubro opera tu empresa?</option>
+              <option value="" disabled>Tu rubro</option>
               {INDUSTRIES.map((i) => (
                 <option key={i} value={i}>{i}</option>
               ))}
@@ -120,7 +120,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="¿Qué tarea digital te quita más tiempo? (opcional)"
               maxLength={500}
               rows={2}
-              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="w-full resize-none rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
             <label htmlFor="currentSolution" className="sr-only">Cómo lo resolvés hoy (opcional)</label>
             <textarea
@@ -129,17 +129,17 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="¿Cómo lo resolvés hoy? (opcional)"
               maxLength={500}
               rows={2}
-              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="w-full resize-none rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
             <p className="mt-0.5 px-1 text-xs text-ink-soft">
               Contanos qué te gustaría simplificar. Esto nos ayuda a crear nuevas herramientas gratuitas.
             </p>
           </div>
           {error && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
           )}
           <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
-            {pending ? "Creando..." : "Crear bóveda"}
+            {pending ? "Creando..." : "Crear cuenta"}
           </CTAButton>
         </form>
         <CTAButton href="/login" variant="secondary" className="mt-5 w-full">

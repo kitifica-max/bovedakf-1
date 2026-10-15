@@ -1,14 +1,15 @@
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { auth } from "@/lib/auth";
+import { BrandFooter, BrandHeader } from "@/components/brand/site-chrome";
 
-export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
   return (
-    <div className="flex flex-col items-center gap-10 px-4 pb-16 sm:gap-16 sm:px-8">
-      <SiteHeader />
-      <main className="w-full max-w-3xl rounded-2xl border border-border-soft bg-paper p-8 sm:p-12">
-        {children}
-      </main>
-      <SiteFooter />
+    <div className="kf-app min-h-dvh">
+      <div className="mx-auto flex max-w-[1360px] flex-col gap-10 px-4 pb-12 sm:px-8">
+        <BrandHeader signedIn={!!session?.user} />
+        <main className="mx-auto flex w-full max-w-5xl flex-col gap-8">{children}</main>
+        <BrandFooter />
+      </div>
     </div>
   );
 }

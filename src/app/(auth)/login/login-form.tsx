@@ -145,8 +145,8 @@ export function LoginForm() {
 
   if (step === "totp") {
     return (
-      <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="t-display text-ink">Verificación</h1>
+      <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
+        <h1 className="font-brand text-5xl leading-[1.04] font-extrabold text-kf-azul uppercase">Verificación</h1>
         <p className="mt-1 text-sm text-ink-soft">
           Ingresá el código de tu app de autenticación, o un código de respaldo.
         </p>
@@ -163,11 +163,11 @@ export function LoginForm() {
               autoFocus
               required
               maxLength={20}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-center text-lg tracking-[0.3em] outline-none transition focus:border-ink"
+              className="h-14 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-center font-mono text-xl tracking-[0.3em] text-kf-tinta outline-none transition focus:border-kf-azul"
             />
           </div>
           {error && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
           )}
           <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
             {pending ? "Verificando..." : "Verificar"}
@@ -188,9 +188,9 @@ export function LoginForm() {
   }
 
   return (
-      <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="t-display text-ink">Entrar</h1>
-        <p className="mt-1 text-sm text-ink-soft">Accede a tu bóveda de credenciales.</p>
+      <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
+        <h1 className="font-brand text-5xl leading-[1.04] font-extrabold text-kf-azul uppercase">Entrar</h1>
+        <p className="mt-1 text-sm text-ink-soft">Entrá a las cuentas de tus clientes.</p>
         <div className="mt-4 empty:hidden">
           <VerifyResult />
         </div>
@@ -206,7 +206,7 @@ export function LoginForm() {
               required
               onBlur={onEmailBlur}
               onChange={() => ssoAvailable && setSsoAvailable(false)}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
           </div>
 
@@ -246,11 +246,11 @@ export function LoginForm() {
                   autoComplete="current-password"
                   placeholder="Contraseña"
                   required
-                  className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+                  className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
                 />
               </div>
               {error && (
-                <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+                <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
               )}
               <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
                 {pending ? "Entrando..." : "Entrar"}
@@ -259,7 +259,7 @@ export function LoginForm() {
           )}
 
           {error && ssoAvailable && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
           )}
         </form>
 
@@ -284,7 +284,7 @@ export function LoginForm() {
 
         <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
           <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
-          <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="underline">Crear una bóveda nueva</Link>
+          <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="underline">Crear una cuenta</Link>
         </div>
       </div>
   );

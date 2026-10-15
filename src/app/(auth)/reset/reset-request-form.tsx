@@ -5,7 +5,7 @@ import { requestPasswordResetAction } from "../actions";
 import { CTAButton } from "@/components/site/cta-button";
 
 const inputCls =
-  "w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink";
+  "h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm";
 
 export function ResetRequestForm() {
   const [pending, setPending] = useState(false);
@@ -20,8 +20,8 @@ export function ResetRequestForm() {
   }
 
   return (
-    <div className="glass w-full max-w-sm rounded-2xl p-8">
-      <h1 className="t-display text-ink">Restablecer contraseña</h1>
+    <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
+      <h1 className="font-brand text-5xl leading-[1.04] font-extrabold text-kf-azul uppercase">Restablecer contraseña</h1>
 
       {sent ? (
         <p className="mt-4 rounded-2xl bg-blue/10 px-4 py-3 text-sm text-ink-soft">

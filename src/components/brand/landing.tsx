@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LogoBadge } from "./logo-badge";
+import { BrandFooter, BrandHeader } from "./site-chrome";
+import { display, pill, pillCard } from "./styles";
 import { GIFT_LINKS, PACKS, perLink, usd } from "@/lib/packs";
 
 // Prepaid model: the account is free, only external share links consume credit (one-time Wompi payments, no recurring billing).
@@ -7,12 +8,7 @@ const ACCOUNT = ["Hasta 5 personas", "Clientes ilimitados", "Contraseñas y cód
 const BEST = PACKS[PACKS.length - 1].links;
 const PACK_CARDS = PACKS.map((p) => ({ links: p.links, price: usd(p.cents), perLink: perLink(p), best: p.links === BEST }));
 
-// Base has no size utilities, so a variant's sizes never fight the defaults (no class merging here).
-const pillBase = "inline-flex items-center justify-center rounded-full py-3 text-center font-extrabold no-underline transition hover:opacity-90";
-const pill = `${pillBase} min-h-14 px-7 text-[13px] tracking-[0.14em] sm:min-h-16 sm:px-9 sm:text-[15px]`;
-const pillSm = `${pillBase} min-h-12 px-4 text-[12px] tracking-[0.1em] sm:min-h-13 sm:px-7 sm:text-[14px] sm:tracking-[0.14em]`;
-const pillCard = `${pillBase} min-h-13 px-6 text-[13px] tracking-[0.12em]`;
-const display = "font-brand font-extrabold uppercase";
+
 
 function Icon({ d, className = "" }: { d: React.ReactNode; className?: string }) {
   return (
@@ -58,32 +54,6 @@ function CodeChip({ code, left }: { code: string; left: number }) {
   );
 }
 
-function Header({ signedIn }: { signedIn: boolean }) {
-  const navLink = `${display} text-[24px] text-kf-azul no-underline hover:text-kf-azul-hondo`;
-  return (
-    <header className="flex flex-wrap items-center justify-between gap-4 pt-6 md:grid md:grid-cols-[1fr_auto_1fr]">
-      <nav aria-label="Principal" className="hidden flex-wrap gap-x-8 gap-y-2 md:flex">
-        <a href="#como" className={navLink}>Cómo funciona</a>
-        <a href="#seguridad" className={navLink}>Seguridad</a>
-        <a href="#planes" className={navLink}>Precios</a>
-      </nav>
-      <Link href="/" aria-label="Bóveda KF-1, inicio" className="flex">
-        <LogoBadge id="kf-ring-header" className="h-16 w-16 sm:h-24 sm:w-24" />
-      </Link>
-      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-3 sm:gap-x-6">
-        {signedIn ? (
-          <Link href="/dashboard" prefetch={false} className={`${pillSm} bg-kf-azul text-white`}>MI BÓVEDA</Link>
-        ) : (
-          <>
-            <Link href="/login" prefetch={false} className={`${display} text-[20px] text-kf-azul no-underline hover:text-kf-azul-hondo sm:text-[24px]`}>Entrar</Link>
-            <Link href="/register" prefetch={false} className={`${pillSm} bg-kf-azul text-white`}>CREAR CUENTA</Link>
-          </>
-        )}
-      </div>
-    </header>
-  );
-}
-
 export function BrandLanding({ signedIn }: { signedIn: boolean }) {
   // Packs are bought from inside the account, so logged-out visitors always start at signup.
   const startHref = signedIn ? "/dashboard/plans" : "/register";
@@ -97,13 +67,13 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
       </div>
 
       <div className="mx-auto flex max-w-[1360px] flex-col gap-10 px-4 pb-12 sm:px-8">
-        <Header signedIn={signedIn} />
+        <BrandHeader signedIn={signedIn} />
 
         <main className="flex flex-col gap-10">
           {/* Hero */}
           <section className="flex flex-wrap overflow-hidden rounded-[48px] bg-kf-carmesi">
             <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
-              <h1 className={`${display} m-0 text-[clamp(48px,7vw,104px)] leading-[1] text-white`}>
+              <h1 className={`${display} m-0 text-[clamp(36px,11vw,104px)] leading-[1] text-white`}>
                 Chau Excel <span className="text-kf-manteca">de contraseñas</span>
               </h1>
               <p className="m-0 text-[15px] font-extrabold leading-relaxed tracking-[0.16em] text-white sm:text-[20px]">
@@ -299,33 +269,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           </section>
         </main>
 
-        <footer className="flex flex-wrap justify-between gap-12 rounded-[48px] bg-kf-azul p-8 text-white sm:p-14 lg:p-20">
-          <div className="flex min-w-0 flex-[1_1_360px] flex-col items-start gap-5">
-            <LogoBadge id="kf-ring-footer" size={104} ink="#fff" center="var(--kf-manteca)" />
-            <h2 className={`${display} m-0 text-[clamp(48px,5vw,76px)] leading-[1.02]`}>Hablemos</h2>
-            <p className="m-0 max-w-[420px] text-[17px] font-semibold text-[#dce8f5]">
-              Contanos cuántos clientes manejás y te armamos el piloto. Escribinos a <span className="text-white">hola@kitifica.com</span>.
-            </p>
-            <Link href="/contacto" className={`${pill} bg-kf-carmesi text-white`}>ESCRIBINOS</Link>
-          </div>
-          <nav aria-label="Pie de página" className="grid min-w-0 flex-[2_1_480px] grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-6">
-            {[
-              { h: "Producto", links: [["#como", "Cómo funciona"], ["#planes", "Precios"], ["/extension", "Extensión"]] },
-              { h: "Confianza", links: [["/seguridad", "Seguridad"], ["/privacidad", "Privacidad"], ["/terminos", "Términos"]] },
-              { h: "Ayuda", links: [["/contacto", "Contacto"], ["/devoluciones", "Devoluciones"], ["/login", "Entrar"]] },
-            ].map((col) => (
-              <div key={col.h} className="flex flex-col gap-2.5">
-                <span className="text-[15px] font-bold text-[#dce8f5]">{col.h}</span>
-                {col.links.map(([href, label]) => (
-                  <Link key={href} href={href} prefetch={false} className={`${display} text-[24px] text-white no-underline hover:text-kf-manteca`}>
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </nav>
-          <div className="basis-full text-[13px] font-semibold tracking-[0.08em] text-[#dce8f5]">© 2026 BÓVEDA KF-1 · KITIFICA</div>
-        </footer>
+        <BrandFooter />
       </div>
     </div>
   );

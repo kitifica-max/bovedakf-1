@@ -1,6 +1,4 @@
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { SectionHead } from "@/components/site/section-head";
+import { PageHero, pageCard } from "@/components/brand/shapes";
 import Link from "next/link";
 import { CopyCodeBlock } from "@/components/copy-code-block";
 
@@ -12,19 +10,20 @@ export const metadata = {
 
 export default function ConnectPage() {
   return (
-    <div className="flex flex-col items-center gap-10 px-4 pb-16 sm:gap-16 sm:px-8">
-      <SiteHeader />
-      <main className="w-full max-w-3xl rounded-2xl border border-border-soft bg-paper p-8 sm:p-12">
-        <SectionHead
-          kicker="Skill"
-          title="Conectá tu agente a KF-1"
-          lead="Tu agente de IA puede listar credenciales y generar links temporales para que vos las veas. Las contraseñas NUNCA se exponen al modelo."
-        />
+    <>
+      <PageHero
+        pair="lavanda"
+        icon="spark"
+        kicker="Skill para agentes de IA"
+        title="Conectá tu agente a KF-1"
+        lead="Tu agente puede listar cuentas y generar links temporales para que vos las veas. Las contraseñas nunca se exponen al modelo."
+      />
+      <div className={pageCard}>
 
         <div className="flex flex-col gap-6">
           {/* Claude Code - Skill */}
-          <div className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-6">
-            <h3 className="font-display text-lg font-semibold text-ink">Claude Code — Skill</h3>
+          <div className="rounded-[28px] bg-kf-amarillo p-6">
+            <h3 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Claude Code — Skill</h3>
             <p className="mt-2 text-sm text-ink-soft">
               La forma más simple. Funciona en terminal, escritorio, y cualquier modo.
             </p>
@@ -52,8 +51,8 @@ export default function ConnectPage() {
           </div>
 
           {/* Security */}
-          <div className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-6">
-            <h3 className="mb-2 font-display text-sm font-semibold text-ink">Seguridad</h3>
+          <div className="rounded-[28px] bg-kf-amarillo p-6">
+            <h3 className="mb-2 font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Seguridad</h3>
             <ul className="flex flex-col gap-1.5 text-xs leading-relaxed text-ink-soft">
               <li>• El agente NUNCA recibe contraseñas — solo links temporales</li>
               <li>• Vos abrís el link en tu navegador para ver el secreto</li>
@@ -62,8 +61,7 @@ export default function ConnectPage() {
             </ul>
           </div>
         </div>
-      </main>
-      <SiteFooter />
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { PageHero } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Extensión de Chrome — Bóveda KF-1",
@@ -11,57 +10,41 @@ export const metadata: Metadata = {
 
 export default function ExtensionPage() {
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto flex w-full max-w-3xl flex-col items-center gap-8 px-4 pb-20 sm:px-8" style={{ paddingTop: "5.75rem" }}>
+    <div className="flex w-full flex-col gap-8">
 
-        {/* ── Hero ── */}
-        <div className="w-full text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue/30 bg-blue/[0.08] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-blue-soft">
-            Extensión para Chrome
-          </span>
-
-          <h1 className="font-display mt-4 text-3xl font-bold leading-tight text-ink sm:text-4xl">
-            Autofill desde tu bóveda
-          </h1>
-          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-ink-soft">
-            Instalá la extensión una sola vez y rellená cualquier formulario de login con tus
-            credenciales en un click. Sin copiar y pegar.
-          </p>
-
-          {/* Download CTA */}
-          <div className="mt-10 flex flex-col items-center gap-2">
+        <PageHero
+          pair="azul"
+          icon="puzzle"
+          kicker="Extensión para Chrome"
+          title="Autocompletá logins en un clic"
+          lead="Instalá la extensión una vez y rellená el login de cualquier cuenta de tus clientes. Sin copiar y pegar."
+        >
+          <div className="flex flex-wrap items-center gap-3">
             <a
               href="/kf1-extension.zip"
               download="kf1-extension.zip"
-              className="inline-flex items-center gap-3 whitespace-nowrap rounded-full bg-blue px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-blue/25 transition-opacity hover:opacity-90"
+              className="inline-flex min-h-13 items-center gap-2.5 rounded-full bg-kf-manteca px-7 text-[13px] font-extrabold tracking-[0.14em] text-kf-azul-hondo no-underline transition hover:opacity-90"
             >
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M8 2v8M4 7l4 4 4-4M2 13h12"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2v8M4 7l4 4 4-4M2 13h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Descargar extensión
+              DESCARGAR EXTENSIÓN
             </a>
-            <span className="text-xs text-ink-soft/60">Chrome · Gratis · v1.0</span>
+            <span className="text-xs font-bold tracking-[0.12em]">CHROME · GRATIS · V1.0</span>
           </div>
-        </div>
+        </PageHero>
 
         {/* ── Steps ── */}
         <div className="flex w-full flex-col gap-4">
 
           {/* Step 01 */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-6 sm:p-7">
+          <div className="rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
             <div className="mb-5 flex items-start gap-4">
-              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue text-sm font-bold text-white">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full font-brand text-lg font-extrabold bg-kf-carmesi text-kf-manteca">
                 01
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-ink">Descargá la extensión</h2>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Descargá la extensión</h2>
                 <p className="text-xs text-ink-soft">Un archivo ZIP con todo lo necesario</p>
               </div>
             </div>
@@ -69,7 +52,7 @@ export default function ExtensionPage() {
               <p className="text-sm leading-relaxed text-ink-soft">
                 Hacé click en <strong className="text-ink">&ldquo;Descargar extensión&rdquo;</strong> arriba. Se
                 guardará un archivo{" "}
-                <code className="rounded bg-gray-deep/60 px-1.5 py-0.5 font-mono text-xs text-blue-soft">
+                <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
                   kf1-extension.zip
                 </code>{" "}
                 en tu carpeta de descargas.
@@ -77,7 +60,7 @@ export default function ExtensionPage() {
               <p className="text-sm leading-relaxed text-ink-soft">
                 <strong className="text-ink">Importante:</strong> Antes de instalar, descomprimí el
                 archivo haciendo doble click sobre él. Obtenés una carpeta llamada{" "}
-                <code className="rounded bg-gray-deep/60 px-1.5 py-0.5 font-mono text-xs text-blue-soft">
+                <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
                   chrome-extension
                 </code>
                 . No la muevas ni la borres — Chrome la va a necesitar en esa ubicación para
@@ -109,13 +92,13 @@ export default function ExtensionPage() {
           </div>
 
           {/* Step 02 */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-6 sm:p-7">
+          <div className="rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
             <div className="mb-5 flex items-start gap-4">
-              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue text-sm font-bold text-white">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full font-brand text-lg font-extrabold bg-kf-bosque text-kf-lima">
                 02
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-ink">Instalá en Chrome</h2>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Instalá en Chrome</h2>
                 <p className="text-xs text-ink-soft">Cuatro clics y listo</p>
               </div>
             </div>
@@ -123,7 +106,7 @@ export default function ExtensionPage() {
               {[
                 <>
                   Abrí Chrome y en la barra de direcciones escribí{" "}
-                  <code className="rounded bg-gray-deep/60 px-1.5 py-0.5 font-mono text-xs font-bold text-blue-soft">
+                  <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs font-bold text-kf-azul">
                     chrome://extensions
                   </code>{" "}
                   y presioná Enter.
@@ -140,14 +123,14 @@ export default function ExtensionPage() {
                 </>,
                 <>
                   Navegá hasta la carpeta{" "}
-                  <code className="rounded bg-gray-deep/60 px-1.5 py-0.5 font-mono text-xs text-blue-soft">
+                  <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
                     chrome-extension
                   </code>{" "}
                   que descomprimiste y hacé click en <strong className="text-ink">Abrir</strong>.
                 </>,
               ].map((text, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/20 text-[10px] font-bold text-blue-soft">
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/20 text-[10px] font-bold text-kf-azul">
                     {String.fromCharCode(65 + i)}
                   </span>
                   <p className="text-sm leading-relaxed text-ink-soft">{text}</p>
@@ -187,13 +170,13 @@ export default function ExtensionPage() {
           </div>
 
           {/* Step 03 */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-6 sm:p-7">
+          <div className="rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
             <div className="mb-5 flex items-start gap-4">
-              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue text-sm font-bold text-white">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full font-brand text-lg font-extrabold bg-kf-durazno text-kf-carmesi-hondo">
                 03
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-ink">Fijá la extensión</h2>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Fijá la extensión</h2>
                 <p className="text-xs text-ink-soft">Para tenerla siempre visible en la barra</p>
               </div>
             </div>
@@ -209,7 +192,7 @@ export default function ExtensionPage() {
                 </>,
               ].map((text, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/20 text-[10px] font-bold text-blue-soft">
+                  <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/20 text-[10px] font-bold text-kf-azul">
                     {i + 1}
                   </span>
                   <p className="text-sm leading-relaxed text-ink-soft">{text}</p>
@@ -221,11 +204,11 @@ export default function ExtensionPage() {
           {/* Step 04 */}
           <div className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-6 sm:p-7">
             <div className="mb-5 flex items-start gap-4">
-              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue text-sm font-bold text-white">
+              <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full font-brand text-lg font-extrabold bg-kf-lavanda text-kf-amarillo">
                 04
               </span>
               <div>
-                <h2 className="font-display text-lg font-bold text-ink">Conectá tu cuenta</h2>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Conectá tu cuenta</h2>
                 <p className="text-xs text-ink-soft">Solo una vez — tarda 2 minutos</p>
               </div>
             </div>
@@ -235,7 +218,7 @@ export default function ExtensionPage() {
                   Iniciá sesión en tu bóveda y andá a{" "}
                   <Link
                     href="/dashboard/ai"
-                    className="font-medium text-blue-soft underline underline-offset-2 hover:opacity-80"
+                    className="font-medium text-kf-azul underline underline-offset-2 hover:opacity-80"
                   >
                     Conectar IA
                   </Link>{" "}
@@ -298,7 +281,7 @@ export default function ExtensionPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-display text-base font-bold text-ink">¡Listo para usar!</h3>
+              <h3 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">¡Listo para usar!</h3>
               <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                 Andá a cualquier sitio con un formulario de login, hacé click en el ícono de Bóveda
                 KF-1 en Chrome, elegí la credencial y listo — los campos se rellenan solos.
@@ -309,7 +292,7 @@ export default function ExtensionPage() {
 
         {/* ── FAQ ── */}
         <div className="flex w-full flex-col gap-3">
-          <h2 className="font-display text-xl font-bold text-ink">Preguntas frecuentes</h2>
+          <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Preguntas frecuentes</h2>
           {[
             {
               q: "¿Por qué necesita el modo desarrollador?",
@@ -338,13 +321,11 @@ export default function ExtensionPage() {
         {/* ── Footer CTA ── */}
         <p className="text-center text-sm text-ink-soft/60">
           ¿Tenés problemas con la instalación?{" "}
-          <a href="mailto:hola@kitifica.com" className="text-blue-soft hover:underline">
+          <a href="mailto:hola@kitifica.com" className="text-kf-azul hover:underline">
             Escribinos a hola@kitifica.com
           </a>
         </p>
 
-        <SiteFooter />
-      </main>
-    </>
+    </div>
   );
 }

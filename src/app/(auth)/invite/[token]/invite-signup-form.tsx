@@ -7,7 +7,7 @@ import { acceptInviteAsNewUserAction } from "@/app/dashboard/actions";
 import { CTAButton } from "@/components/site/cta-button";
 
 const inputCls =
-  "w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink";
+  "h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm";
 
 export function InviteSignupForm({ token, email }: { token: string; email: string }) {
   const router = useRouter();
@@ -54,7 +54,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
         name="password"
         type="password"
         autoComplete="new-password"
-        placeholder="Contraseña (mín. 10 caracteres)"
+        placeholder="Contraseña (mín. 10)"
         required
         minLength={10}
         className={inputCls}
@@ -71,7 +71,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
         className={inputCls}
       />
       {error && (
-        <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
       )}
       <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
         {pending ? "Creando..." : "Crear cuenta y unirme"}
