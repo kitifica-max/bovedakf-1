@@ -17,6 +17,7 @@ export const ICONS = {
   refund: <><path d="M4 12a8 8 0 1 0 8-8" /><path d="M4 5v4h4" /><path d="M12 8v8M9.5 10.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4" /></>,
   puzzle: <><path d="M9 4h3a2 2 0 1 1 4 0h3v5a2 2 0 1 1 0 4v6h-6a2 2 0 1 0-4 0H4v-6a2 2 0 1 0 0-4V4z" /></>,
   spark: <><path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3" /></>,
+  users: <><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><circle cx="17" cy="9" r="2.5" /><path d="M16.5 14.6c2.6.3 4.5 2.2 4.5 5" /></>,
 } as const;
 export type IconName = keyof typeof ICONS;
 
@@ -88,11 +89,11 @@ export const pageCard = "rounded-[40px] border-2 border-kf-borde bg-white p-6 sm
 
 const DOT_COLORS = ["var(--kf-carmesi)", "var(--kf-azul)", "var(--kf-bosque)", "var(--kf-durazno)", "var(--kf-lavanda)"];
 
-// Small starburst bullet for section headings; cycles the palette by index.
-export function StarDot({ i }: { i: number }) {
+// Small starburst bullet for section headings; cycles the palette by index, or a fixed `color` on colored grounds.
+export function StarDot({ i, color }: { i: number; color?: string }) {
   return (
     <svg viewBox="0 0 200 200" aria-hidden="true" className="h-7 w-7 shrink-0">
-      <polygon points={STAR_POINTS} fill={DOT_COLORS[i % DOT_COLORS.length]} />
+      <polygon points={STAR_POINTS} fill={color ?? DOT_COLORS[i % DOT_COLORS.length]} />
     </svg>
   );
 }

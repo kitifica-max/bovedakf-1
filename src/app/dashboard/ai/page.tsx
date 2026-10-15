@@ -5,6 +5,9 @@ import Link from "next/link";
 import { KeyRoundIcon, LockIcon, ShieldCheckIcon } from "@/components/icons";
 import { CliTokenManager } from "@/components/cli-token-manager";
 import { CopyCodeBlock } from "@/components/copy-code-block";
+import { AppShell } from "../app-shell";
+import { PAIRS, PageHero, StarDot } from "@/components/brand/shapes";
+import { appCard, appH2, kicker } from "@/components/brand/styles";
 
 export default async function AiDashboardPage() {
   const session = await auth();
@@ -27,163 +30,133 @@ export default async function AiDashboardPage() {
       .map((c) => ({ ...c, vaultId: v.id, vaultName: v.name }))
   );
 
-  const firstVaultId = vaults[0]?.id;
+  const on = aiCredentials.length > 0;
+  const STEP_PAIRS = ["carmesi", "bosque", "durazno", "azul"] as const;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
-      {/* Glass header */}
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border-soft bg-paper/60 px-4 py-3 backdrop-blur-xl md:px-6">
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-on-dark.svg" alt="KF-1" className="h-5 w-auto" />
-          <div className="h-4 w-px bg-border-soft" />
-          <span className="text-sm font-semibold text-ink">Conectar IA</span>
+    <AppShell active="ia">
+      <PageHero
+        pair="lavanda"
+        icon="spark"
+        kicker="Skill para agentes de IA"
+        title="Conectá tu IA"
+        lead="Tu agente pide cuentas en lenguaje natural y recibe links temporales que vos abrís. Nunca ve una contraseña."
+      />
+
+      <div className={`flex flex-wrap items-center gap-4 rounded-[28px] px-6 py-5 ${on ? "bg-kf-bosque text-kf-lima" : "bg-kf-amarillo text-kf-lavanda"}`}>
+        <ShieldCheckIcon className="h-9 w-9 shrink-0" />
+        <div className="flex min-w-0 flex-[1_1_240px] flex-col">
+          <p className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">
+            {on
+              ? `${aiCredentials.length} cuenta${aiCredentials.length !== 1 ? "s" : ""} habilitada${aiCredentials.length !== 1 ? "s" : ""} para IA`
+              : "Ninguna cuenta habilitada para IA"}
+          </p>
+          <p className="m-0 text-sm font-semibold">
+            {on ? "Los agentes pueden pedir links temporales de esas cuentas." : "Activá «Acceso IA» en cada cuenta desde la ficha del cliente."}
+          </p>
         </div>
-        {firstVaultId && (
-          <Link
-            href={`/dashboard/${firstVaultId}`}
-            className="flex items-center gap-1.5 rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:text-ink"
-          >
-            <span aria-hidden="true">←</span> Volver
-          </Link>
-        )}
-      </header>
+      </div>
 
-      {/* Scrollable content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6 md:px-6">
+      <section className={`${appCard} flex flex-col gap-5`}>
+        <h2 className={appH2}>Cómo funciona</h2>
+        <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 p-0">
+          {[
+            "Generá un token CLI en esta página.",
+            "Instalá la skill de KF-1 en Claude Code con dos comandos.",
+            "Pedile cuentas en lenguaje natural: la skill genera links temporales.",
+            "Abrí el link en tu navegador para ver la contraseña.",
+          ].map((step, i) => {
+            const c = PAIRS[STEP_PAIRS[i]];
+            return (
+              <li key={i} style={{ background: c.bg, color: c.ink }} className="flex min-w-0 flex-col gap-3 rounded-[28px] p-5">
+                <span className="font-brand text-5xl leading-none font-extrabold">{i + 1}</span>
+                <span className="text-sm font-bold">{step}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
 
-          {/* Status chip */}
-          <div className={`flex items-center gap-3 rounded-2xl border p-4 ${aiCredentials.length > 0 ? "border-blue/25 bg-blue/[0.07]" : "border-border-soft bg-paper"}`}>
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue text-paper">
-              <ShieldCheckIcon className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-ink">
-                {aiCredentials.length > 0
-                  ? `${aiCredentials.length} credencial${aiCredentials.length !== 1 ? "es" : ""} habilitada${aiCredentials.length !== 1 ? "s" : ""} para IA`
-                  : "Sin credenciales habilitadas para IA"}
-              </p>
-              <p className="text-xs text-ink-soft">
-                {aiCredentials.length > 0
-                  ? "Los agentes pueden solicitar links temporales de acceso."
-                  : "Habilitá el acceso IA en cada credencial desde tu bóveda."}
-              </p>
+      <section className={`${appCard} flex flex-col gap-4`}>
+        <h2 className={appH2}>Instalar la skill</h2>
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className={`${kicker} mb-2`}>1 · Descargá la skill</p>
+            <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && curl -sL https://kf1.kitifica.com/skill/SKILL.md -o ~/.claude/skills/kf1/SKILL.md && curl -sL https://kf1.kitifica.com/skill/kf1.sh -o ~/.claude/skills/kf1/kf1.sh" />
+          </div>
+          <div>
+            <p className={`${kicker} mb-2`}>2 · Configurá tu token</p>
+            <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
+          </div>
+          <div>
+            <p className={`${kicker} mb-2`}>3 · Usala desde Claude Code</p>
+            <div className="flex flex-col gap-2">
+              <CopyCodeBlock code="/kf1 list" />
+              <CopyCodeBlock code="/kf1 view <credential-id>" />
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* How it works */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-5">
-            <h2 className="font-display text-sm font-semibold text-ink">Cómo funciona</h2>
-            <ol className="mt-4 flex flex-col gap-0">
-              {[
-                "Generá un token CLI en esta página.",
-                "Instalá la skill de KF-1 en Claude Code con dos comandos.",
-                "Pedile credenciales en lenguaje natural. La skill genera links temporales.",
-                "Abrí el link en tu navegador para ver la credencial.",
-              ].map((step, i) => (
-                <li key={i} className="flex items-start gap-3 py-2.5 border-b border-border-soft last:border-0">
-                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue/[0.12] text-[10px] font-bold text-blue mt-0.5">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm text-ink-soft">{step}</span>
-                </li>
-              ))}
-            </ol>
+      <section className={`${appCard} flex flex-col gap-4`}>
+        <div className="flex items-start gap-3">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-kf-durazno text-kf-carmesi-hondo">
+            <KeyRoundIcon className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className={appH2}>Token CLI</h2>
+            <p className="m-0 mt-1 text-sm font-semibold text-kf-tinta-suave">
+              Autentica la skill sin OAuth. Expira en 30 días. Regeneralo si se filtra.
+            </p>
           </div>
+        </div>
+        <CliTokenManager />
+      </section>
 
-          {/* Install */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-5">
-            <h2 className="font-display text-sm font-semibold text-ink">Instalar Skill</h2>
-            <div className="mt-4 flex flex-col gap-3">
-              <div>
-                <p className="mb-2 text-xs font-medium text-ink-soft">1. Descargá la skill:</p>
-                <CopyCodeBlock code="mkdir -p ~/.claude/skills/kf1 && curl -sL https://kf1.kitifica.com/skill/SKILL.md -o ~/.claude/skills/kf1/SKILL.md && curl -sL https://kf1.kitifica.com/skill/kf1.sh -o ~/.claude/skills/kf1/kf1.sh" />
-              </div>
-              <div>
-                <p className="mb-2 text-xs font-medium text-ink-soft">2. Configurá tu token:</p>
-                <CopyCodeBlock code="bash ~/.claude/skills/kf1/kf1.sh setup" />
-              </div>
-              <div>
-                <p className="mb-2 text-xs font-medium text-ink-soft">3. Usá la skill desde Claude Code:</p>
-                <div className="flex flex-col gap-2">
-                  <CopyCodeBlock code="/kf1 list" />
-                  <CopyCodeBlock code="/kf1 view <credential-id>" />
+      <section className={`${appCard} flex flex-col gap-4`}>
+        <h2 className={appH2}>Cuentas disponibles para IA</h2>
+        {!on ? (
+          <p className="m-0 text-sm font-semibold text-kf-tinta-suave">
+            Abrí un cliente y activá <strong className="text-kf-tinta">Acceso IA</strong> en la cuenta que quieras.
+          </p>
+        ) : (
+          <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+            {aiCredentials.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] bg-kf-niebla px-5 py-3.5">
+                <div className="min-w-0">
+                  <p className="m-0 truncate text-sm font-extrabold">{c.service}</p>
+                  <p className="m-0 truncate font-mono text-xs text-kf-tinta-suave">{c.username} · {c.vaultName}</p>
                 </div>
-              </div>
-            </div>
-          </div>
+                <Link href={`/dashboard/${c.vaultId}`} className="shrink-0 text-[13px] font-bold text-kf-azul underline decoration-2 underline-offset-4">
+                  Ver cliente
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-          {/* CLI Token */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-5">
-            <div className="flex items-start gap-3">
-              <KeyRoundIcon className="h-4 w-4 shrink-0 text-ink-soft mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <h2 className="font-display text-sm font-semibold text-ink">Token CLI</h2>
-                <p className="mt-1 text-xs text-ink-soft">
-                  Autenticá la skill sin OAuth. Expira en 30 días. Regeneralo si lo comprometés.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <CliTokenManager />
-            </div>
-          </div>
-
-          {/* IA-accessible credentials */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-5">
-            <h2 className="font-display text-sm font-semibold text-ink">
-              Credenciales disponibles para IA
-            </h2>
-            {aiCredentials.length === 0 ? (
-              <p className="mt-3 text-sm text-ink-soft">
-                Andá a tu bóveda, expandí una credencial y activá el toggle <strong className="text-ink">Acceso IA</strong>.
-              </p>
-            ) : (
-              <ul className="mt-3 flex flex-col gap-2">
-                {aiCredentials.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-gray/40 px-4 py-2.5">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-ink truncate">{c.service}</p>
-                      <p className="text-xs text-ink-soft">{c.username} · {c.vaultName}</p>
-                    </div>
-                    <Link
-                      href={`/dashboard/${c.vaultId}`}
-                      className="shrink-0 text-xs text-ink-soft underline decoration-border-soft underline-offset-4 transition hover:text-ink"
-                    >
-                      Ver bóveda
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Security */}
-          <div className="rounded-2xl border border-border-soft bg-paper p-5">
-            <div className="flex items-start gap-3">
-              <LockIcon className="h-4 w-4 shrink-0 text-ink-soft mt-0.5" />
-              <h2 className="font-display text-sm font-semibold text-ink">Seguridad</h2>
-            </div>
-            <ul className="mt-3 flex flex-col gap-0">
-              {[
-                <>El agente <strong className="text-ink">nunca</strong> recibe contraseñas en texto plano.</>,
-                "Solo recibe links temporales que vos abrís en el navegador.",
-                "Los links expiran en 1 hora.",
-                "El token CLI expira en 30 días.",
-                "Cada acceso queda registrado en auditoría.",
-                "Podés desactivar el acceso a cualquier credencial en cualquier momento.",
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 py-2 border-b border-border-soft last:border-0 text-xs text-ink-soft">
-                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue/40" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+      <section className="flex flex-col gap-4 rounded-[32px] bg-kf-azul p-6 text-white sm:p-8">
+        <div className="flex items-center gap-3">
+          <LockIcon className="h-6 w-6 shrink-0 text-kf-manteca" />
+          <h2 className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">Seguridad</h2>
         </div>
-      </main>
-    </div>
+        <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-2.5 p-0">
+          {[
+            <>El agente <strong>nunca</strong> recibe contraseñas en texto plano.</>,
+            "Solo recibe links temporales que vos abrís en el navegador.",
+            "Los links expiran en 1 hora.",
+            "El token CLI expira en 30 días.",
+            "Cada acceso queda registrado en auditoría.",
+            "Podés quitar el acceso a cualquier cuenta cuando quieras.",
+          ].map((item, i) => (
+            <li key={i} className="flex items-start gap-3 rounded-[20px] bg-white/10 px-4 py-3 text-sm font-semibold">
+              <StarDot i={i} color="var(--kf-manteca)" />
+              <span className="min-w-0">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </AppShell>
   );
 }

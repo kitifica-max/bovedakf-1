@@ -23,11 +23,11 @@ export function BuyPackButton({ links, label }: { links: number; label: string }
         type="button"
         onClick={buy}
         disabled={pending}
-        className="rounded-full bg-blue py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+        className="min-h-11 cursor-pointer rounded-full bg-white px-5 text-xs font-extrabold tracking-[0.12em] text-kf-tinta uppercase transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Abriendo pago…" : label}
       </button>
-      {error && <p role="alert" className="text-xs text-danger">{error}</p>}
+      {error && <p role="alert" className="m-0 rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-kf-carmesi-hondo">{error}</p>}
     </div>
   );
 }
@@ -51,7 +51,7 @@ export function PurchasePoller() {
     </p>
   ) : (
     <p className="flex items-center gap-2 text-sm text-ink-soft">
-      <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue border-t-transparent" />
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-kf-azul border-t-transparent" />
       Confirmando tu pago…
     </p>
   );
