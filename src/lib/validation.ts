@@ -65,3 +65,17 @@ export const shareLinkSchema = z.object({
   permission: z.enum(["READ", "DOWNLOAD"], { message: "Permiso inválido" }),
   expiresInHours: z.coerce.number({ message: "Expiración requerida" }).int().min(1).max(168), // 1h – 7d
 });
+
+export const changePasswordSchema = z
+  .object({
+    current: z.string().min(1, "Ingresá tu contraseña actual"),
+    next: z.string().min(10, "La nueva contraseña necesita al menos 10 caracteres"),
+    confirm: z.string(),
+  })
+  .refine((v) => v.next === v.confirm, { message: "Las contraseñas nuevas no coinciden", path: ["confirm"] })
+  .refine((v) => v.next !== v.current, { message: "La nueva contraseña tiene que ser distinta de la actual", path: ["next"] });
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Ingresá tu contraseña"),
+  confirmEmail: z.string().trim().toLowerCase().email("Escribí tu email para confirmar"),
+});

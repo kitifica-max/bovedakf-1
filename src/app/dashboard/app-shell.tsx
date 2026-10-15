@@ -5,7 +5,7 @@ import { isAdmin } from "@/lib/admin";
 import { LogoBadge } from "@/components/brand/logo-badge";
 import { SignOutButton } from "./sign-out-button";
 
-type NavId = "clientes" | "links" | "facturacion" | "ia" | "org" | "admin" | "admin-orgs";
+type NavId = "clientes" | "links" | "facturacion" | "ia" | "ajustes" | "org" | "admin" | "admin-orgs";
 
 const navCls = (active: boolean) =>
   `rounded-[18px] px-4 py-2.5 no-underline transition ${active ? "bg-kf-azul text-white" : "text-kf-azul hover:bg-white"}`;
@@ -27,6 +27,7 @@ export async function AppShell({ active, children }: { active?: NavId; children:
     { id: "links", href: "/dashboard/plans", label: "Links" },
     { id: "facturacion", href: "/dashboard/billing", label: "Facturación" },
     { id: "ia", href: "/dashboard/ai", label: "Conectar IA" },
+    { id: "ajustes", href: "/dashboard/settings", label: "Ajustes" },
     { href: "/extension", label: "Extensión" },
     ...(orgRole === "OWNER" || orgRole === "ADMIN" ? [{ id: "org" as const, href: "/dashboard/org", label: "Organización" }] : []),
     ...(isAdmin(email)

@@ -16,16 +16,13 @@ import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
 import { VerifyBanner } from "@/components/verify-banner";
 import { VerifyResult } from "@/components/verify-result";
-import { TwoFactorSettings } from "@/components/two-factor-settings";
-import { PasskeySettings } from "@/components/passkey-settings";
 import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
-import { ErrorBoundary } from "@/components/error-boundary";
 import { PlatformIcon } from "@/components/brand/platform-icon";
 import { PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
-type Tab = "cuentas" | "actividad" | "equipo" | "seguridad";
+type Tab = "cuentas" | "actividad" | "equipo";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
@@ -50,7 +47,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "cuentas", label: "Cuentas" },
   { id: "actividad", label: "Auditoría" },
   { id: "equipo", label: "Equipo" },
-  { id: "seguridad", label: "Seguridad" },
 ];
 
 const initialsOf = (name: string) =>
@@ -66,9 +62,7 @@ export function VaultView({
   vault,
   auditLogs,
   showSurvey,
-  totpEnabled,
   emailVerified,
-  passkeys,
   role,
   members,
   invites,
@@ -76,9 +70,7 @@ export function VaultView({
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
   showSurvey: boolean;
-  totpEnabled: boolean;
   emailVerified: boolean;
-  passkeys: { credentialID: string; credentialDeviceType: string; createdAt: Date }[];
   role: Role;
   members: { id: string; email: string; role: Role }[];
   invites: { id: string; email: string; role: Role }[];
@@ -175,14 +167,6 @@ export function VaultView({
           <p className="text-sm font-semibold text-kf-tinta-suave">Solo el propietario puede gestionar el equipo.</p>
         ))}
 
-      {activeTab === "seguridad" && (
-        <div className="flex flex-col gap-4">
-          <ErrorBoundary>
-            <PasskeySettings initialPasskeys={passkeys} />
-          </ErrorBoundary>
-          <TwoFactorSettings initialEnabled={totpEnabled} />
-        </div>
-      )}
     </section>
   );
 }

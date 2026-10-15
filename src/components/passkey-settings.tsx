@@ -52,9 +52,9 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
   }
 
   return (
-    <div className="rounded-2xl border border-border-soft bg-paper p-5">
+    <div className="rounded-[28px] bg-kf-niebla p-5">
       <div className="flex items-center gap-3">
-        <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray/60 text-ink-soft">
+        <span aria-hidden="true" className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-kf-azul text-white">
           <FingerprintIcon className="h-4 w-4" />
         </span>
         <div>
@@ -83,7 +83,7 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
           <button
             onClick={addPasskey}
             disabled={pending}
-            className="mt-4 w-full cursor-pointer rounded-full bg-ink px-4 py-3 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 min-h-11 cursor-pointer rounded-full bg-kf-azul px-5 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Creando..." : "Crear passkey"}
           </button>
@@ -92,7 +92,7 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
         <>
           <ul className="mt-4 flex flex-col gap-1.5 border-t border-border-soft pt-4 text-sm">
             {passkeys.map((p) => (
-              <li key={p.credentialID} className="flex items-center justify-between gap-2">
+              <li key={p.credentialID} className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-ink-soft">
                   {p.credentialDeviceType === "multiDevice" ? "Sincronizada" : "Este dispositivo"} · agregada{" "}
                   {p.createdAt.toLocaleDateString()}
@@ -123,7 +123,7 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
       )}
 
       {error && (
-        <p role="alert" className="mt-3 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        <p role="alert" className="mt-3 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
       )}
 
       <details className="group mt-4 border-t border-border-soft pt-3">

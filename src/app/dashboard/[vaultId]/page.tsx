@@ -32,18 +32,13 @@ export default async function VaultPage({
 
   if (!vault || !role || !meId) notFound();
 
-  // Account panels (survey, verify banner, 2FA, passkeys) are the LOGGED-IN
-  // user's own settings — not the vault owner's.
-  const [auditLogs, me, passkeys, memberRows, invites] = await Promise.all([
+  // Account panels (survey, verify banner) are the LOGGED-IN user's own settings — not the
+  // vault owner's. 2FA and passkeys live in /dashboard/settings.
+  const [auditLogs, me, memberRows, invites] = await Promise.all([
     db.auditLog.findMany({ where: { vaultId }, orderBy: { createdAt: "desc" }, take: 50 }),
     db.user.findUnique({
       where: { id: meId },
-      select: { email: true, surveyDismissedAt: true, totpEnabled: true, emailVerified: true },
-    }),
-    db.authenticator.findMany({
-      where: { userId: meId },
-      orderBy: { createdAt: "desc" },
-      select: { credentialID: true, credentialDeviceType: true, createdAt: true },
+      select: { email: true, surveyDismissedAt: true, emailVerified: true },
     }),
     db.vaultMember.findMany({
       where: { vaultId },
@@ -77,9 +72,7 @@ export default async function VaultPage({
           vault={vault}
           auditLogs={auditLogs}
           showSurvey={!me?.surveyDismissedAt}
-          totpEnabled={me?.totpEnabled ?? false}
           emailVerified={me ? emailIsVerified(me) : true}
-          passkeys={passkeys}
           role={role}
           members={members}
           invites={invites}
