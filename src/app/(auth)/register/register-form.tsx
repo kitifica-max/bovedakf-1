@@ -58,7 +58,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
         </p>
         <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
           <div>
-            <label htmlFor="companyName" className="sr-only">Nombre de la empresa</label>
+            <label htmlFor="companyName" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la empresa</label>
             <input
               id="companyName"
               name="companyName"
@@ -71,7 +71,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
             />
           </div>
           <div>
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
               id="email"
               name="email"
@@ -84,7 +84,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
             />
           </div>
           <div>
-            <label htmlFor="password" className="sr-only">Contraseña</label>
+            <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
             <input
               id="password"
               name="password"
@@ -97,7 +97,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
             />
           </div>
           <div className="relative">
-            <label htmlFor="industry" className="sr-only">Rubro de tu empresa</label>
+            <label htmlFor="industry" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Rubro de tu empresa</label>
             <select
               id="industry"
               name="industry"
@@ -113,7 +113,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="bottleneck" className="sr-only">Qué tarea digital te quita más tiempo (opcional)</label>
+            <label htmlFor="bottleneck" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Qué tarea digital te quita más tiempo (opcional)</label>
             <textarea
               id="bottleneck"
               name="bottleneck"
@@ -122,7 +122,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               rows={2}
               className="w-full resize-none rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
-            <label htmlFor="currentSolution" className="sr-only">Cómo lo resolvés hoy (opcional)</label>
+            <label htmlFor="currentSolution" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Cómo lo resolvés hoy (opcional)</label>
             <textarea
               id="currentSolution"
               name="currentSolution"

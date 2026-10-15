@@ -22,10 +22,10 @@
   --kf-tinta-suave: #5b6383;
   --kf-niebla: #eef0f6;
   --kf-borde: #e4e7f0;
-  --kf-carmesi: #c8234f;
+  --kf-carmesi: #b31f47; /* AA: manteca text on it = 4.6:1 */
   --kf-carmesi-hondo: #a81b42;
   --kf-manteca: #ffd27a;
-  --kf-bosque: #0b6b47;
+  --kf-bosque: #0b6845; /* AA: lima text on it = 4.6:1 */
   --kf-bosque-hondo: #0b4a31;
   --kf-lima: #b9e35a;
   --kf-amarillo: #f4eea6;
@@ -107,6 +107,15 @@ body::before {
   font-family: var(--font-montserrat), "Helvetica Neue", Helvetica, sans-serif;
 }
 .kf-app .glass { background: #ffffff; border-color: var(--kf-borde); }
+/* Two-tone focus ring (tinta outline over a white halo): visible on white, misty and every colored
+   brand ground — a single azul ring vanished on azul/carmesí cards and the footer. */
+.kf-app :focus-visible,
+.kf-app:focus-visible {
+  outline: 3px solid var(--kf-tinta);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px #ffffff;
+}
+main:focus { outline: none; }
 /* Legacy type roles on brand pages: condensed uppercase headings (line-height ≥ 1.04 so
    Spanish accents on a second line never touch the line above), Montserrat kickers. */
 .kf-app .t-display,

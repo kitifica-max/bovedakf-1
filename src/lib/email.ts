@@ -60,10 +60,10 @@ const HEROES = {
   verify: { bg: "#1f6fb2", ink: "#ffffff", star: "star-verify.png" },
   reset: { bg: "#f4eea6", ink: "#4e52a6", star: "star-reset.png" },
   duplicate: { bg: "#f7c55a", ink: "#a81b42", star: "star-duplicate.png" },
-  opened: { bg: "#0b6b47", ink: "#b9e35a", star: "star-opened.png" },
+  opened: { bg: "#0b6845", ink: "#b9e35a", star: "star-opened.png" },
   invite: { bg: "#f1d3e3", ink: "#1b5a93", star: "star-invite.png" },
   paid: { bg: "#4e52a6", ink: "#f4eea6", star: "star-paid.png" },
-  failed: { bg: "#c8234f", ink: "#ffd27a", star: "star-failed.png" },
+  failed: { bg: "#b31f47", ink: "#ffd27a", star: "star-failed.png" },
 } as const;
 type Hero = keyof typeof HEROES;
 

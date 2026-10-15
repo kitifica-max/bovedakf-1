@@ -32,7 +32,7 @@ export default function OAuthSuccessPage() {
 
   if (!code || !callback) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4">
+      <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center p-4">
         <div className="glass w-full max-w-md rounded-2xl p-8 text-center">
           <p className="text-sm text-danger">Parámetros de autorización inválidos.</p>
         </div>
@@ -41,7 +41,7 @@ export default function OAuthSuccessPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center p-4">
       <div className="glass w-full max-w-md rounded-2xl p-8 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-on-dark.svg" alt="Bóveda KF-1" className="mx-auto mb-6 h-7 w-auto" />

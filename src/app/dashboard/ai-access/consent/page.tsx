@@ -58,14 +58,14 @@ export default function ConsentPage() {
 
   if (!token) {
     return (
-      <main className="flex min-h-dvh items-center justify-center p-4">
+      <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center p-4">
         <p className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-3 text-sm font-semibold text-kf-carmesi-hondo">Token de autorización no encontrado.</p>
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-4">
+    <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center p-4">
       <div className="w-full max-w-md overflow-hidden rounded-[40px] border-2 border-kf-borde bg-white">
         {/* Seal on its own row so the condensed title gets the full width at any screen size. */}
         <div className="flex flex-col gap-3 bg-kf-lavanda px-6 py-7 text-kf-amarillo sm:px-10">

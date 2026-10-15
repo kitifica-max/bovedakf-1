@@ -44,7 +44,7 @@ export default async function AiDashboardPage() {
       />
 
       <div className={`flex flex-wrap items-center gap-4 rounded-[28px] px-6 py-5 ${on ? "bg-kf-bosque text-kf-lima" : "bg-kf-amarillo text-kf-lavanda"}`}>
-        <ShieldCheckIcon className="h-9 w-9 shrink-0" />
+        <ShieldCheckIcon aria-hidden="true" className="h-9 w-9 shrink-0" />
         <div className="flex min-w-0 flex-[1_1_240px] flex-col">
           <p className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">
             {on
@@ -101,7 +101,7 @@ export default async function AiDashboardPage() {
       <section className={`${appCard} flex flex-col gap-4`}>
         <div className="flex items-start gap-3">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-kf-durazno text-kf-carmesi-hondo">
-            <KeyRoundIcon className="h-5 w-5" />
+            <KeyRoundIcon aria-hidden="true" className="h-5 w-5" />
           </span>
           <div className="min-w-0">
             <h2 className={appH2}>Token CLI</h2>
@@ -138,7 +138,7 @@ export default async function AiDashboardPage() {
 
       <section className="flex flex-col gap-4 rounded-[32px] bg-kf-azul p-6 text-white sm:p-8">
         <div className="flex items-center gap-3">
-          <LockIcon className="h-6 w-6 shrink-0 text-kf-manteca" />
+          <LockIcon aria-hidden="true" className="h-6 w-6 shrink-0 text-kf-manteca" />
           <h2 className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">Seguridad</h2>
         </div>
         <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-2.5 p-0">

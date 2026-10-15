@@ -1,13 +1,13 @@
 // Client-safe catalog for agency vaults: each client vault gets a color, each credential a platform.
 export const PLATFORMS = [
-  { id: "instagram", label: "Instagram", short: "IG", color: "#c8234f" },
+  { id: "instagram", label: "Instagram", short: "IG", color: "#b31f47" },
   { id: "tiktok", label: "TikTok", short: "TT", color: "#1b2340" },
   { id: "facebook", label: "Facebook", short: "FB", color: "#1f6fb2" },
   { id: "meta_business", label: "Meta Business", short: "MB", color: "#1b5a93" },
   { id: "linkedin", label: "LinkedIn", short: "IN", color: "#1b5a93" },
   { id: "x", label: "X", short: "X", color: "#1b2340" },
   { id: "youtube", label: "YouTube", short: "YT", color: "#a81b42" },
-  { id: "google_ads", label: "Google Ads", short: "GA", color: "#0b6b47" },
+  { id: "google_ads", label: "Google Ads", short: "GA", color: "#0b6845" },
   { id: "email", label: "Email", short: "@", color: "#4e52a6" },
   { id: "other", label: "Otros", short: "•", color: "#5b6383" },
 ] as const;
@@ -21,9 +21,9 @@ export const platformOf = (id: string) => PLATFORMS.find((p) => p.id === id) ?? 
 export const CLIENT_COLORS = [
   { id: "azul", label: "Azul", bg: "#1f6fb2", ink: "#ffffff", text: "#1f6fb2" },
   { id: "rosa", label: "Rosa", bg: "#f1d3e3", ink: "#1b5a93", text: "#1b5a93" },
-  { id: "bosque", label: "Bosque", bg: "#0b6b47", ink: "#b9e35a", text: "#0b6b47" },
+  { id: "bosque", label: "Bosque", bg: "#0b6845", ink: "#b9e35a", text: "#0b6845" },
   { id: "amarillo", label: "Amarillo", bg: "#f4eea6", ink: "#4e52a6", text: "#4e52a6" },
-  { id: "carmesi", label: "Carmesí", bg: "#c8234f", ink: "#ffd27a", text: "#c8234f" },
+  { id: "carmesi", label: "Carmesí", bg: "#b31f47", ink: "#ffd27a", text: "#b31f47" },
   { id: "durazno", label: "Durazno", bg: "#f7c55a", ink: "#a81b42", text: "#a81b42" },
 ] as const;
 

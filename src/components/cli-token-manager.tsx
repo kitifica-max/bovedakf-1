@@ -98,8 +98,12 @@ export function CliTokenManager() {
         </div>
       )}
 
-      <form onSubmit={handleGenerate} className="flex flex-wrap gap-2.5">
+      <form onSubmit={handleGenerate} className="flex flex-wrap items-end gap-2.5">
+        <label htmlFor="cli-token-name" className="w-full text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">
+          Nombre del token
+        </label>
         <input
+          id="cli-token-name"
           type="text"
           value={tokenName}
           onChange={(e) => setTokenName(e.target.value)}

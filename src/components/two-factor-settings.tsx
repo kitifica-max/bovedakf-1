@@ -95,7 +95,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
         </div>
 
         <form onSubmit={confirmEnrollment} className="mt-4 flex flex-col gap-2" noValidate>
-          <label htmlFor="confirm-code" className="sr-only">Código de verificación</label>
+          <label htmlFor="confirm-code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código de verificación</label>
           <input
             id="confirm-code"
             name="code"
@@ -172,7 +172,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
 
       {disabling && (
         <form onSubmit={submitDisable} className="mt-4 flex flex-wrap items-center gap-2 border-t border-border-soft pt-4" noValidate>
-          <label htmlFor="disable-code" className="sr-only">Código para confirmar</label>
+          <label htmlFor="disable-code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código para confirmar</label>
           <input
             id="disable-code"
             name="code"

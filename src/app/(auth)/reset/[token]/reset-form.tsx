@@ -49,7 +49,7 @@ export function ResetForm({ token, email }: { token: string; email: string }) {
         <>
           <p className="mt-1 text-sm text-ink-soft">Mínimo 10 caracteres.</p>
           <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
-            <label htmlFor="password" className="sr-only">Contraseña nueva</label>
+            <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña nueva</label>
             <input
               id="password"
               name="password"
@@ -60,7 +60,7 @@ export function ResetForm({ token, email }: { token: string; email: string }) {
               minLength={10}
               className={inputCls}
             />
-            <label htmlFor="confirm" className="sr-only">Repetir contraseña</label>
+            <label htmlFor="confirm" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Repetir contraseña</label>
             <input
               id="confirm"
               name="confirm"

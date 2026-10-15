@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="kf-app min-h-dvh">
       <div className="mx-auto flex max-w-[1360px] flex-col gap-10 px-4 pb-12 sm:px-8">
         <BrandHeader signedIn={false} />
-        <main className="flex w-full flex-1 flex-wrap items-stretch justify-center gap-8">
+        <main id="main" tabIndex={-1} className="flex w-full flex-1 flex-wrap items-stretch justify-center gap-8">
           <div className="order-last flex max-w-md flex-[1_1_380px] flex-col gap-8 rounded-[48px] bg-kf-carmesi p-7 text-kf-manteca sm:p-10 lg:order-none">
             {/* Sticker on its own row: the condensed headline needs the panel's full width. */}
             <div className="flex flex-col gap-4">

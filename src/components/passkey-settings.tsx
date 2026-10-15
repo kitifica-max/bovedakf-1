@@ -127,7 +127,7 @@ export function PasskeySettings({ initialPasskeys }: { initialPasskeys: Passkey[
       )}
 
       <details className="group mt-4 border-t border-border-soft pt-3">
-        <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-medium text-ink-soft marker:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-xs font-medium text-ink-soft marker:hidden">
           ¿Me sale un código QR? Qué hacer
           <ChevronDownIcon aria-hidden="true" className="h-3.5 w-3.5 shrink-0 transition group-open:rotate-180" />
         </summary>

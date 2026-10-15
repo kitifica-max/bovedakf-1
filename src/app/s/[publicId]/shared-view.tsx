@@ -82,7 +82,7 @@ export function SharedCredentialView() {
   }, [publicId]);
 
   return (
-    <main className="kf-app flex min-h-dvh items-center justify-center p-4">
+    <main id="main" tabIndex={-1} className="kf-app flex min-h-dvh items-center justify-center p-4">
       <div className="w-full max-w-md overflow-hidden rounded-[40px] border-2 border-kf-borde bg-white">
         {/* Seal on its own row so the condensed title gets the full width at any screen size. */}
         <div className="flex flex-col gap-3 bg-kf-azul px-6 py-7 text-white sm:px-10">

@@ -89,7 +89,7 @@ export default async function BillingPage({
           <div className="flex flex-wrap gap-2.5">
             <a href="https://panel.wompi.sv/Recurrentes" target="_blank" rel="noopener noreferrer" className={pillLine}>
               GESTIONAR EN WOMPI ↗
-            </a>
+            <span className="sr-only"> (se abre en otra pestaña)</span></a>
           </div>
         </section>
       )}

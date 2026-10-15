@@ -29,8 +29,8 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
 
   return (
     <div className="mt-4 rounded-2xl border border-border-soft p-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 flex-[1_1_180px]">
           <h3 className="text-sm font-medium text-ink">Acceso IA (Skill)</h3>
           <p className="mt-0.5 text-xs text-ink-soft">
             Permite que agentes de IA generen links temporales para esta credencial
@@ -41,14 +41,16 @@ export function AiAccessPanel({ credentialId, credentialService, initialAiAccess
           disabled={loading}
           onClick={handleToggle}
           aria-checked={aiAccessible}
+          aria-label={`Acceso IA para ${credentialService}`}
           role="switch"
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ${
-            aiAccessible ? "bg-green-500" : "bg-gray"
+          className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors duration-200 ${
+            aiAccessible ? "border-kf-bosque bg-kf-bosque" : "border-kf-tinta-suave bg-white"
           } disabled:opacity-50`}
         >
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              aiAccessible ? "translate-x-6" : "translate-x-1"
+            aria-hidden="true"
+            className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+              aiAccessible ? "translate-x-6 bg-kf-lima" : "translate-x-1 bg-kf-tinta-suave"
             }`}
           />
         </button>

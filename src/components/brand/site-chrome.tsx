@@ -4,7 +4,7 @@ import { display, pill, pillSm } from "./styles";
 
 // Header and footer shared by the home and every public page (agencies brand).
 export function BrandHeader({ signedIn }: { signedIn: boolean }) {
-  const navLink = `${display} text-[24px] text-kf-azul no-underline hover:text-kf-azul-hondo`;
+  const navLink = `${display} inline-flex min-h-11 items-center text-[24px] text-kf-azul no-underline hover:text-kf-azul-hondo`;
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 pt-6 md:grid md:grid-cols-[1fr_auto_1fr]">
       <nav aria-label="Principal" className="hidden flex-wrap gap-x-8 gap-y-2 md:flex">
@@ -20,7 +20,7 @@ export function BrandHeader({ signedIn }: { signedIn: boolean }) {
           <Link href="/dashboard" prefetch={false} className={`${pillSm} bg-kf-azul text-white`}>MI BÓVEDA</Link>
         ) : (
           <>
-            <Link href="/login" prefetch={false} className={`${display} text-[20px] text-kf-azul no-underline hover:text-kf-azul-hondo sm:text-[24px]`}>Entrar</Link>
+            <Link href="/login" prefetch={false} className={`${display} inline-flex min-h-11 items-center text-[20px] text-kf-azul no-underline hover:text-kf-azul-hondo sm:text-[24px]`}>Entrar</Link>
             <Link href="/register" prefetch={false} className={`${pillSm} bg-kf-azul text-white`}>CREAR CUENTA</Link>
           </>
         )}
@@ -35,7 +35,7 @@ export function BrandFooter() {
     <div className="flex min-w-0 flex-[1_1_360px] flex-col items-start gap-5">
       <LogoBadge id="kf-ring-footer" size={104} ink="#fff" center="var(--kf-manteca)" />
       <h2 className={`${display} m-0 text-[clamp(48px,5vw,76px)] leading-[1.02]`}>Hablemos</h2>
-      <p className="m-0 max-w-[420px] text-[17px] font-semibold text-[#dce8f5]">
+      <p className="m-0 max-w-[420px] text-[17px] font-semibold text-white">
         Contanos cuántos clientes manejás y te armamos el piloto. Escribinos a <span className="text-white">hola@kitifica.com</span>.
       </p>
       <Link href="/contacto" className={`${pill} bg-kf-carmesi text-white`}>ESCRIBINOS</Link>
@@ -46,17 +46,17 @@ export function BrandFooter() {
         { h: "Confianza", links: [["/seguridad", "Seguridad"], ["/privacidad", "Privacidad"], ["/terminos", "Términos"]] },
         { h: "Ayuda", links: [["/contacto", "Contacto"], ["/devoluciones", "Devoluciones"], ["/login", "Entrar"]] },
       ].map((col) => (
-        <div key={col.h} className="flex flex-col gap-2.5">
-          <span className="text-[15px] font-bold text-[#dce8f5]">{col.h}</span>
+        <div key={col.h} className="flex flex-col gap-1">
+          <span className="text-[15px] font-bold text-white">{col.h}</span>
           {col.links.map(([href, label]) => (
-            <Link key={href} href={href} prefetch={false} className={`${display} text-[24px] text-white no-underline hover:text-kf-manteca`}>
+            <Link key={href} href={href} prefetch={false} className={`${display} inline-flex min-h-11 items-center text-[24px] text-white no-underline hover:text-kf-manteca`}>
               {label}
             </Link>
           ))}
         </div>
       ))}
     </nav>
-    <div className="basis-full text-[13px] font-semibold tracking-[0.08em] text-[#dce8f5]">© 2026 BÓVEDA KF-1 · KITIFICA</div>
+    <div className="basis-full text-[13px] font-semibold tracking-[0.08em] text-white">© 2026 BÓVEDA KF-1 · KITIFICA</div>
   </footer>
   );
 }

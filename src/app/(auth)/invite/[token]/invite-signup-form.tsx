@@ -39,7 +39,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
   return (
     <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-3" noValidate>
       <div>
-        <label htmlFor="invite-email" className="sr-only">Correo</label>
+        <label htmlFor="invite-email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Correo</label>
         <input
           id="invite-email"
           value={email}
@@ -48,7 +48,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
           className={`${inputCls} cursor-not-allowed text-ink-soft`}
         />
       </div>
-      <label htmlFor="password" className="sr-only">Contraseña</label>
+      <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
       <input
         id="password"
         name="password"
@@ -59,7 +59,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
         minLength={10}
         className={inputCls}
       />
-      <label htmlFor="confirm" className="sr-only">Repetir contraseña</label>
+      <label htmlFor="confirm" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Repetir contraseña</label>
       <input
         id="confirm"
         name="confirm"

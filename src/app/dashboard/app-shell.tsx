@@ -81,7 +81,7 @@ export async function AppShell({ active, children }: { active?: NavId; children:
           <SignOutButton />
         </div>
       </aside>
-      <main className="flex min-w-0 flex-1 flex-col gap-7 p-5 md:p-10">{children}</main>
+      <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-7 p-5 md:p-10">{children}</main>
     </div>
   );
 }

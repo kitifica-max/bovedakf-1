@@ -78,7 +78,7 @@ export default async function OrgDashboardPage() {
                 }}
                 className="flex flex-wrap items-center gap-2"
               >
-                <label className="sr-only" htmlFor={`role-${m.id}`}>Rol de {m.email}</label>
+                <label className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase" htmlFor={`role-${m.id}`}>Rol de {m.email}</label>
                 <select id={`role-${m.id}`} name="role" defaultValue={m.orgRole ?? OrgRole.MEMBER} className={`${fieldCls} h-11 w-auto cursor-pointer`}>
                   {Object.values(OrgRole).map((r) => (
                     <option key={r} value={r}>{ROLE_LABELS[r]}</option>
@@ -109,9 +109,9 @@ export default async function OrgDashboardPage() {
           </ul>
         )}
         <form action={createOrgVault} className="flex flex-wrap gap-2.5 rounded-[28px] bg-kf-niebla p-4">
-          <label className="sr-only" htmlFor="org-vault-name">Nombre de la bóveda</label>
+          <label className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase" htmlFor="org-vault-name">Nombre de la bóveda</label>
           <input id="org-vault-name" name="name" required placeholder="Nueva bóveda" className={`${fieldCls} min-w-0 flex-[1_1_200px]`} />
-          <label className="sr-only" htmlFor="org-vault-role">Quién accede</label>
+          <label className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase" htmlFor="org-vault-role">Quién accede</label>
           <select id="org-vault-role" name="orgMinRole" className={`${fieldCls} w-auto cursor-pointer`}>
             <option value={OrgRole.MEMBER}>Todos</option>
             <option value={OrgRole.ADMIN}>Admin+</option>

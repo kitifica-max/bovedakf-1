@@ -34,7 +34,7 @@ export default function OrgsSudoPage() {
             Ingresá la contraseña de tu cuenta para entrar a Organizaciones.
           </p>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label htmlFor="password" className="sr-only">Contraseña</label>
+            <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
             <input
               id="password"
               name="password"

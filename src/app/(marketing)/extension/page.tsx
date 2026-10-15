@@ -70,18 +70,18 @@ export default function ExtensionPage() {
               {/* Visual: zip → folder */}
               <div className="flex items-center justify-center gap-6 rounded-xl border border-border-soft bg-gray/30 py-6">
                 <div className="flex flex-col items-center gap-2">
-                  <svg width="40" height="48" viewBox="0 0 40 48" fill="none">
+                  <svg aria-hidden="true" width="40" height="48" viewBox="0 0 40 48" fill="none">
                     <rect x="1" y="1" width="38" height="46" rx="4" fill="#2d3548" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
                     <path d="M26 1L36 11H26V1Z" fill="rgba(255,255,255,0.18)"/>
                     <text x="20" y="33" textAnchor="middle" fontSize="9" fontFamily="monospace" fill="#edf0f4">.zip</text>
                   </svg>
                   <span className="text-xs text-ink-soft">kf1-extension.zip</span>
                 </div>
-                <svg width="28" height="14" viewBox="0 0 28 14" fill="none">
+                <svg aria-hidden="true" width="28" height="14" viewBox="0 0 28 14" fill="none">
                   <path d="M1 7h24M19 1l6 6-6 6" stroke="#6bb5d6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <div className="flex flex-col items-center gap-2">
-                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                  <svg aria-hidden="true" width="44" height="44" viewBox="0 0 44 44" fill="none">
                     <path d="M2 14C2 11.8 3.8 10 6 10H22L28 16H38C40.2 16 42 17.8 42 20V38C42 40.2 40.2 42 38 42H6C3.8 42 2 40.2 2 38V14Z" fill="#1d5f8f" opacity="0.4" stroke="#6bb5d6" strokeWidth="1.5"/>
                     <path d="M22 24v8M19 29l3 3 3-3" stroke="#6bb5d6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -249,7 +249,7 @@ export default function ExtensionPage() {
               <div className="flex items-center justify-between border-b border-border-soft bg-paper px-3 py-2.5">
                 <div className="flex items-center gap-2">
                   <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue">
-                    <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+                    <svg aria-hidden="true" width="10" height="12" viewBox="0 0 10 12" fill="none">
                       <path d="M5 1L1 2.5V6C1 8.5 2.8 10.7 5 11.5C7.2 10.7 9 8.5 9 6V2.5L5 1Z" fill="white" opacity="0.9"/>
                     </svg>
                   </div>
@@ -276,7 +276,7 @@ export default function ExtensionPage() {
         <div className="w-full rounded-2xl border border-blue/30 bg-blue/[0.08] p-6">
           <div className="flex items-start gap-4">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue/20">
-              <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+              <svg aria-hidden="true" width="18" height="14" viewBox="0 0 18 14" fill="none">
                 <path d="M1.5 7L6.5 12L16.5 1.5" stroke="#6bb5d6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>

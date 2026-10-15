@@ -23,7 +23,7 @@ export async function PlanBanner({ userId }: { userId: string }) {
             className="rounded-full bg-blue px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
             Actualizar método de pago →
-          </a>
+          <span className="sr-only"> (se abre en otra pestaña)</span></a>
           <Link href="/dashboard/plans" className="rounded-full border border-border-soft px-4 py-2 text-sm font-semibold text-ink transition hover:bg-ink/5">
             Ver mis links
           </Link>

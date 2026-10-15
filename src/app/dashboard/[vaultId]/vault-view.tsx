@@ -238,7 +238,7 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
       <input type="hidden" name="vaultId" value={vaultId} />
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative">
-          <label htmlFor={`${idPrefix}-platform`} className="sr-only">Plataforma</label>
+          <label htmlFor={`${idPrefix}-platform`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Plataforma</label>
           <select id={`${idPrefix}-platform`} name="platform" defaultValue="instagram" className={`${inputCls} cursor-pointer appearance-none pr-11`}>
             {PLATFORMS.map((p) => (
               <option key={p.id} value={p.id}>{p.label}</option>
@@ -247,29 +247,29 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
           <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
         </div>
         <div>
-          <label htmlFor={`${idPrefix}-service`} className="sr-only">Nombre de la cuenta</label>
+          <label htmlFor={`${idPrefix}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
           <input id={`${idPrefix}-service`} name="service" placeholder="Nombre" required className={inputCls} />
         </div>
         <div>
-          <label htmlFor={`${idPrefix}-username`} className="sr-only">Usuario</label>
+          <label htmlFor={`${idPrefix}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
           <input id={`${idPrefix}-username`} name="username" placeholder="Usuario o email" required className={inputCls} />
         </div>
         <div>
-          <label htmlFor={`${idPrefix}-secret`} className="sr-only">Contraseña</label>
+          <label htmlFor={`${idPrefix}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
           <input id={`${idPrefix}-secret`} name="secret" placeholder="Contraseña" required className={inputCls} />
         </div>
       </div>
       <div>
-        <label htmlFor={`${idPrefix}-loginUrl`} className="sr-only">URL de login</label>
+        <label htmlFor={`${idPrefix}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
         <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login" className={inputCls} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={`${idPrefix}-totp`} className="sr-only">Clave 2FA</label>
+        <label htmlFor={`${idPrefix}-totp`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Clave 2FA</label>
         <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA" className={`${inputCls} font-mono`} />
         <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
       </div>
       <div>
-        <label htmlFor={`${idPrefix}-notes`} className="sr-only">Notas</label>
+        <label htmlFor={`${idPrefix}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas</label>
         <textarea
           id={`${idPrefix}-notes`}
           name="notes"
@@ -343,10 +343,10 @@ function CredentialRow({
             href={credential.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[13px] font-bold text-kf-azul underline decoration-2 underline-offset-4"
+            className="inline-flex min-h-11 items-center text-[13px] font-bold text-kf-azul underline decoration-2 underline-offset-4"
           >
             Abrir login ↗
-          </a>
+          <span className="sr-only"> (se abre en otra pestaña)</span></a>
         )}
         {credential.hasTotp && <TotpCode vaultId={vaultId} credentialId={credential.id} />}
       </div>
@@ -425,7 +425,7 @@ function CredentialRow({
             await newLink(new FormData(e.currentTarget));
           }}
         >
-          <label htmlFor={`${idPrefix}-permission`} className="sr-only">Permiso del link</label>
+          <label htmlFor={`${idPrefix}-permission`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Permiso del link</label>
           <div className="relative">
             <select id={`${idPrefix}-permission`} name="permission" className={`${inputCls} h-11 w-auto cursor-pointer appearance-none pr-11`}>
               <option value="READ">Solo lectura</option>
@@ -433,7 +433,7 @@ function CredentialRow({
             </select>
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
           </div>
-          <label htmlFor={`${idPrefix}-expires`} className="sr-only">Expiración del link</label>
+          <label htmlFor={`${idPrefix}-expires`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Expiración del link</label>
           <div className="relative">
             <select id={`${idPrefix}-expires`} name="expiresInHours" defaultValue="24" className={`${inputCls} h-11 w-auto cursor-pointer appearance-none pr-11`}>
               <option value="1">1 hora</option>
@@ -457,7 +457,7 @@ function CredentialRow({
         <div className="flex flex-col gap-2 rounded-[20px] bg-kf-lima p-4 text-sm text-kf-bosque-hondo">
           <p className="font-bold">Copiá este link ahora: la clave no se guarda y no vas a poder verla otra vez.</p>
           <div className="flex items-center gap-1.5 rounded-full bg-white pr-1.5">
-            <label htmlFor={`${idPrefix}-share-url`} className="sr-only">Link compartible</label>
+            <label htmlFor={`${idPrefix}-share-url`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Link compartible</label>
             <input
               id={`${idPrefix}-share-url`}
               readOnly
@@ -545,7 +545,7 @@ function EditCredentialForm({
       <p className={kicker}>EDITAR CUENTA</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative">
-          <label htmlFor={`${id}-platform`} className="sr-only">Plataforma</label>
+          <label htmlFor={`${id}-platform`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Plataforma</label>
           <select id={`${id}-platform`} name="platform" defaultValue={platformOf(credential.platform).id} className={`${inputCls} cursor-pointer appearance-none pr-11`}>
             {PLATFORMS.map((p) => (
               <option key={p.id} value={p.id}>{p.label}</option>
@@ -554,24 +554,24 @@ function EditCredentialForm({
           <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
         </div>
         <div>
-          <label htmlFor={`${id}-service`} className="sr-only">Nombre de la cuenta</label>
+          <label htmlFor={`${id}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
           <input id={`${id}-service`} name="service" defaultValue={credential.service} required className={inputCls} />
         </div>
         <div>
-          <label htmlFor={`${id}-username`} className="sr-only">Usuario</label>
+          <label htmlFor={`${id}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
           <input id={`${id}-username`} name="username" defaultValue={credential.username} required className={inputCls} />
         </div>
         <div>
-          <label htmlFor={`${id}-secret`} className="sr-only">Contraseña nueva</label>
+          <label htmlFor={`${id}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña nueva</label>
           <input id={`${id}-secret`} name="secret" autoComplete="off" placeholder="Clave nueva" className={inputCls} />
         </div>
       </div>
       <div>
-        <label htmlFor={`${id}-loginUrl`} className="sr-only">URL de login</label>
+        <label htmlFor={`${id}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
         <input id={`${id}-loginUrl`} name="loginUrl" type="url" defaultValue={credential.loginUrl ?? ""} placeholder="URL de login" className={inputCls} />
       </div>
       <div>
-        <label htmlFor={`${id}-notes`} className="sr-only">Notas nuevas</label>
+        <label htmlFor={`${id}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas nuevas</label>
         <textarea
           id={`${id}-notes`}
           name="notes"
@@ -632,7 +632,7 @@ function EditClientForm({
     >
       <p className={kicker}>EDITAR CLIENTE</p>
       <div>
-        <label htmlFor={`${id}-name`} className="sr-only">Nombre del cliente</label>
+        <label htmlFor={`${id}-name`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre del cliente</label>
         <input id={`${id}-name`} name="name" required maxLength={60} defaultValue={name} className={inputCls} />
       </div>
       <fieldset className="m-0 flex flex-wrap gap-2.5 border-0 p-0">

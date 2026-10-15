@@ -69,7 +69,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
       <div className="mx-auto flex max-w-[1360px] flex-col gap-10 px-4 pb-12 sm:px-8">
         <BrandHeader signedIn={signedIn} />
 
-        <main className="flex flex-col gap-10">
+        <main id="main" tabIndex={-1} className="flex flex-col gap-10">
           {/* Hero */}
           <section className="flex flex-wrap overflow-hidden rounded-[48px] bg-kf-carmesi">
             <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
@@ -226,7 +226,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
             </div>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
               <div className="flex flex-col gap-6 rounded-[40px] bg-kf-azul p-8 text-white sm:p-12">
-                <div className="text-[13px] font-extrabold tracking-[0.2em] text-kf-manteca">TU CUENTA</div>
+                <div className="text-[13px] font-extrabold tracking-[0.2em] text-white">TU CUENTA</div>
                 <div className={`${display} text-[clamp(72px,8vw,112px)] leading-[1]`}>Gratis</div>
                 <ul className="m-0 flex flex-1 list-none flex-col gap-2.5 p-0 text-[17px] font-semibold">
                   {ACCOUNT.map((f) => (

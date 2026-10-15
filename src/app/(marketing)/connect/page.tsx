@@ -23,7 +23,7 @@ export default function ConnectPage() {
         <div className="flex flex-col gap-6">
           {/* Claude Code - Skill */}
           <div className="rounded-[28px] bg-kf-amarillo p-6">
-            <h3 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Claude Code — Skill</h3>
+            <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Claude Code — Skill</h2>
             <p className="mt-2 text-sm text-ink-soft">
               La forma más simple. Funciona en terminal, escritorio, y cualquier modo.
             </p>
@@ -31,7 +31,7 @@ export default function ConnectPage() {
               <div className="rounded-xl bg-gray/60 p-4">
                 <p className="mb-2 text-xs font-medium text-ink">1. Generá un token CLI</p>
                 <p className="text-xs text-ink-soft">
-                  Andá a <Link href="/dashboard/ai" className="text-blue underline">AI &amp; Skill</Link> y generá un token.
+                  Andá a <Link href="/dashboard/ai" className="font-bold text-kf-azul-hondo underline">Conectar IA</Link> y generá un token.
                 </p>
               </div>
               <div className="rounded-xl bg-gray/60 p-4">
@@ -52,7 +52,7 @@ export default function ConnectPage() {
 
           {/* Security */}
           <div className="rounded-[28px] bg-kf-amarillo p-6">
-            <h3 className="mb-2 font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Seguridad</h3>
+            <h2 className="mb-2 font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Seguridad</h2>
             <ul className="flex flex-col gap-1.5 text-xs leading-relaxed text-ink-soft">
               <li>• El agente NUNCA recibe contraseñas — solo links temporales</li>
               <li>• Vos abrís el link en tu navegador para ver el secreto</li>

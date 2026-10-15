@@ -118,6 +118,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${bodySans.variable} ${geistMono.variable} ${archivo.variable} ${silkscreen.variable} ${barlow.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <a
+          href="#main"
+          className="sr-only z-[100] rounded-full bg-kf-tinta text-sm font-bold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:inline-flex focus:min-h-11 focus:items-center focus:px-5"
+        >
+          Saltar al contenido
+        </a>
         <Providers session={session}>{children}</Providers>
         {/* Kitifica "App Directa" install prompt — marketing pages only; the
             overlay has no dismiss control, so it must never cover auth, the

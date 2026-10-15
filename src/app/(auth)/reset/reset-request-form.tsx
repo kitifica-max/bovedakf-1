@@ -34,7 +34,7 @@ export function ResetRequestForm() {
             Ingresá tu correo y te mandamos un enlace para elegir una nueva.
           </p>
           <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
               id="email"
               name="email"

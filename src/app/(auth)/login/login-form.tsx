@@ -152,7 +152,7 @@ export function LoginForm() {
         </p>
         <form onSubmit={onSubmitTotp} className="mt-6 flex flex-col gap-3" noValidate>
           <div>
-            <label htmlFor="code" className="sr-only">Código</label>
+            <label htmlFor="code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código</label>
             <input
               id="code"
               name="code"
@@ -196,7 +196,7 @@ export function LoginForm() {
         </div>
         <form onSubmit={onSubmitPassword} className="mt-6 flex flex-col gap-3" noValidate>
           <div>
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
               id="email"
               name="email"
@@ -238,7 +238,7 @@ export function LoginForm() {
           ) : (
             <>
               <div>
-                <label htmlFor="password" className="sr-only">Contraseña</label>
+                <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
                 <input
                   id="password"
                   name="password"
@@ -283,8 +283,8 @@ export function LoginForm() {
         )}
 
         <div className="mt-5 flex flex-col items-center gap-1.5 text-sm text-ink-soft">
-          <Link href="/reset" className="underline">¿Olvidaste tu contraseña?</Link>
-          <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="underline">Crear una cuenta</Link>
+          <Link href="/reset" className="inline-flex min-h-11 items-center underline">¿Olvidaste tu contraseña?</Link>
+          <Link href={nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : "/register"} className="inline-flex min-h-11 items-center underline">Crear una cuenta</Link>
         </div>
       </div>
   );
