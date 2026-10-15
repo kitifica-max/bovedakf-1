@@ -1,3 +1,4 @@
+import { CLIENT_COLOR_IDS, PLATFORM_IDS } from "@/lib/platforms";
 import { z } from "zod";
 
 export const registerSchema = z.object({
@@ -42,6 +43,19 @@ export const credentialSchema = z.object({
   username: z.string().min(1, "Usuario requerido").max(200),
   secret: z.string().min(1, "Contraseña o secreto requerido"),
   notes: z.string().max(2000).optional(),
+  platform: z.enum(PLATFORM_IDS, { message: "Plataforma inválida" }).default("other"),
+  // Rendered as a link: only http(s) so a stored `javascript:` URL can never run.
+  loginUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .regex(/^https?:\/\/[^\s]+$/i, "La URL de login debe empezar con https://")
+    .optional(),
+});
+
+export const clientSchema = z.object({
+  name: z.string().trim().min(1, "Nombre del cliente requerido").max(60, "Máximo 60 caracteres"),
+  color: z.enum(CLIENT_COLOR_IDS, { message: "Color inválido" }),
 });
 
 export const shareLinkSchema = z.object({

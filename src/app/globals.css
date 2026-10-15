@@ -89,6 +89,25 @@ body::before {
   pointer-events: none;
 }
 
+/* Platform (dashboard) on the light agencies brand: re-point the legacy
+   neutral tokens so every shared component flips without a rewrite. */
+.kf-app {
+  --color-gray: #eef0f6;
+  --color-gray-deep: #c9cedd;
+  --color-paper: #ffffff;
+  --color-ink: #1b2340;
+  --color-ink-soft: #5b6383;
+  --color-ink-reverse: #1b2340;
+  --color-blue: #1f6fb2;
+  --color-blue-soft: #cfe6ee;
+  --color-danger: #a81b42;
+  --color-border: #e4e7f0;
+  background: #ffffff;
+  color: var(--kf-tinta);
+  font-family: var(--font-montserrat), "Helvetica Neue", Helvetica, sans-serif;
+}
+.kf-app .glass { background: #ffffff; border-color: var(--kf-borde); }
+
 /* Glassmorphism — used sparingly, on a handful of cards, not the whole site. */
 .glass {
   background: rgb(33 38 49 / 0.55);

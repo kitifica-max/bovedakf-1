@@ -177,6 +177,8 @@ model CliToken {
 model Vault {
   id          String       @id @default(cuid())
   name        String
+  // Client "flavor" id from src/lib/platforms.ts CLIENT_COLORS (null = default).
+  color       String?
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   credentials Credential[]
@@ -194,6 +196,9 @@ model Credential {
   vault         Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   service       String
   username      String
+  // Platform id from src/lib/platforms.ts PLATFORMS; validated in the app.
+  platform      String      @default("other")
+  loginUrl      String?
   // AES-256-GCM at rest, base64: iv(12) + tag(16) + ciphertext, key = env ENCRYPTION_KEY
   encryptedData String
   notes         String?

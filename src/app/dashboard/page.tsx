@@ -1,48 +1,29 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { ROLE_LABEL } from "@/lib/team-validation";
-import type { Role } from "@/lib/vault-access";
+import { AppShell } from "./app-shell";
+import { ClientGrid } from "./client-grid";
+import { listClients } from "./clients";
 
-export default async function DashboardIndexPage() {
+export default async function DashboardIndexPage({ searchParams }: { searchParams: Promise<{ nuevo?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
-  const userId = session.user.id;
-
-  const [owned, memberships] = await Promise.all([
-    db.vault.findMany({ where: { ownerId: userId }, select: { id: true, name: true } }),
-    db.vaultMember.findMany({
-      where: { userId, vault: { ownerId: { not: userId } } },
-      orderBy: { createdAt: "asc" },
-      select: { role: true, vault: { select: { id: true, name: true } } },
-    }),
-  ]);
-
-  const vaults: { id: string; name: string; role: Role }[] = [
-    ...owned.map((v) => ({ id: v.id, name: v.name, role: "OWNER" as Role })),
-    ...memberships.map((m) => ({ id: m.vault.id, name: m.vault.name, role: m.role as Role })),
-  ];
-
-  if (vaults.length === 0) redirect("/login");
-  if (vaults.length === 1) redirect(`/dashboard/${vaults[0].id}`);
+  const clients = await listClients(session.user.id);
+  if (clients.length === 0) redirect("/login");
+  const { nuevo } = await searchParams;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <h1 className="font-pixel text-xl leading-[1.3] text-ink">Tus bóvedas</h1>
-      <ul className="flex flex-col gap-3">
-        {vaults.map((v) => (
-          <li key={v.id}>
-            <Link
-              href={`/dashboard/${v.id}`}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-blue/25 bg-blue/[0.07] p-5 transition hover:bg-blue/[0.12]"
-            >
-              <span className="font-display text-lg font-semibold text-ink">{v.name}</span>
-              <span className="text-xs text-ink-soft">{ROLE_LABEL[v.role]}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <AppShell active="clientes">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-brand text-6xl leading-none font-extrabold text-kf-azul uppercase md:text-7xl">Clientes</h1>
+        <Link
+          href="/dashboard?nuevo=1#nuevo-cliente"
+          className="inline-flex h-13 items-center rounded-full bg-kf-azul px-7 text-[13px] font-extrabold tracking-[0.14em] text-white no-underline transition hover:opacity-90"
+        >
+          + NUEVO CLIENTE
+        </Link>
+      </div>
+      <ClientGrid clients={clients} openNew={nuevo === "1"} />
+    </AppShell>
   );
 }

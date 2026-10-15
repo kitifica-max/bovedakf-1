@@ -24,6 +24,7 @@ import {
   type BackupCode,
 } from "@/lib/totp";
 import {
+  clientSchema,
   credentialSchema,
   dashboardSurveySchema,
   shareLinkSchema,
@@ -87,19 +88,37 @@ export async function createCredentialAction(formData: FormData) {
     username: formData.get("username") ?? "",
     secret: formData.get("secret") ?? "",
     notes: formData.get("notes") || undefined,
+    platform: formData.get("platform") || undefined,
+    loginUrl: formData.get("loginUrl") || undefined,
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
-  const { vaultId, service, username, secret, notes } = parsed.data;
+  const { vaultId, service, username, secret, notes, platform, loginUrl } = parsed.data;
   await requireVaultAccess(vaultId, "EDITOR");
 
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
-    data: { vaultId, service, username, encryptedData: encryptAtRest(payload) },
+    data: { vaultId, service, username, platform, loginUrl, encryptedData: encryptAtRest(payload) },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
   return null;
+}
+
+// New client = new vault owned by the caller. Clients are unlimited; the cap only stops runaway scripts.
+export async function createClientAction(formData: FormData): Promise<{ error: string } | { error: null; id: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autenticado" };
+  const parsed = clientSchema.safeParse({ name: formData.get("name") ?? "", color: formData.get("color") ?? "" });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const userId = session.user.id;
+  if ((await db.vault.count({ where: { ownerId: userId } })) >= 500) {
+    return { error: "Llegaste al máximo de clientes. Escribinos a hola@kitifica.com." };
+  }
+  const client = await db.vault.create({ data: { ...parsed.data, ownerId: userId } });
+  revalidatePath("/dashboard");
+  return { error: null, id: client.id };
 }
 
 export async function revealCredentialAction(vaultId: string, credentialId: string) {

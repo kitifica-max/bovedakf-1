@@ -13,10 +13,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   return (
-    <>
+    <div className="kf-app flex min-h-dvh flex-col">
       <IdleSessionGuard />
       <PlanBanner userId={session.user.id} />
       {children}
-    </>
+    </div>
   );
 }
