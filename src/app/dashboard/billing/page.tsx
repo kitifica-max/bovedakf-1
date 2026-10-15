@@ -4,6 +4,14 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+const STATUS_LABEL: Record<string, string> = {
+  TRIALING: "Prueba",
+  SUSPENDED: "Suspendido",
+  CANCELLED: "Cancelado",
+  EXPIRED: "Expirado",
+  PENDING: "Pendiente",
+};
+
 export const metadata: Metadata = {
   title: "Facturación — Bóveda KF-1",
 };
@@ -65,9 +73,7 @@ export default async function BillingPage({
               <p className="mt-1 text-xs text-ink-soft">
                 {sub.status === "ACTIVE"
                   ? `Próximo cobro: ${sub.currentPeriodEnd.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`
-                  : sub.status === "TRIALING"
-                    ? `Prueba gratis hasta el ${sub.currentPeriodEnd.toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`
-                    : `Estado: ${{ SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}`}
+                  : `Estado: ${STATUS_LABEL[sub.status] ?? sub.status}`}
               </p>
             </div>
             <span
@@ -77,7 +83,7 @@ export default async function BillingPage({
                   : "bg-gray/40 text-ink-soft"
               }`}
             >
-              {sub.status === "ACTIVE" ? "Activo" : { TRIALING: "Prueba", SUSPENDED: "Suspendido", CANCELLED: "Cancelado", EXPIRED: "Expirado", PENDING: "Pendiente" }[sub.status] ?? sub.status}
+              {sub.status === "ACTIVE" ? "Activo" : STATUS_LABEL[sub.status] ?? sub.status}
             </span>
           </div>
 

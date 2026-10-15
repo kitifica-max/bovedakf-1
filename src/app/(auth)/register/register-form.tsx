@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { registerAction } from "../actions";
 import { ChevronDownIcon } from "@/components/icons";
 import { CTAButton } from "@/components/site/cta-button";
+import { GIFT_LINKS } from "@/lib/packs";
 
 const INDUSTRIES = [
   "Tecnología / Software",
@@ -21,9 +22,8 @@ const INDUSTRIES = [
 
 export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; prefillEmail: string }) {
   const router = useRouter();
-  // /checkout?plan=X → start that plan's trial and skip checkout; pay later from the dashboard.
-  const trialPlan = nextUrl?.match(/^\/checkout\?plan=(personal|team)$/)?.[1] ?? null;
-  const dest = trialPlan ? "/dashboard" : nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
+  // Only same-site paths: "//evil.com" would be protocol-relative.
+  const dest = nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//") ? nextUrl : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -54,12 +54,9 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
           Crear bóveda
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
-          {trialPlan
-            ? `Empezás con 30 días gratis del plan ${trialPlan === "team" ? "Equipo" : "Personal"}. Sin tarjeta.`
-            : "Un espacio encriptado para tu equipo."}
+          Gratis para tu equipo, con {GIFT_LINKS} links de regalo para compartir.
         </p>
         <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
-          {trialPlan && <input type="hidden" name="plan" value={trialPlan} />}
           <div>
             <label htmlFor="companyName" className="sr-only">Nombre de la empresa</label>
             <input

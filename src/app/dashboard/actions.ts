@@ -31,8 +31,12 @@ import {
   updateCompanyNameSchema,
 } from "@/lib/validation";
 import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
-import { userPlan, vaultOwnerPlan } from "@/lib/plan";
-import { FREE_CREDENTIAL_LIMIT, FREE_SEATS, GRACE_ERROR } from "@/lib/plan-state";
+import { spendShareLink, userPlan } from "@/lib/plan";
+import { FREE_SEATS } from "@/lib/plan-state";
+import { findPack } from "@/lib/packs";
+import { createEnlacePago } from "@/lib/wompi";
+
+const NO_LINKS_ERROR = "Te quedaste sin links para compartir. Recargá desde Planes para seguir.";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function updateCompanyNameAction(formData: FormData) {
@@ -89,15 +93,6 @@ export async function createCredentialAction(formData: FormData) {
   const { vaultId, service, username, secret, notes } = parsed.data;
   await requireVaultAccess(vaultId, "EDITOR");
 
-  const plan = await vaultOwnerPlan(vaultId);
-  if (plan.kind === "grace") return GRACE_ERROR;
-  if (plan.kind === "free") {
-    const count = await db.credential.count({ where: { vaultId } });
-    if (count >= FREE_CREDENTIAL_LIMIT) {
-      return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
-    }
-  }
-
   const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
     data: { vaultId, service, username, encryptedData: encryptAtRest(payload) },
@@ -140,7 +135,6 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
-  if ((await vaultOwnerPlan(vaultId)).kind === "grace") return GRACE_ERROR;
   const { credentialId, permission, expiresInHours } = parsed.data;
 
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -155,15 +149,24 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   const linkKey = generateLinkKey();
   const publicId = generatePublicId();
 
-  const created = await db.shareLink.create({
-    data: {
-      publicId,
-      credentialId,
-      permission,
-      payload: encryptForLink(plaintext, linkKey),
-      expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000),
-    },
-  });
+  const charge = await spendShareLink(vaultId);
+  if (!charge.ok) return NO_LINKS_ERROR;
+
+  let created;
+  try {
+    created = await db.shareLink.create({
+      data: {
+        publicId,
+        credentialId,
+        permission,
+        payload: encryptForLink(plaintext, linkKey),
+        expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000),
+      },
+    });
+  } catch (err) {
+    await charge.refund();
+    throw err;
+  }
 
   await db.auditLog.create({
     data: {
@@ -310,18 +313,21 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
-  // Seat enforcement: free tier = 2 total (owner + 1), paid/trial = sub.seats.
-  const [plan, currentCount] = await Promise.all([
+  // Seats are people per ACCOUNT (owner included), across every client vault the owner has.
+  // Someone already in another of the owner's vaults doesn't take a new seat. Legacy subscriptions
+  // keep their seat count when it's higher than the free account's.
+  const [plan, members] = await Promise.all([
     userPlan(userId),
-    db.vaultMember.count({ where: { vaultId } }),
+    db.vaultMember.findMany({
+      where: { vault: { ownerId: userId }, userId: { not: userId } },
+      select: { user: { select: { email: true } } },
+      distinct: ["userId"],
+    }),
   ]);
-  if (plan.kind === "grace") return GRACE_ERROR;
-  const maxSeats = plan.kind === "free" ? FREE_SEATS : plan.seats;
-  // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
-  if (currentCount + 1 >= maxSeats) {
-    return plan.kind === "free"
-      ? "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más."
-      : `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`;
+  const maxSeats = Math.max(FREE_SEATS, plan.kind === "free" ? 0 : plan.seats);
+  const people = new Set(members.map((m) => m.user.email.toLowerCase()));
+  if (!people.has(email) && people.size + 1 >= maxSeats) {
+    return `Tu cuenta permite hasta ${maxSeats} personas. Quitá a alguien de otro cliente para sumar a esta persona.`;
   }
 
   // Case-insensitive: emails may be stored with mixed case from older signups.
@@ -484,43 +490,35 @@ export async function acceptInviteAction(
   return { ok: true, vaultId: invite.vaultId };
 }
 
-// ── Trial ────────────────────────────────────────────────────────────
+// ── Link packs (one-time Wompi payments) ─────────────────────────────
 
-// Ends a trial (or grace) and keeps all data on the free plan. Free limits
-// then block new credentials/invites until the vault is back under them.
-export async function switchToFreeAction(): Promise<string | null> {
+export async function buyLinksAction(links: number): Promise<{ error: string } | { error: null; url: string }> {
   const session = await auth();
-  if (!session?.user?.id) return "No autenticado";
-  await db.subscription.deleteMany({ where: { userId: session.user.id, status: "TRIALING" } });
-  revalidatePath("/dashboard", "layout");
-  return null;
-}
-
-// Plaintext export of every credential in vaults the caller OWNS — lets a
-// user in grace take their data before it's purged. Audited per vault.
-export async function exportMyCredentialsAction(): Promise<
-  { error: string } | { error: null; rows: { vault: string; service: string; username: string; secret: string; notes: string }[] }
-> {
-  const session = await auth();
-  if (!session?.user?.id || !session.user.email) return { error: "No autenticado" };
-  if (!(await rateLimit(`export:${session.user.id}`, 3)).success) {
+  if (!session?.user?.id) return { error: "No autenticado" };
+  const pack = findPack(links);
+  if (!pack) return { error: "Paquete inválido." };
+  if (!(await rateLimit(`buy-links:${session.user.id}`, 5)).success) {
     return { error: "Demasiados intentos. Esperá un minuto." };
   }
 
-  const vaults = await db.vault.findMany({
-    where: { ownerId: session.user.id },
-    select: { id: true, name: true, credentials: { orderBy: { service: "asc" } } },
+  const purchase = await db.linkPurchase.create({
+    data: { userId: session.user.id, links: pack.links, amountCents: pack.cents },
   });
-  const rows = vaults.flatMap((v) =>
-    v.credentials.map((c) => {
-      const { secret, notes } = JSON.parse(decryptAtRest(c.encryptedData)) as { secret: string; notes: string };
-      return { vault: v.name, service: c.service, username: c.username, secret, notes };
-    }),
-  );
-  await db.auditLog.createMany({
-    data: vaults.map((v) => ({ vaultId: v.id, action: "vault_exported", actorEmail: session.user!.email! })),
-  });
-  return { error: null, rows };
+  try {
+    const enlace = await createEnlacePago({
+      ref: purchase.id,
+      amountCents: pack.cents,
+      productName: `${pack.links} links para compartir · Bóveda KF-1`,
+      redirectUrl: `${APP_URL}/dashboard/plans?compra=${purchase.id}`,
+      webhookUrl: `${APP_URL}/api/wompi/webhook`,
+    });
+    await db.linkPurchase.update({ where: { id: purchase.id }, data: { wompiLinkId: enlace.idEnlace } });
+    return { error: null, url: enlace.urlEnlace };
+  } catch (err) {
+    console.error("[buyLinks] Wompi EnlacePago failed:", err);
+    await db.linkPurchase.delete({ where: { id: purchase.id } });
+    return { error: "No pudimos iniciar el pago. Probá de nuevo en unos minutos." };
+  }
 }
 
 // ── AI Access (MCP) ──────────────────────────────────────────────────

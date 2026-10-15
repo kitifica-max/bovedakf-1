@@ -38,6 +38,30 @@ function resolvePlan(body: WompiWebhook): "personal" | "starter" | "team" | null
   return null;
 }
 
+async function creditLinkPack(body: WompiWebhook, purchase: { id: string; userId: string; links: number; amountCents: number }) {
+  if (body.ResultadoTransaccion !== "ExitosaAprobada") return NextResponse.json({ ok: true });
+  if (!body.EsProductiva && process.env.NODE_ENV === "production") {
+    console.warn("[wompi/webhook] ignoring test transaction for purchase", purchase.id);
+    return NextResponse.json({ ok: true });
+  }
+  if (Math.round(body.Monto * 100) !== purchase.amountCents) {
+    console.error("[wompi/webhook] amount mismatch for purchase", purchase.id, body.Monto);
+    return NextResponse.json({ ok: true });
+  }
+
+  // PENDING → PAID is the idempotency gate: a retried webhook finds nothing to flip and credits nothing.
+  await db.$transaction(async (tx) => {
+    const { count } = await tx.linkPurchase.updateMany({
+      where: { id: purchase.id, status: "PENDING" },
+      data: { status: "PAID", transactionId: body.IdTransaccion, paidAt: new Date() },
+    });
+    if (count === 1) {
+      await tx.user.update({ where: { id: purchase.userId }, data: { linkCredits: { increment: purchase.links } } });
+    }
+  });
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature = req.headers.get("wompi_hash") ?? "";
@@ -57,6 +81,13 @@ export async function POST(req: NextRequest) {
     body = JSON.parse(rawBody) as WompiWebhook;
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  // Link packs: matched by our purchase id, never by the payer's email.
+  const ref = body.EnlacePago?.IdentificadorEnlaceComercio;
+  if (ref) {
+    const purchase = await db.linkPurchase.findUnique({ where: { id: ref } });
+    if (purchase) return creditLinkPack(body, purchase);
   }
 
   const email = body.cliente?.Email;

@@ -49,6 +49,38 @@ export async function getEnlaceSuscripciones(idEnlace: string) {
   }>(`/EnlacePagoRecurrente/${idEnlace}/suscripciones`);
 }
 
+// One-time payment link, usable for a single successful payment. `ref` comes back in the
+// webhook as EnlacePago.IdentificadorEnlaceComercio, so the purchase is matched by id, not email.
+export async function createEnlacePago(opts: {
+  ref: string;
+  amountCents: number;
+  productName: string;
+  redirectUrl: string;
+  webhookUrl: string;
+}) {
+  return wompiRequest<{ idEnlace: number; urlEnlace: string; estaProductivo: boolean }>("/EnlacePago", "POST", {
+    identificadorEnlaceComercio: opts.ref,
+    monto: opts.amountCents / 100,
+    nombreProducto: opts.productName,
+    formaPago: {
+      permitirTarjetaCreditoDebido: true,
+      permitirPagoConPuntoAgricola: false,
+      permitirPagoEnCuotasAgricola: false,
+      permitirPagoEnBitcoin: false,
+      permitePagoQuickPay: false,
+    },
+    configuracion: {
+      urlRedirect: opts.redirectUrl,
+      urlWebhook: opts.webhookUrl,
+      esMontoEditable: false,
+      esCantidadEditable: false,
+      cantidadPorDefecto: 1,
+      notificarTransaccionCliente: true,
+    },
+    limitesDeUso: { cantidadMaximaPagosExitosos: 1 },
+  });
+}
+
 export function validateWebhookSignature(rawBody: string, signature: string): boolean {
   const secret = process.env.WOMPI_CLIENT_SECRET!;
   const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");

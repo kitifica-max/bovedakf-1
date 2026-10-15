@@ -38,7 +38,6 @@ const sections = [
     h: "Cuánto tiempo guardamos tus datos",
     p: [
       "Mientras tu cuenta exista. Los links compartidos y su registro de auditoría se conservan aunque el link haya expirado, como historial de acceso.",
-      "Excepción: si tu prueba de un plan de pago termina y no elegís un plan dentro de los 15 días siguientes, eliminamos tus credenciales de forma permanente (ver Términos, sección 2). Tu cuenta y el registro de auditoría se conservan.",
     ],
   },
   {

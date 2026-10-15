@@ -37,6 +37,28 @@ model Subscription {
   updatedAt        DateTime           @updatedAt
 }
 
+enum LinkPurchaseStatus {
+  PENDING
+  PAID
+}
+
+// One-time Wompi payment for a pack of share links. `id` is sent to Wompi as
+// identificadorEnlaceComercio, so the webhook credits the exact account.
+model LinkPurchase {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links         Int
+  amountCents   Int
+  status        LinkPurchaseStatus @default(PENDING)
+  wompiLinkId   Int?
+  transactionId String?            @unique
+  createdAt     DateTime           @default(now())
+  paidAt        DateTime?
+
+  @@index([userId])
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -75,6 +97,9 @@ model User {
   authenticators Authenticator[]
   cliTokens     CliToken[]
   subscription    Subscription?
+  // Prepaid share-link balance. New accounts start with 5 gift links.
+  linkCredits     Int            @default(5)
+  linkPurchases   LinkPurchase[]
   organizationId  String?
   organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   orgRole         OrgRole?

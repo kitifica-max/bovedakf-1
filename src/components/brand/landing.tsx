@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { LogoBadge } from "./logo-badge";
+import { GIFT_LINKS, PACKS, perLink, usd } from "@/lib/packs";
 
 // Prepaid model: the account is free, only external share links consume credit (one-time Wompi payments, no recurring billing).
-// ponytail: lives here until packs exist in the backend; then move to src/lib/plans.ts.
-const GIFT_LINKS = 5;
 const ACCOUNT = ["Hasta 5 personas", "Clientes ilimitados", "Contraseñas y códigos 2FA", "Auditoría completa", `${GIFT_LINKS} links de regalo`];
-const PACKS = [
-  { links: 5, price: "1.99", perLink: "0.40" },
-  { links: 10, price: "2.99", perLink: "0.30" },
-  { links: 20, price: "4.99", perLink: "0.25" },
-  { links: 40, price: "7.99", perLink: "0.20", best: true },
-];
+const BEST = PACKS[PACKS.length - 1].links;
+const PACK_CARDS = PACKS.map((p) => ({ links: p.links, price: usd(p.cents), perLink: perLink(p), best: p.links === BEST }));
 
 // Base has no size utilities, so a variant's sizes never fight the defaults (no class merging here).
 const pillBase = "inline-flex items-center justify-center rounded-full py-3 text-center font-extrabold no-underline transition hover:opacity-90";
@@ -38,7 +33,7 @@ const note = <><path d="M14 3v11a4 4 0 1 1-4-4" /><path d="M14 3c.5 2.5 2.5 4.5 
 
 function Sticker() {
   return (
-    <svg viewBox="0 0 200 200" role="img" aria-label={`${GIFT_LINKS} links de regalo`} className="h-32 w-32 sm:h-40 sm:w-40">
+    <svg viewBox="0 0 200 200" role="img" aria-label={`${GIFT_LINKS} links de regalo`} className="h-24 w-24 sm:h-36 sm:w-36">
       <polygon
         points="100.0,4.0 114.2,19.2 132.8,9.8 141.0,29.0 161.7,26.5 162.8,47.3 183.1,52.0 177.1,72.0 194.5,83.3 182.0,100.0 194.5,116.7 177.1,128.0 183.1,148.0 162.8,152.7 161.7,173.5 141.0,171.0 132.8,190.2 114.2,180.8 100.0,196.0 85.8,180.8 67.2,190.2 59.0,171.0 38.3,173.5 37.2,152.7 16.9,148.0 22.9,128.0 5.5,116.7 18.0,100.0 5.5,83.3 22.9,72.0 16.9,52.0 37.2,47.3 38.3,26.5 59.0,29.0 67.2,9.8 85.8,19.2"
         fill="var(--kf-carmesi)"
@@ -123,10 +118,14 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                 <a href="#como" className={`${pill} border-2 border-kf-manteca text-kf-manteca`}>CÓMO FUNCIONA</a>
               </div>
             </div>
-            <div className="flex min-w-0 flex-[1_1_440px] flex-col items-center gap-6 bg-kf-manteca p-5 sm:p-12">
-              <div className="self-end"><Sticker /></div>
-              <div className="flex w-full max-w-[420px] flex-col gap-3.5 rounded-[32px] bg-white p-5 shadow-[0_30px_60px_rgba(120,20,45,0.25)] sm:p-6">
-                <div className="flex items-center gap-3.5">
+            <div className="flex min-w-0 flex-[1_1_440px] items-center justify-center bg-kf-manteca px-5 pb-8 pt-20 sm:p-12 sm:pt-20">
+              {/* Sticker overlaps the card's top-right corner; the header keeps right padding so it never covers text. */}
+              <div className="relative w-full max-w-[420px]">
+                <div className="absolute -right-4 -top-16 z-10 rotate-[8deg] sm:-right-10 sm:-top-16">
+                  <Sticker />
+                </div>
+              <div className="flex w-full flex-col gap-3.5 rounded-[32px] bg-white p-5 shadow-[0_30px_60px_rgba(120,20,45,0.25)] sm:p-6">
+                <div className="flex items-center gap-3.5 pr-20 sm:pr-24">
                   <span className={`${display} flex h-13 w-13 items-center justify-center rounded-[18px] bg-kf-rosa text-[26px] text-kf-azul-hondo`}>PA</span>
                   <div className="flex flex-col">
                     <b className="text-[18px]">Tu cliente: Panadería</b>
@@ -157,6 +156,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                   </div>
                   <span className="text-[12px] font-extrabold tracking-[0.1em] text-kf-bosque">ACTIVO</span>
                 </div>
+              </div>
               </div>
             </div>
           </section>
@@ -196,9 +196,9 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           {/* Clients by color */}
           <section className="flex flex-col gap-7">
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <h2 className={`${display} m-0 text-[clamp(44px,5vw,72px)] leading-[1.02] text-kf-azul`}>Cada cliente, su sabor</h2>
+              <h2 className={`${display} m-0 text-[clamp(44px,5vw,72px)] leading-[1.02] text-kf-azul`}>Cada cliente, su color</h2>
               <span className="max-w-[460px] text-[16px] font-semibold text-kf-tinta-suave">
-                Una bóveda por cliente, con su color. Tu equipo ve solo los clientes que le asignás.
+                Una bóveda por cliente. Tu equipo ve solo los clientes que le asignás.
               </span>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -275,7 +275,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {PACKS.map((p) => (
+                  {PACK_CARDS.map((p) => (
                     <div
                       key={p.links}
                       className={`flex flex-col gap-2 rounded-[28px] px-6 py-5 ${p.best ? "bg-kf-carmesi text-white" : "bg-kf-niebla text-kf-tinta"}`}
