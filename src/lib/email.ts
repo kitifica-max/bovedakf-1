@@ -39,60 +39,92 @@ export async function sendEmail(
 }
 
 // ── Shared shell ────────────────────────────────────────────────────────
-// Dark, table-based, all styles inline — matches the app: bg #0a0e15,
-// card #212631, ink #edf0f4, accent #1d5f8f. The wordmark is rendered as
-// text (pixel font can't load in mail clients) with the "KF-1" chip.
+// Light agencies brand, table-based, all styles inline. Header = the KF-1 seal (same as the
+// landing). Each email opens with a colored hero: one color pair + a starburst PNG on its own
+// row above the title — a condensed heading beside it would overflow on 320px phones, and
+// fallback fonts (Arial) are much wider than Barlow. Images are decorative except the seal,
+// whose alt text keeps the brand readable when a client blocks images.
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+const SANS = "Montserrat,'Helvetica Neue',Helvetica,Arial,sans-serif";
+const DISPLAY = "'Barlow Condensed','Arial Narrow','Roboto Condensed',Arial,sans-serif";
+const INK = "#1b2340";
+const INK_SOFT = "#5b6383";
+const LINE = "#e4e7f0";
+const AZUL = "#1f6fb2";
+
+// Hero color pairs (ground, ink) + the starburst file in public/email/.
+const HEROES = {
+  verify: { bg: "#1f6fb2", ink: "#ffffff", star: "star-verify.png" },
+  reset: { bg: "#f4eea6", ink: "#4e52a6", star: "star-reset.png" },
+  duplicate: { bg: "#f7c55a", ink: "#a81b42", star: "star-duplicate.png" },
+  opened: { bg: "#0b6b47", ink: "#b9e35a", star: "star-opened.png" },
+  invite: { bg: "#f1d3e3", ink: "#1b5a93", star: "star-invite.png" },
+  paid: { bg: "#4e52a6", ink: "#f4eea6", star: "star-paid.png" },
+  failed: { bg: "#c8234f", ink: "#ffd27a", star: "star-failed.png" },
+} as const;
+type Hero = keyof typeof HEROES;
+
 function shell(opts: {
+  hero: Hero;
   preview: string;
   heading: string;
   bodyHtml: string;
   cta?: { label: string; href: string };
   footnote?: string;
 }) {
-  const { preview, heading, bodyHtml, cta, footnote } = opts;
+  const { hero, preview, heading, bodyHtml, cta, footnote } = opts;
+  const h = HEROES[hero];
   return `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<meta name="supported-color-schemes" content="dark">
-<style>:root{color-scheme:dark;supported-color-schemes:dark}</style>
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light only;supported-color-schemes:light}</style>
 </head>
-<body style="margin:0;padding:0;background:#0a0e15;">
+<body style="margin:0;padding:0;background:#ffffff;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preview)}${"&#847;&zwnj;&nbsp;".repeat(30)}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e15;padding:32px 16px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:24px 12px;">
     <tr><td align="center">
-      <!--[if mso]><table role="presentation" width="480" align="center" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:480px;">
-        <tr><td style="padding:0 4px 20px;">
-          <img src="${APP_URL}/logo-email.png" width="150" height="21" alt="Bóveda KF-1"
-               style="display:block;border:0;outline:none;text-decoration:none;width:150px;height:21px;font-family:'Arial Black',Arial,Helvetica,sans-serif;font-weight:800;font-size:16px;color:#edf0f4;">
+      <!--[if mso]><table role="presentation" width="520" align="center" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:520px;">
+        <tr><td style="padding:0 4px 16px;">
+          <img src="${APP_URL}/email/seal.png" width="64" height="64" alt="Bóveda KF-1"
+               style="display:block;border:0;outline:none;text-decoration:none;width:64px;height:64px;border-radius:32px;font-family:${DISPLAY};font-size:18px;font-weight:800;color:${AZUL};">
         </td></tr>
-        <tr><td style="background:#212631;border:1px solid rgba(255,255,255,0.10);border-radius:20px;padding:32px;">
-          <h1 style="margin:0 0 16px;font-family:'Archivo',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#edf0f4;">${esc(heading)}</h1>
-          <div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#c8cdd6;">${bodyHtml}</div>
+        <tr><td style="background:${h.bg};border-radius:32px;padding:22px 24px 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="right" style="padding-bottom:6px;">
+              <img src="${APP_URL}/email/${h.star}" width="72" height="72" alt="" style="display:block;border:0;outline:none;width:72px;height:72px;">
+            </td></tr>
+            <tr><td style="font-family:${DISPLAY};font-size:30px;line-height:1.08;font-weight:800;text-transform:uppercase;color:${h.ink};word-break:break-word;">${esc(heading)}</td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="height:12px;line-height:12px;font-size:0;">&nbsp;</td></tr>
+        <tr><td style="border:2px solid ${LINE};border-radius:28px;padding:24px;">
+          <div style="font-family:${SANS};font-size:15px;line-height:1.6;font-weight:500;color:${INK};">${bodyHtml}</div>
           ${
             cta
-              ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 4px;"><tr><td style="border-radius:999px;background:#1d5f8f;">
-                   <a href="${esc(cta.href)}" style="display:inline-block;padding:12px 28px;mso-padding-alt:12px 28px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(cta.label)}</a>
+              ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px 0 4px;"><tr><td style="border-radius:999px;background:${AZUL};">
+                   <a href="${esc(cta.href)}" style="display:inline-block;padding:14px 26px;mso-padding-alt:14px 26px;font-family:${SANS};font-size:12px;line-height:1.4;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(cta.label)}</a>
                  </td></tr></table>
-                 <p style="margin:12px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#9aa2b1;word-break:break-all;">O pegá este enlace: ${esc(cta.href)}</p>`
+                 <p style="margin:12px 0 0;font-family:${SANS};font-size:12px;line-height:1.5;color:${INK_SOFT};word-break:break-all;">O pegá este enlace: ${esc(cta.href)}</p>`
               : ""
           }
           ${
             footnote
-              ? `<p style="margin:20px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#9aa2b1;">${esc(footnote)}</p>`
+              ? `<p style="margin:20px 0 0;padding-top:16px;border-top:2px solid ${LINE};font-family:${SANS};font-size:12px;line-height:1.5;color:${INK_SOFT};">${esc(footnote)}</p>`
               : ""
           }
         </td></tr>
-        <tr><td style="padding:18px 4px 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.5;color:#7b8494;">
-          Bóveda KF-1 · Compartí credenciales sin dejar rastro en el chat.<br>
-          <a href="${esc(APP_URL)}" style="color:#9aa2b1;text-decoration:underline;">${esc(APP_URL.replace(/^https?:\/\//, ""))}</a>
+        <tr><td style="padding:18px 4px 0;font-family:${SANS};font-size:11px;line-height:1.5;font-weight:500;color:${INK_SOFT};">
+          Bóveda KF-1 · Las contraseñas y códigos 2FA de tus clientes, ordenados.<br>
+          <a href="${esc(APP_URL)}" style="color:${AZUL};font-weight:700;text-decoration:underline;">${esc(APP_URL.replace(/^https?:\/\//, ""))}</a>
         </td></tr>
       </table>
       <!--[if mso]></td></tr></table><![endif]-->
@@ -108,10 +140,11 @@ export function verificationEmail(link: string) {
   return {
     subject: "Confirmá tu correo — Bóveda KF-1",
     html: shell({
-      preview: "Confirmá tu dirección de correo para activar tu bóveda.",
+      hero: "verify",
+      preview: "Confirmá tu dirección de correo para activar tu cuenta.",
       heading: "Confirmá tu correo",
       bodyHtml:
-        "<p style='margin:0 0 12px;'>Tu bóveda ya está creada. Confirmá que esta dirección es tuya para poder recuperar el acceso si alguna vez perdés la contraseña.</p>",
+        "<p style='margin:0 0 12px;'>Tu cuenta ya está creada. Confirmá que esta dirección es tuya para poder recuperar el acceso si alguna vez perdés la contraseña.</p>",
       cta: { label: "Confirmar correo", href: link },
       footnote: "Si no creaste una cuenta en Bóveda KF-1, ignorá este mensaje. El enlace vence en 24 horas.",
     }),
@@ -122,6 +155,7 @@ export function passwordResetEmail(link: string) {
   return {
     subject: "Restablecer contraseña — Bóveda KF-1",
     html: shell({
+      hero: "reset",
       preview: "Enlace para elegir una contraseña nueva.",
       heading: "Restablecer contraseña",
       bodyHtml:
@@ -137,10 +171,11 @@ export function duplicateSignupEmail(appUrl: string) {
   return {
     subject: "Alguien intentó registrarse con tu correo — Bóveda KF-1",
     html: shell({
-      preview: "Ya existe una bóveda con esta dirección. No se creó ninguna cuenta nueva.",
+      hero: "duplicate",
+      preview: "Ya existe una cuenta con esta dirección. No se creó ninguna cuenta nueva.",
       heading: "Alguien intentó registrarse con tu correo",
       bodyHtml:
-        "<p style='margin:0 0 12px;'>Recibimos un intento de crear una bóveda nueva con esta dirección, pero ya existe una cuenta asociada. <strong>No se creó nada nuevo</strong> y tus datos no cambiaron.</p><p style='margin:0;'>Si fuiste vos, entrá con tu contraseña de siempre. Si no, no hace falta que hagas nada — pero si querés, cambiá tu contraseña por las dudas.</p>",
+        "<p style='margin:0 0 12px;'>Recibimos un intento de crear una cuenta nueva con esta dirección, pero ya existe una cuenta asociada. <strong>No se creó nada nuevo</strong> y tus datos no cambiaron.</p><p style='margin:0;'>Si fuiste vos, entrá con tu contraseña de siempre. Si no, no hace falta que hagas nada — pero si querés, cambiá tu contraseña por las dudas.</p>",
       cta: { label: "Ir a Bóveda KF-1", href: appUrl },
     }),
   };
@@ -153,6 +188,7 @@ export function linkOpenedEmail(service: string, appUrl: string) {
     // product exists to avoid. It only appears inside the email body.
     subject: "Abrieron un link compartido de tu bóveda",
     html: shell({
+      hero: "opened",
       preview: "Uno de tus links compartidos se abrió por primera vez.",
       heading: "Abrieron tu link compartido",
       bodyHtml: `<p style='margin:0 0 12px;'>El link que compartiste para <strong>${esc(
@@ -167,6 +203,7 @@ export function inviteEmail(link: string, vaultName: string, inviterName: string
   return {
     subject: `${inviterName} te invitó a una bóveda en KF-1`,
     html: shell({
+      hero: "invite",
       preview: `Te sumaron a "${vaultName}" como ${roleLabel}.`,
       heading: "Te invitaron a una bóveda",
       bodyHtml: `<p style='margin:0 0 12px;'><strong>${esc(inviterName)}</strong> te sumó a la bóveda <strong>${esc(
@@ -187,25 +224,26 @@ export function paymentSuccessEmail(opts: {
   return {
     subject: `Pago recibido — Plan ${opts.planName} activado · Bóveda KF-1`,
     html: shell({
+      hero: "paid",
       preview: `Tu plan ${opts.planName} está activo. Adjuntamos tu recibo.`,
       heading: `Plan ${opts.planName} activo`,
       bodyHtml: `
         <p style='margin:0 0 16px;'>Recibimos tu pago correctamente. Tu suscripción está activa y podés usar todas las funciones del plan.</p>
         <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 16px;">
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#9aa2b1;">Plan</td>
-            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#edf0f4;text-align:right;font-weight:600;">${esc(opts.planName)}</td>
+            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#5b6383;">Plan</td>
+            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#1b2340;text-align:right;font-weight:600;">${esc(opts.planName)}</td>
           </tr>
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#9aa2b1;">Monto</td>
-            <td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;color:#edf0f4;text-align:right;font-weight:600;">${esc(opts.currency)} $${esc(opts.amount)}</td>
+            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#5b6383;">Monto</td>
+            <td style="padding:10px 0;border-bottom:2px solid #e4e7f0;font-size:13px;color:#1b2340;text-align:right;font-weight:600;">${esc(opts.currency)} $${esc(opts.amount)}</td>
           </tr>
           <tr>
-            <td style="padding:10px 0;font-size:13px;color:#9aa2b1;">Próximo cobro</td>
-            <td style="padding:10px 0;font-size:13px;color:#edf0f4;text-align:right;">${esc(opts.nextBillingDate)}</td>
+            <td style="padding:10px 0;font-size:13px;color:#5b6383;">Próximo cobro</td>
+            <td style="padding:10px 0;font-size:13px;color:#1b2340;text-align:right;">${esc(opts.nextBillingDate)}</td>
           </tr>
         </table>
-        <p style='margin:0;font-size:13px;color:#9aa2b1;'>El recibo en PDF va adjunto a este correo. Para cancelar o gestionar tu suscripción, entrá a tu panel de facturación.</p>`,
+        <p style='margin:0;font-size:13px;color:#5b6383;'>El recibo en PDF va adjunto a este correo. Para cancelar o gestionar tu suscripción, entrá a tu panel de facturación.</p>`,
       cta: { label: "Ver panel de facturación", href: `${APP_URL}/dashboard/billing` },
       footnote: "El pago fue procesado por Wompi. Política de devoluciones: kf1.kitifica.com/devoluciones",
     }),
@@ -216,18 +254,19 @@ export function paymentFailedEmail(opts: { planName: string; manageUrl: string }
   return {
     subject: `Pago no procesado — Bóveda KF-1`,
     html: shell({
+      hero: "failed",
       preview: "No pudimos procesar tu pago. Tu suscripción puede quedar suspendida.",
       heading: "No pudimos procesar tu pago",
       bodyHtml: `
         <p style='margin:0 0 12px;'>Intentamos cobrar tu suscripción del plan <strong>${esc(opts.planName)}</strong> pero el pago no fue aprobado.</p>
         <p style='margin:0 0 12px;'>Esto puede ocurrir si:</p>
-        <ul style='margin:0 0 16px;padding-left:20px;color:#c8cdd6;font-size:14px;line-height:1.7;'>
+        <ul style='margin:0 0 16px;padding-left:20px;color:#1b2340;font-size:14px;line-height:1.7;'>
           <li>Tu método de pago expiró o fue rechazado</li>
           <li>No había fondos suficientes</li>
           <li>Tu banco bloqueó el cargo</li>
         </ul>
-        <p style='margin:0;'>Actualizá tu método de pago en <a href="https://panel.wompi.sv/Recurrentes" style="color:#4f8ef7;">panel.wompi.sv/Recurrentes</a> para evitar la suspensión de tu cuenta.</p>`,
-      cta: { label: "Actualizar método de pago", href: opts.manageUrl },
+        <p style='margin:0;'>Actualizá tu método de pago en <a href="https://panel.wompi.sv/Recurrentes" style="color:#1f6fb2;">panel.wompi.sv/Recurrentes</a> para evitar la suspensión de tu cuenta.</p>`,
+      cta: { label: "Actualizar pago", href: opts.manageUrl },
       footnote: "Si el problema persiste, contactanos en contacto@kitifica.com.",
     }),
   };
