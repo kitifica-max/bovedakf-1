@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { sudoOrgsAction } from "./actions";
+import { LogoBadge } from "@/components/brand/logo-badge";
 
 export default function OrgsSudoPage() {
   const [error, setError] = useState<string | null>(null);
@@ -18,18 +20,21 @@ export default function OrgsSudoPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border-soft bg-paper p-8">
-        <h1 className="font-display text-xl font-semibold text-ink">Confirmar identidad</h1>
-        <p className="mt-1.5 text-sm text-ink-soft">
-          Ingresá la contraseña de tu cuenta para acceder a Organizaciones.
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-xs font-medium text-ink-soft">
-              Contraseña
-            </label>
+    <div className="flex min-h-dvh items-center justify-center px-4">
+      <div className="w-full max-w-sm overflow-hidden rounded-[40px] border-2 border-kf-borde bg-white">
+        {/* Seal on its own row so the condensed title gets the full width at any screen size. */}
+        <div className="flex flex-col gap-3 bg-kf-lavanda px-6 py-7 text-kf-amarillo sm:px-8">
+          <LogoBadge id="kf-ring-sudo" title="Bóveda KF-1" ink="var(--kf-amarillo)" center="#ffffff" className="h-16 w-16 shrink-0 self-end" />
+          <h1 className="m-0 font-brand text-[clamp(34px,10vw,44px)] leading-[1.04] font-extrabold break-words uppercase">
+            Confirmar identidad
+          </h1>
+        </div>
+        <div className="flex flex-col gap-5 p-6 sm:p-8">
+          <p className="m-0 text-sm font-semibold text-kf-tinta-suave">
+            Ingresá la contraseña de tu cuenta para entrar a Organizaciones.
+          </p>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label htmlFor="password" className="sr-only">Contraseña</label>
             <input
               id="password"
               name="password"
@@ -37,27 +42,24 @@ export default function OrgsSudoPage() {
               autoFocus
               autoComplete="current-password"
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-3.5 py-3 text-sm text-ink outline-none transition focus:border-ink placeholder:text-ink-soft/40"
-              placeholder="••••••••"
+              placeholder="Contraseña"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
-          </div>
-
-          {error && (
-            <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="mt-1 rounded-full bg-blue px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-          >
-            {pending ? "Verificando…" : "Continuar →"}
-          </button>
-        </form>
-
-        <p className="mt-5 text-center text-xs text-ink-soft">
-          <a href="/admin" className="hover:text-ink transition-colors">← Volver a Admin</a>
-        </p>
+            {error && (
+              <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={pending}
+              className="min-h-12 cursor-pointer rounded-full bg-kf-azul px-6 text-xs font-extrabold tracking-[0.14em] text-white uppercase transition hover:opacity-90 disabled:opacity-50"
+            >
+              {pending ? "Verificando…" : "Continuar"}
+            </button>
+          </form>
+          <Link href="/admin" className="text-center text-[13px] font-bold text-kf-azul underline decoration-2 underline-offset-4">
+            ← Volver a Admin
+          </Link>
+        </div>
       </div>
     </div>
   );
