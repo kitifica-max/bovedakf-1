@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen } from "next/font/google";
+import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen, Barlow_Condensed, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { auth } from "@/lib/auth";
@@ -29,14 +29,27 @@ const silkscreen = Silkscreen({
   weight: ["400", "700"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const title = "Bóveda KF-1 — Links temporales para compartir credenciales de forma segura";
-const description =
-  "Generá un link seguro para compartir tus credenciales. La otra persona accede sin necesitar cuenta — vos controlás el tiempo y revocás cuando terminás. AES-256, audit log incluido.";
+// Agencies brand: condensed display + geometric sans.
+const barlow = Barlow_Condensed({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["700", "800"],
+});
 
-const ogTitle = "Necesitás compartir una credencial. Generá el link. Revocás cuando termines.";
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const title = "Bóveda KF-1 — Las contraseñas y códigos 2FA de tus clientes, ordenados";
+const description =
+  "La bóveda para agencias: contraseñas y códigos de verificación de las redes de cada cliente, ordenados y cifrados con AES-256. Compartí accesos con links que expiran y revocalos cuando termines.";
+
+const ogTitle = "Chau Excel de contraseñas. La bóveda de las agencias.";
 const ogDescription =
-  "Links temporales con encriptación AES-256 para compartir acceso a tus credenciales. Sin vault compartido, sin exponer contraseñas, sin que el destinatario necesite cuenta.";
+  "Contraseñas y códigos 2FA de Instagram, TikTok y más, ordenados por cliente. Cuenta gratis para tu equipo, sin suscripción: pagás solo los links que compartís.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -59,16 +72,16 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   keywords: [
-    "compartir credenciales de forma segura",
+    "gestor de contraseñas para agencias",
+    "contraseñas de redes sociales de clientes",
+    "compartir códigos 2FA con el equipo",
+    "social media password manager",
+    "contraseñas para community managers",
+    "compartir contraseñas de forma segura",
     "links temporales para compartir contraseñas",
-    "dar acceso temporal a credenciales",
-    "compartir credenciales sin exponer contraseña",
-    "zero-knowledge credential sharing",
-    "acceso temporal revocable a contraseñas",
-    "compartir acceso AWS GitHub seguro",
-    "vault compartir credenciales equipo",
+    "alternativa a 1Password para agencias",
     "AES-256 compartir contraseñas",
-    "audit log acceso credenciales",
+    "auditoría de accesos a cuentas",
   ],
   authors: [{ name: "Kitifica", url: "https://www.kitifica.com" }],
   category: "technology",
@@ -102,7 +115,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      className={`${bodySans.variable} ${geistMono.variable} ${archivo.variable} ${silkscreen.variable} h-full antialiased`}
+      className={`${bodySans.variable} ${geistMono.variable} ${archivo.variable} ${silkscreen.variable} ${barlow.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers session={session}>{children}</Providers>

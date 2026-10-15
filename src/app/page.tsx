@@ -1,18 +1,6 @@
 import { headers } from "next/headers";
-import { SiteHeader } from "@/components/site-header";
-import { HeroSection } from "@/components/site/sections/hero";
-import { ProblemaSection } from "@/components/site/sections/problema";
-import { ComoFuncionaSection } from "@/components/site/sections/como-funciona";
-import { ParaEquiposSection } from "@/components/site/sections/para-equipos";
-import { SeguridadSection } from "@/components/site/sections/seguridad";
-import { PentestSection } from "@/components/site/sections/pentest";
-import { AiAgentSection } from "@/components/site/sections/ai-agent";
-import { YAdemasSection } from "@/components/site/sections/y-ademas";
-import { PreciosSection } from "@/components/site/sections/precios";
-import { FaqSection } from "@/components/site/sections/faq";
-import { CtaFinalSection } from "@/components/site/sections/cta-final";
-import { SiteFooter } from "@/components/site-footer";
-import { Reveals } from "@/components/reveals";
+import { auth } from "@/lib/auth";
+import { BrandLanding } from "@/components/brand/landing";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -21,12 +9,13 @@ const jsonLd = {
   applicationCategory: "SecurityApplication",
   operatingSystem: "Web",
   description:
-    "Bóveda de credenciales con Skill para Claude Code: tu agente IA pide credenciales en lenguaje natural y recibe un link temporal zero-knowledge. La contraseña nunca llega al modelo. Encriptación AES-256-GCM, expiración configurable y auditoría completa.",
+    "La bóveda para agencias: contraseñas y códigos 2FA de las redes de cada cliente, ordenados y cifrados con AES-256-GCM. Links para compartir que expiran, revocación en un clic y auditoría completa.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 
 export default async function HomePage() {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const session = await auth();
   return (
     <>
       <script
@@ -34,22 +23,7 @@ export default async function HomePage() {
         nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SiteHeader />
-      <main className="flex flex-col items-center gap-16 px-4 pb-16 pt-6 sm:gap-24 sm:px-8">
-      <HeroSection />
-      <AiAgentSection />
-      <ProblemaSection />
-      <ComoFuncionaSection />
-      <ParaEquiposSection />
-      <SeguridadSection />
-      <PentestSection />
-      <YAdemasSection />
-      <PreciosSection />
-      <FaqSection />
-      <CtaFinalSection />
-      <SiteFooter />
-      <Reveals />
-      </main>
+      <BrandLanding signedIn={!!session?.user} />
     </>
   );
 }

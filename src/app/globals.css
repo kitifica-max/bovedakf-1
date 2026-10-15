@@ -13,6 +13,25 @@
   --color-blue-soft: #cfe6ee;
   --color-danger: #f87171;
   --color-border: rgba(255, 255, 255, 0.12);
+
+  /* Agencies brand (light, color pairs: one ground + one tone-on-tone ink).
+     Marketing site first; the dashboard keeps the dark tokens above until it is restyled. */
+  --kf-azul: #1f6fb2;
+  --kf-azul-hondo: #1b5a93;
+  --kf-tinta: #1b2340;
+  --kf-tinta-suave: #5b6383;
+  --kf-niebla: #eef0f6;
+  --kf-borde: #e4e7f0;
+  --kf-carmesi: #c8234f;
+  --kf-carmesi-hondo: #a81b42;
+  --kf-manteca: #ffd27a;
+  --kf-bosque: #0b6b47;
+  --kf-bosque-hondo: #0b4a31;
+  --kf-lima: #b9e35a;
+  --kf-amarillo: #f4eea6;
+  --kf-lavanda: #4e52a6;
+  --kf-durazno: #f7c55a;
+  --kf-rosa: #f1d3e3;
 }
 
 @theme inline {
@@ -30,6 +49,24 @@
   --font-pixel: var(--font-silkscreen);
   --font-sans: var(--font-body-sans);
   --font-mono: var(--font-geist-mono);
+  --font-brand: var(--font-barlow);
+  --font-brand-sans: var(--font-montserrat);
+  --color-kf-azul: var(--kf-azul);
+  --color-kf-azul-hondo: var(--kf-azul-hondo);
+  --color-kf-tinta: var(--kf-tinta);
+  --color-kf-tinta-suave: var(--kf-tinta-suave);
+  --color-kf-niebla: var(--kf-niebla);
+  --color-kf-borde: var(--kf-borde);
+  --color-kf-carmesi: var(--kf-carmesi);
+  --color-kf-carmesi-hondo: var(--kf-carmesi-hondo);
+  --color-kf-manteca: var(--kf-manteca);
+  --color-kf-bosque: var(--kf-bosque);
+  --color-kf-bosque-hondo: var(--kf-bosque-hondo);
+  --color-kf-lima: var(--kf-lima);
+  --color-kf-amarillo: var(--kf-amarillo);
+  --color-kf-lavanda: var(--kf-lavanda);
+  --color-kf-durazno: var(--kf-durazno);
+  --color-kf-rosa: var(--kf-rosa);
 }
 
 body {
