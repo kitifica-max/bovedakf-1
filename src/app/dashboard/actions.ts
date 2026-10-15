@@ -19,6 +19,8 @@ import {
   generateBackupCodes,
   generateTotpSecret,
   matchBackupCode,
+  parseTotpInput,
+  sharedTotpNow,
   totpAuthUrl,
   verifyTotp,
   type BackupCode,
@@ -36,6 +38,7 @@ import { spendShareLink, userPlan } from "@/lib/plan";
 import { FREE_SEATS } from "@/lib/plan-state";
 import { findPack } from "@/lib/packs";
 import { createEnlacePago } from "@/lib/wompi";
+import { readShareable, readTotp, withTotp, writePayload } from "@/lib/credential-payload";
 
 const NO_LINKS_ERROR = "Te quedaste sin links para compartir. Recargá desde Planes para seguir.";
 import { rateLimit } from "@/lib/rate-limit";
@@ -90,15 +93,25 @@ export async function createCredentialAction(formData: FormData) {
     notes: formData.get("notes") || undefined,
     platform: formData.get("platform") || undefined,
     loginUrl: formData.get("loginUrl") || undefined,
+    totp: formData.get("totp") || undefined,
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { vaultId, service, username, secret, notes, platform, loginUrl } = parsed.data;
+  const totp = parsed.data.totp ? parseTotpInput(parsed.data.totp) : undefined;
+  if (totp === null) return TOTP_INVALID;
   await requireVaultAccess(vaultId, "EDITOR");
 
-  const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
-    data: { vaultId, service, username, platform, loginUrl, encryptedData: encryptAtRest(payload) },
+    data: {
+      vaultId,
+      service,
+      username,
+      platform,
+      loginUrl,
+      hasTotp: !!totp,
+      encryptedData: writePayload({ secret, notes: notes ?? "", totp }),
+    },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
@@ -121,6 +134,51 @@ export async function createClientAction(formData: FormData): Promise<{ error: s
   return { error: null, id: client.id };
 }
 
+const TOTP_INVALID = "Esa clave 2FA no es válida. Pegá la clave de texto (letras A-Z y números 2-7) o el link otpauth:// del QR.";
+
+// Adds or replaces a client account's 2FA seed (e.g. "¿No podés escanear?" key from Instagram).
+export async function setTotpAction(vaultId: string, credentialId: string, raw: string) {
+  const totp = parseTotpInput(raw);
+  if (!totp) return TOTP_INVALID;
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!credential) return "Credencial no encontrada";
+  await db.credential.update({
+    where: { id: credential.id },
+    data: { hasTotp: true, encryptedData: withTotp(credential.encryptedData, totp) },
+  });
+  await db.auditLog.create({
+    data: { vaultId, action: "totp_added", credentialService: credential.service, actorEmail: email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+// Current code only — the seed never leaves the server. The UI polls this while the code is open,
+// so the audit entry is deduped to one per person, account and 10 minutes.
+export async function totpCodeAction(vaultId: string, credentialId: string) {
+  const { email } = await requireVaultAccess(vaultId, "VIEWER");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  const totp = credential?.hasTotp ? readTotp(credential.encryptedData) : null;
+  if (!credential || !totp) throw new Error("Esta cuenta no tiene 2FA");
+  const recent = await db.auditLog.findFirst({
+    where: {
+      vaultId,
+      action: "totp_code_viewed",
+      credentialService: credential.service,
+      actorEmail: email,
+      createdAt: { gt: new Date(Date.now() - 10 * 60_000) },
+    },
+    select: { id: true },
+  });
+  if (!recent) {
+    await db.auditLog.create({
+      data: { vaultId, action: "totp_code_viewed", credentialService: credential.service, actorEmail: email },
+    });
+  }
+  return sharedTotpNow(totp);
+}
+
 export async function revealCredentialAction(vaultId: string, credentialId: string) {
   const { email } = await requireVaultAccess(vaultId, "VIEWER");
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -133,10 +191,7 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
       actorEmail: email,
     },
   });
-  return JSON.parse(decryptAtRest(credential.encryptedData)) as {
-    secret: string;
-    notes: string;
-  };
+  return readShareable(credential.encryptedData);
 }
 
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
@@ -162,7 +217,7 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   const plaintext = JSON.stringify({
     service: credential.service,
     username: credential.username,
-    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+    ...readShareable(credential.encryptedData),
   });
 
   const linkKey = generateLinkKey();

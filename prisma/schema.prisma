@@ -199,6 +199,8 @@ model Credential {
   // Platform id from src/lib/platforms.ts PLATFORMS; validated in the app.
   platform      String      @default("other")
   loginUrl      String?
+  // True when the encrypted payload holds a 2FA seed (src/lib/credential-payload.ts).
+  hasTotp       Boolean     @default(false)
   // AES-256-GCM at rest, base64: iv(12) + tag(16) + ciphertext, key = env ENCRYPTION_KEY
   encryptedData String
   notes         String?

@@ -14,7 +14,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
-import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
+import { encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
+import { readShareable } from "@/lib/credential-payload";
 import { validateToken, hasScope, type McpTokenPayload } from "@/lib/mcp-auth";
 
 const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate, private" };
@@ -101,7 +102,7 @@ async function handleGetCredential(token: McpTokenPayload, vaultId: string, cred
   const plaintext = JSON.stringify({
     service: credential.service,
     username: credential.username,
-    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+    ...readShareable(credential.encryptedData),
   });
 
   const linkKey = generateLinkKey();

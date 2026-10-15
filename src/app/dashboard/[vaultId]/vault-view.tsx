@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { AuditLog, Credential, ShareLink, Vault } from "@prisma/client";
 import {
   createCredentialAction,
@@ -8,6 +8,8 @@ import {
   deleteCredentialAction,
   revealCredentialAction,
   revokeShareLinkAction,
+  setTotpAction,
+  totpCodeAction,
 } from "../actions";
 import { ChevronDownIcon } from "@/components/icons";
 import { CopyButton } from "@/components/copy-button";
@@ -243,6 +245,11 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         <label htmlFor={`${idPrefix}-loginUrl`} className="sr-only">URL de login</label>
         <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login (opcional, https://…)" className={inputCls} />
       </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${idPrefix}-totp`} className="sr-only">Clave 2FA</label>
+        <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA (opcional)" className={`${inputCls} font-mono`} />
+        <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
+      </div>
       <div>
         <label htmlFor={`${idPrefix}-notes`} className="sr-only">Notas</label>
         <textarea
@@ -321,6 +328,7 @@ function CredentialRow({
             Abrir login ↗
           </a>
         )}
+        {credential.hasTotp && <TotpCode vaultId={vaultId} credentialId={credential.id} />}
       </div>
 
       <div className="flex flex-wrap gap-2.5">
@@ -459,10 +467,129 @@ function CredentialRow({
         </div>
       )}
 
+      {!credential.hasTotp && canEdit && <AddTotp vaultId={vaultId} credentialId={credential.id} />}
+
       {role === "OWNER" && (
         <AiAccessPanel credentialId={credential.id} credentialService={credential.service} initialAiAccessible={credential.aiAccessible} />
       )}
     </li>
+  );
+}
+
+const TOTP_HINT = "En la red social: Seguridad → Autenticación en dos pasos → app de autenticación → «¿No podés escanear?». Pegá esa clave o el link otpauth://.";
+
+// Live code from the server (the seed never reaches the browser). Refetches at each period boundary
+// while open and closes itself after 5 minutes.
+function TotpCode({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
+  const [state, setState] = useState<{ code: string; secondsLeft: number; period: number } | null>(null);
+  const [openedAt, setOpenedAt] = useState(0);
+  const [error, setError] = useState(false);
+
+  async function load() {
+    try {
+      setState(await totpCodeAction(vaultId, credentialId));
+      setError(false);
+    } catch {
+      setError(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!state) return;
+    const t = setTimeout(() => {
+      if (Date.now() - openedAt > 5 * 60_000) return setState(null);
+      if (state.secondsLeft <= 1) return void load();
+      setState({ ...state, secondsLeft: state.secondsLeft - 1 });
+    }, 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load is stable for this credential
+  }, [state, openedAt]);
+
+  if (!state) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setOpenedAt(Date.now());
+          load();
+        }}
+        className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-kf-bosque px-5 text-xs font-extrabold tracking-[0.12em] text-kf-lima transition hover:opacity-90"
+      >
+        {error ? "REINTENTAR 2FA" : "VER CÓDIGO 2FA"}
+      </button>
+    );
+  }
+
+  const circumference = 50.3; // 2π·8
+  const offset = circumference * (1 - state.secondsLeft / state.period);
+  const spaced = state.code.length === 6 ? `${state.code.slice(0, 3)} ${state.code.slice(3)}` : state.code;
+  return (
+    <div className="flex items-center gap-3 rounded-[22px] bg-kf-bosque py-2.5 pr-2 pl-4 text-kf-lima">
+      <svg width="30" height="30" viewBox="0 0 20 20" role="img" aria-label={`Quedan ${state.secondsLeft} segundos`}>
+        <circle cx="10" cy="10" r="8" fill="none" stroke="#2e8a62" strokeWidth="3" />
+        <circle
+          cx="10"
+          cy="10"
+          r="8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform="rotate(-90 10 10)"
+          className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+        />
+      </svg>
+      <div className="flex flex-col">
+        <span className="text-[10px] font-extrabold tracking-[0.16em]">CÓDIGO 2FA</span>
+        <span className="font-mono text-[26px] leading-tight font-semibold tracking-[0.06em]" aria-live="polite">
+          {spaced}
+        </span>
+      </div>
+      <CopyButton value={state.code} label="Copiar código 2FA" className="h-11 w-11 text-kf-lima! hover:bg-white/10!" />
+    </div>
+  );
+}
+
+function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className={`${quietBtn} self-start px-0 text-kf-bosque`}>
+        + Agregar código 2FA
+      </button>
+    );
+  }
+  return (
+    <form
+      className="flex flex-col gap-2.5 rounded-[20px] bg-white p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setPending(true);
+        setError(null);
+        const raw = String(new FormData(e.currentTarget).get("totp") ?? "");
+        try {
+          const result = await setTotpAction(vaultId, credentialId, raw);
+          if (result) setError(result);
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+    >
+      <label htmlFor={id} className={kicker}>CLAVE 2FA DE ESTA CUENTA</label>
+      <input id={id} name="totp" required autoFocus autoComplete="off" spellCheck={false} className={`${inputCls} font-mono`} />
+      <p className="px-1 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
+      {error && <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR 2FA"}</button>
+        <button type="button" onClick={() => setOpen(false)} className={quietBtn}>Cancelar</button>
+      </div>
+    </form>
   );
 }
 
@@ -473,6 +600,8 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   link_denied_expired_or_revoked: "Acceso denegado (expirado o revocado)",
   link_denied_not_found: "Acceso denegado (link inexistente)",
   credential_viewed: "Credencial vista",
+  totp_added: "2FA agregado",
+  totp_code_viewed: "Código 2FA visto",
   ai_access_enabled: "Acceso AI habilitado",
   ai_access_disabled: "Acceso AI deshabilitado",
   ai_credential_accessed: "Credencial accedida por AI",

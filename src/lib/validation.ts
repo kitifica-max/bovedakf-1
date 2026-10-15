@@ -51,6 +51,8 @@ export const credentialSchema = z.object({
     .max(500)
     .regex(/^https?:\/\/[^\s]+$/i, "La URL de login debe empezar con https://")
     .optional(),
+  // Base32 key or otpauth:// URI; parsed by parseTotpInput.
+  totp: z.string().trim().max(600).optional(),
 });
 
 export const clientSchema = z.object({

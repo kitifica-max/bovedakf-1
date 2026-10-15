@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateCliToken } from "@/lib/cli-auth";
 import { db } from "@/lib/db";
-import { decryptAtRest, encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
+import { encryptForLink, generateLinkKey, generatePublicId } from "@/lib/crypto";
+import { readShareable } from "@/lib/credential-payload";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { anonymizeIp } from "@/lib/audit";
 
@@ -43,7 +44,7 @@ export async function POST(
   const plaintext = JSON.stringify({
     service: credential.service,
     username: credential.username,
-    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+    ...readShareable(credential.encryptedData),
   });
 
   const linkKey = generateLinkKey();

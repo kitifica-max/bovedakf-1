@@ -37,7 +37,7 @@ function base32Decode(str: string): Buffer {
   return Buffer.from(bytes);
 }
 
-function hotp(secret: Buffer, counter: number): string {
+function hotp(secret: Buffer, counter: number, digits = DIGITS): string {
   const buf = Buffer.alloc(8);
   buf.writeBigInt64BE(BigInt(counter));
   const hmac = createHmac("sha1", secret).update(buf).digest();
@@ -47,7 +47,7 @@ function hotp(secret: Buffer, counter: number): string {
     ((hmac[offset + 1] & 0xff) << 16) |
     ((hmac[offset + 2] & 0xff) << 8) |
     (hmac[offset + 3] & 0xff);
-  return (code % 10 ** DIGITS).toString().padStart(DIGITS, "0");
+  return (code % 10 ** digits).toString().padStart(digits, "0");
 }
 
 export function generateTotpSecret(): string {
@@ -64,6 +64,42 @@ export function totpAuthUrl(secretBase32: string, email: string, issuer = "Bóve
     period: String(STEP_SECONDS),
   });
   return `otpauth://totp/${label}?${params.toString()}`;
+}
+
+// A client's account 2FA (Instagram, TikTok…): the seed lives inside the credential's encrypted payload.
+export type SharedTotp = { secret: string; digits: number; period: number };
+
+// Accepts the base32 key platforms show under "can't scan?" or a full otpauth:// URI from the QR.
+export function parseTotpInput(raw: string): SharedTotp | null {
+  let secret = raw.trim();
+  let digits = DIGITS;
+  let period = STEP_SECONDS;
+  if (/^otpauth:\/\/totp\//i.test(secret)) {
+    let url: URL;
+    try {
+      url = new URL(secret);
+    } catch {
+      return null;
+    }
+    const algorithm = url.searchParams.get("algorithm");
+    if (algorithm && algorithm.toUpperCase() !== "SHA1") return null; // ponytail: SHA1 only, like every major social platform
+    secret = url.searchParams.get("secret") ?? "";
+    digits = Number(url.searchParams.get("digits") ?? DIGITS);
+    period = Number(url.searchParams.get("period") ?? STEP_SECONDS);
+  }
+  secret = secret.toUpperCase().replace(/[\s-]/g, "").replace(/=+$/, "");
+  if (!/^[A-Z2-7]{16,128}$/.test(secret)) return null;
+  if (![6, 7, 8].includes(digits) || !Number.isInteger(period) || period < 15 || period > 120) return null;
+  return { secret, digits, period };
+}
+
+export function sharedTotpNow(t: SharedTotp, nowMs = Date.now()) {
+  const seconds = nowMs / 1000;
+  return {
+    code: hotp(base32Decode(t.secret), Math.floor(seconds / t.period), t.digits),
+    secondsLeft: Math.ceil(t.period - (seconds % t.period)),
+    period: t.period,
+  };
 }
 
 // Accepts codes from one step behind/ahead to tolerate clock drift.
