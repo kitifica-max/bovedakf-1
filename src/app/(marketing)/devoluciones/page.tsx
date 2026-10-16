@@ -3,54 +3,59 @@ import Link from "next/link";
 import { PageHero, StarDot, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
-  title: "Política de devoluciones — Bóveda KF-1",
-  description: "Política de cancelación y devoluciones de Bóveda KF-1.",
+  title: "Política de devoluciones",
+  description: "Política de devoluciones de Bóveda KF-1: recargas de links con pago único, sin suscripción ni cobros automáticos.",
   alternates: { canonical: "/devoluciones" },
 };
 
 const sections = [
   {
-    h: "1. Suscripciones y facturación",
+    h: "1. Pagos únicos, sin suscripción",
     p: [
-      "Bóveda KF-1 ofrece suscripciones mensuales procesadas mediante Wompi. Los cargos se realizan automáticamente al inicio de cada período de facturación.",
-      "Al suscribirte aceptás que el primer cobro se realiza de inmediato y los siguientes cada 30 días hasta que canceles.",
+      "Bóveda KF-1 no es una suscripción. La cuenta es gratuita y solo pagás cuando recargás links para compartir credenciales con alguien de afuera. Cada recarga es un pago único procesado mediante Wompi.",
+      "Nunca hacemos cobros automáticos ni renovaciones: si no volvés a recargar, no se te cobra nada y no hay nada que cancelar.",
     ],
   },
   {
-    h: "2. Cancelación",
+    h: "2. Qué recibís al pagar",
     p: [
-      "Podés cancelar tu suscripción en cualquier momento desde el panel de Wompi en panel.wompi.sv/Recurrentes.",
-      "La cancelación es efectiva al final del período de facturación en curso. Seguirás teniendo acceso a las funciones de tu plan hasta esa fecha. No se generan cargos adicionales.",
+      "Cuando Wompi aprueba el pago, los links del pack se suman a tu saldo de inmediato y te enviamos un comprobante por correo. Los links se consumen al crear un link compartible; ver credenciales dentro de tu equipo no gasta saldo.",
     ],
   },
   {
     h: "3. Política de reembolsos",
     p: [
-      "Dado que Bóveda KF-1 es un servicio digital con acceso inmediato, no ofrecemos reembolsos por períodos ya utilizados como política general.",
-      "Sin embargo, en los siguientes casos procesamos un reembolso completo del último período de facturación:",
+      "Dado que Bóveda KF-1 es un servicio digital con acceso inmediato, no ofrecemos reembolsos por links ya utilizados como política general.",
+      "Sin embargo, en los siguientes casos procesamos un reembolso completo de la recarga afectada:",
     ],
     list: [
-      "El cobro se realizó después de que hayas cancelado correctamente la suscripción.",
-      "Ocurrió un error técnico imputable a nuestra plataforma que impidió el uso normal del servicio.",
       "Se realizó un cobro duplicado.",
+      "El pago fue aprobado pero los links no se acreditaron en tu saldo.",
+      "Ocurrió un error técnico imputable a nuestra plataforma que te impidió usar los links que compraste.",
     ],
   },
   {
     h: "4. Pago no aprobado",
     p: [
-      "Si un pago no puede ser procesado (saldo insuficiente, tarjeta vencida, etc.), recibirás un correo de aviso desde Bóveda KF-1. Podés actualizar tu método de pago directamente en panel.wompi.sv/Recurrentes.",
-      "Si el pago no se regulariza, tu suscripción puede quedar suspendida. Tus datos no se eliminan: al regularizar el pago tu acceso se restaura automáticamente.",
+      "Si un pago no puede ser procesado (saldo insuficiente, tarjeta vencida, etc.), no se te cobra y no se acreditan links. Podés volver a intentarlo desde Links en tu panel. No queda ninguna deuda pendiente.",
     ],
   },
   {
-    h: "5. Cómo solicitar un reembolso",
+    h: "5. Si tenías un plan mensual anterior",
     p: [
-      "Si creés que tu caso aplica a los supuestos del punto 3, escribinos a hola@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
+      "Antes de pasar a links prepagos vendimos planes mensuales. Si tenés uno activo, se mantiene hasta que lo canceles y conservás los links ilimitados mientras siga activo. Podés cancelarlo cuando quieras desde el panel de Wompi en panel.wompi.sv/Recurrentes; la cancelación es efectiva al final del período en curso y no se generan cargos adicionales.",
+      "Si se te cobró después de cancelarlo correctamente, te reembolsamos ese cobro.",
+    ],
+  },
+  {
+    h: "6. Cómo solicitar un reembolso",
+    p: [
+      "Si creés que tu caso aplica, escribinos a hola@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
       "Respondemos en un plazo máximo de 5 días hábiles. Los reembolsos aprobados pueden tardar de 3 a 7 días hábiles en reflejarse según tu banco.",
     ],
   },
   {
-    h: "6. Cambios a esta política",
+    h: "7. Cambios a esta política",
     p: [
       "Nos reservamos el derecho de modificar esta política. Publicaremos los cambios en esta página con al menos 15 días de anticipación. El uso continuado del servicio implica la aceptación de la política vigente.",
     ],
@@ -60,7 +65,7 @@ const sections = [
 export default function DevolucionesPage() {
   return (
     <>
-      <PageHero pair="durazno" icon="refund" kicker="Última actualización: septiembre de 2026" title="Devoluciones" />
+      <PageHero pair="durazno" icon="refund" kicker="Última actualización: octubre de 2026" title="Devoluciones" />
       <div className={pageCard}>
 
       <div className="mt-8 flex flex-col gap-8">
