@@ -32,8 +32,8 @@ export function Mono({ name, className = "" }: { name: IconName; className?: str
 // Decorative starburst with a monoline icon centered inside (the icon sits within the inner chord).
 export function StarBadge({ fill, ink, icon, className = "h-32 w-32" }: { fill: string; ink: string; icon: IconName; className?: string }) {
   return (
-    <svg viewBox="0 0 200 200" aria-hidden="true" className={`shrink-0 ${className}`}>
-      <polygon points={STAR_POINTS} fill={fill} />
+    <svg data-reveal="pop" viewBox="0 0 200 200" aria-hidden="true" className={`shrink-0 ${className}`}>
+      <polygon data-spin="80" points={STAR_POINTS} fill={fill} />
       <g transform="translate(58 58) scale(3.5)" fill="none" stroke={ink} strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round">
         {ICONS[icon]}
       </g>
@@ -73,7 +73,7 @@ export function PageHero({
   const c = PAIRS[pair];
   return (
     <header style={{ background: c.bg, color: c.ink }} className="flex flex-wrap items-center justify-between gap-8 rounded-[48px] px-7 py-10 sm:px-14 sm:py-16">
-      <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
+      <div data-reveal className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
         {kicker && <span className="text-xs font-extrabold tracking-[0.18em] uppercase opacity-90">{kicker}</span>}
         <h1 className={`${display} m-0 text-[clamp(44px,7vw,92px)] leading-[1.04] break-words`}>{title}</h1>
         {lead && <p className="m-0 max-w-xl text-base font-semibold sm:text-lg">{lead}</p>}

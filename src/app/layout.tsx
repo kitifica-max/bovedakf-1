@@ -1,3 +1,4 @@
+import { Motion } from "@/components/brand/motion";
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { IBM_Plex_Sans, Geist_Mono, Archivo, Silkscreen, Barlow_Condensed, Montserrat } from "next/font/google";
@@ -125,6 +126,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           Saltar al contenido
         </a>
         <Providers session={session}>{children}</Providers>
+        <Motion />
         {/* Kitifica "App Directa" install prompt — marketing pages only; the
             overlay has no dismiss control, so it must never cover auth, the
             dashboard, the shared-link viewer, or an email-link landing. */}

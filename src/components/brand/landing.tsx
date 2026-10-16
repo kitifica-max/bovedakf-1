@@ -73,13 +73,13 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           {/* Hero */}
           <section className="flex flex-wrap overflow-hidden rounded-[48px] bg-kf-carmesi">
             <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
-              <h1 className={`${display} m-0 text-[clamp(36px,11vw,104px)] leading-[1] text-white`}>
+              <h1 data-reveal className={`${display} m-0 text-[clamp(36px,11vw,104px)] leading-[1] text-white`}>
                 Chau Excel <span className="text-kf-manteca">de contraseñas</span>
               </h1>
-              <p className="m-0 text-[15px] font-extrabold leading-relaxed tracking-[0.16em] text-white sm:text-[20px]">
+              <p data-reveal data-delay=".12" className="m-0 text-[15px] font-extrabold leading-relaxed tracking-[0.16em] text-white sm:text-[20px]">
                 CONTRASEÑAS Y CÓDIGOS 2FA DE CADA RED, <span className="text-kf-manteca">ORDENADOS POR CLIENTE.</span>
               </p>
-              <div className="flex flex-wrap gap-3.5">
+              <div data-reveal data-delay=".24" className="flex flex-wrap gap-3.5">
                 {signedIn ? (
                   <Link href="/dashboard" prefetch={false} className={`${pill} bg-white text-kf-carmesi-hondo`}>IR A MI BÓVEDA</Link>
                 ) : (
@@ -92,9 +92,9 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
               {/* Sticker overlaps the card's top-right corner; the header keeps right padding so it never covers text. */}
               <div className="relative w-full max-w-[420px]">
                 <div className="absolute -right-4 -top-16 z-10 rotate-[8deg] sm:-right-10 sm:-top-16">
-                  <Sticker />
+                  <div data-reveal="pop" data-delay=".7"><div data-float><Sticker /></div></div>
                 </div>
-              <div className="flex w-full flex-col gap-3.5 rounded-[32px] bg-white p-5 shadow-[0_30px_60px_rgba(120,20,45,0.25)] sm:p-6">
+              <div data-reveal data-delay=".3" className="flex w-full flex-col gap-3.5 rounded-[32px] bg-white p-5 shadow-[0_30px_60px_rgba(120,20,45,0.25)] sm:p-6">
                 <div className="flex items-center gap-3.5 pr-20 sm:pr-24">
                   <span className={`${display} flex h-13 w-13 items-center justify-center rounded-[18px] bg-kf-rosa text-[26px] text-kf-azul-hondo`}>PA</span>
                   <div className="flex flex-col">
@@ -133,7 +133,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* Statement */}
           <section id="como" className="scroll-mt-6 px-2 py-8 text-center sm:py-16">
-            <p className={`${display} mx-auto m-0 max-w-[1180px] text-[clamp(38px,6.4vw,96px)] leading-[1.08] text-kf-azul`}>
+            <p data-reveal className={`${display} mx-auto m-0 max-w-[1180px] text-[clamp(38px,6.4vw,96px)] leading-[1.08] text-kf-azul`}>
               Un cliente <Icon d={phone} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> un código 2FA y todo tu equipo{" "}
               <Icon d={lock} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> entrando sin pedirle el celu{" "}
               <Icon d={refresh} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> a nadie
@@ -141,9 +141,9 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           </section>
 
           {/* 2FA */}
-          <section className="flex flex-wrap gap-6">
+          <section data-stagger className="flex flex-wrap gap-6">
             <div className="flex min-w-0 flex-[1_1_520px] flex-col items-center gap-6 rounded-[48px] bg-kf-bosque p-8 text-center text-kf-lima sm:p-14 lg:p-18">
-              <svg width="112" height="140" viewBox="0 0 160 200" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+              <svg data-float width="112" height="140" viewBox="0 0 160 200" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M52 74 V54 a28 28 0 0 1 56 0 V74" /><rect x="34" y="74" width="92" height="78" rx="18" /><circle cx="80" cy="106" r="9" /><path d="M80 115 V130" /><path d="M62 152 L56 182 H44" /><path d="M98 152 L104 182 H116" /><path d="M34 100 L14 84" /><path d="M126 98 L148 74" /><path d="M150 58 L156 52 M140 54 L142 44" />
               </svg>
               <h2 className={`${display} m-0 text-[clamp(44px,5vw,76px)] leading-[1.04]`}>Publicás. No pedís códigos.</h2>
@@ -155,7 +155,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
               <div className="text-center text-[13px] font-extrabold tracking-[0.2em]">INSTAGRAM · TU CLIENTE</div>
               <svg viewBox="0 0 120 120" role="img" aria-label="Código 2FA vigente por 18 segundos" className="h-52 w-52">
                 <circle cx="60" cy="60" r="52" fill="none" stroke="#9fcb45" strokeWidth="10" />
-                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--kf-bosque)" strokeWidth="10" strokeLinecap="round" strokeDasharray="326.7" strokeDashoffset="130" transform="rotate(-90 60 60)" />
+                <circle data-countdown cx="60" cy="60" r="52" fill="none" stroke="var(--kf-bosque)" strokeWidth="10" strokeLinecap="round" strokeDasharray="326.7" strokeDashoffset="130" transform="rotate(-90 60 60)" />
                 <text x="60" y="62" textAnchor="middle" fontFamily="var(--font-geist-mono), monospace" fontWeight={600} fontSize={17} fill="currentColor">482 913</text>
                 <text x="60" y="78" textAnchor="middle" fontFamily="var(--font-montserrat), sans-serif" fontWeight={700} fontSize={7.5} letterSpacing={1.2} fill="currentColor">QUEDAN 18 S</text>
               </svg>
@@ -165,13 +165,13 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* Clients by color */}
           <section className="flex flex-col gap-7">
-            <div className="flex flex-wrap items-end justify-between gap-3">
+            <div data-reveal className="flex flex-wrap items-end justify-between gap-3">
               <h2 className={`${display} m-0 text-[clamp(44px,5vw,72px)] leading-[1.02] text-kf-azul`}>Cada cliente, su color</h2>
               <span className="max-w-[460px] text-[16px] font-semibold text-kf-tinta-suave">
                 Una bóveda por cliente. Tu equipo ve solo los clientes que le asignás.
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div data-stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {[
                 { name: "Panadería", nets: "Instagram · TikTok · Meta Ads · Gmail", cls: "bg-kf-rosa text-kf-azul-hondo" },
                 { name: "Cafetería", nets: "Instagram · LinkedIn · Google Ads", cls: "bg-kf-bosque text-kf-lima" },
@@ -188,8 +188,8 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* Security */}
           <section id="seguridad" className="flex scroll-mt-6 flex-col items-center gap-12 rounded-[48px] bg-kf-amarillo px-8 py-12 text-kf-lavanda sm:px-14 sm:py-20">
-            <h2 className={`${display} m-0 text-center text-[clamp(38px,4.4vw,64px)] leading-[1.04]`}>Seguridad nivel banco, vibra nivel agencia</h2>
-            <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-10">
+            <h2 data-reveal className={`${display} m-0 text-center text-[clamp(38px,4.4vw,64px)] leading-[1.04]`}>Seguridad nivel banco, vibra nivel agencia</h2>
+            <div data-stagger className="grid w-full grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-10">
               {[
                 { icon: lock, t: "Cifrado AES-256", b: "Cada clave se cifra antes de tocar la base de datos." },
                 { icon: phone, t: "Códigos 2FA compartidos", b: "El código vive en la bóveda, no en el celular del cliente." },
@@ -210,13 +210,13 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* CTA */}
           <section className="flex flex-col items-start gap-8 rounded-[48px] bg-kf-durazno px-8 py-12 sm:px-16 sm:py-20 lg:px-20">
-            <h2 className={`${display} m-0 max-w-[900px] text-[clamp(52px,8vw,128px)] leading-[1.02] text-kf-carmesi-hondo`}>¿Seguís pidiendo códigos por chat?</h2>
-            <a href="#planes" className={`${pill} bg-kf-carmesi-hondo text-white`}>VER PRECIOS</a>
+            <h2 data-reveal className={`${display} m-0 max-w-[900px] text-[clamp(52px,8vw,128px)] leading-[1.02] text-kf-carmesi-hondo`}>¿Seguís pidiendo códigos por chat?</h2>
+            <a data-reveal data-delay=".2" href="#planes" className={`${pill} bg-kf-carmesi-hondo text-white`}>VER PRECIOS</a>
           </section>
 
           {/* Plans */}
           <section id="planes" className="flex scroll-mt-6 flex-col gap-10 rounded-[48px] bg-kf-rosa px-8 py-12 sm:px-14 sm:py-20">
-            <div className="flex flex-wrap items-end justify-between gap-6">
+            <div data-reveal className="flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${display} m-0 text-[clamp(48px,5.6vw,84px)] leading-[1.02] text-kf-azul-hondo`}>¿Pagar todos los meses? No.</h2>
               <ul className={`${display} m-0 flex list-none flex-col gap-2 p-0 text-[24px] font-bold text-kf-azul-hondo`}>
                 <li>✓ Sin suscripción ni cobros automáticos</li>
@@ -224,7 +224,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                 <li>✓ Pagás solo los links que compartís</li>
               </ul>
             </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
+            <div data-stagger className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.15fr]">
               <div className="flex flex-col gap-6 rounded-[40px] bg-kf-azul p-8 text-white sm:p-12">
                 <div className="text-[13px] font-extrabold tracking-[0.2em] text-white">TU CUENTA</div>
                 <div className={`${display} text-[clamp(72px,8vw,112px)] leading-[1]`}>Gratis</div>
@@ -244,7 +244,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                     Cada link comparte una credencial con alguien de afuera: expira solo y lo revocás cuando quieras. Pago único, sin cobros automáticos.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {PACK_CARDS.map((p) => (
                     <div
                       key={p.links}

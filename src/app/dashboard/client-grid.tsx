@@ -17,7 +17,7 @@ export function ClientGrid({
   className?: string;
 }) {
   return (
-    <ul className={`grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-4 ${className}`}>
+    <ul data-stagger className={`grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-4 ${className}`}>
       {clients.map((c) => {
         const { bg, ink, text } = clientColor(c.color);
         const selected = c.id === selectedId;

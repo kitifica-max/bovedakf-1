@@ -34,7 +34,7 @@ export function OnboardingChecklist({ steps }: { steps: OnboardingStep[] }) {
   const next = steps.find((s) => !s.done);
 
   return (
-    <section aria-labelledby="checklist-title" className={`${appCard} flex flex-col gap-5`}>
+    <section data-reveal aria-labelledby="checklist-title" className={`${appCard} flex flex-col gap-5`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <p className={kicker}>Primeros pasos · {done} de {steps.length}</p>
@@ -65,9 +65,9 @@ export function OnboardingChecklist({ steps }: { steps: OnboardingStep[] }) {
         aria-valuetext={`${done} de ${steps.length} pasos completos`}
         className="h-3 overflow-hidden rounded-full bg-kf-niebla"
       >
-        <div style={{ width: `${(done / steps.length) * 100}%` }} className="h-full rounded-full bg-kf-bosque transition-[width]" />
+        <div data-reveal="bar" style={{ width: `${(done / steps.length) * 100}%` }} className="h-full rounded-full bg-kf-bosque transition-[width]" />
       </div>
-      <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+      <ul data-stagger className="m-0 flex list-none flex-col gap-2.5 p-0">
         {steps.map((s) => (
           <li key={s.id} className={`flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-5 py-3.5 ${s.done ? "bg-kf-niebla" : "border-2 border-kf-borde bg-white"}`}>
             <span

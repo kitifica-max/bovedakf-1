@@ -26,7 +26,7 @@ export default async function DashboardIndexPage({ searchParams }: { searchParam
 
   return (
     <AppShell active="clientes">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div data-reveal className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-brand text-6xl leading-none font-extrabold text-kf-azul uppercase md:text-7xl">Clientes</h1>
         <Link
           href="/dashboard?nuevo=1#nuevo-cliente"
