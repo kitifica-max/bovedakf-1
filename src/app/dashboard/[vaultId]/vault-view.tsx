@@ -26,6 +26,7 @@ import { AiAccessPanel } from "@/components/ai-access-panel";
 import { PlatformIcon } from "@/components/brand/platform-icon";
 import { CLIENT_COLORS, PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
 import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
+import { TotpField, totpRules } from "./totp-field";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 type Tab = "cuentas" | "actividad" | "equipo";
@@ -275,7 +276,7 @@ function UndoToast({ vaultId, undo, onClose }: { vaultId: string; undo: { id: st
 }
 
 function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () => void }) {
-  const v = useInlineValidation();
+  const v = useInlineValidation(totpRules);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const idPrefix = useId();
@@ -340,12 +341,13 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login" className={inputCls} />
         <FieldMsg v={v} name="loginUrl" />
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={`${idPrefix}-totp`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Clave 2FA</label>
-        <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA" className={`${inputCls} font-mono`} />
-        <FieldMsg v={v} name="totp" />
-        <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
-      </div>
+      <TotpField
+        id={`${idPrefix}-totp`}
+        v={v}
+        label="Clave 2FA (opcional)"
+        labelClassName="block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase"
+        inputClassName={inputCls}
+      />
       <div>
         <label htmlFor={`${idPrefix}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas</label>
         <textarea
@@ -756,7 +758,6 @@ function EditClientForm({
   );
 }
 
-const TOTP_HINT = "En la red social: Seguridad → Autenticación en dos pasos → app de autenticación → «¿No podés escanear?». Pegá esa clave o el link otpauth://.";
 
 // Live code from the server (the seed never reaches the browser). Refetches at each period boundary
 // while open and closes itself after 5 minutes.
@@ -832,7 +833,7 @@ function TotpCode({ vaultId, credentialId }: { vaultId: string; credentialId: st
 }
 
 function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
-  const v = useInlineValidation();
+  const v = useInlineValidation(totpRules);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -864,10 +865,7 @@ function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: str
       }}
      {...v.formProps}
    >
-      <label htmlFor={id} className={kicker}>CLAVE 2FA DE ESTA CUENTA</label>
-      <input id={id} name="totp" required autoFocus autoComplete="off" spellCheck={false} className={`${inputCls} font-mono`} />
-      <FieldMsg v={v} name="totp" />
-      <p className="px-1 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
+      <TotpField id={id} v={v} label="CLAVE 2FA DE ESTA CUENTA" required autoFocus labelClassName={kicker} inputClassName={inputCls} />
       {error && <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR 2FA"}</button>

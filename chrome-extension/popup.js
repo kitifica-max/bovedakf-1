@@ -2,6 +2,22 @@
 
 const API = "https://kf1.kitifica.com";
 
+// Brand look: one color pair per account card (same pairs as the web app), cycled by position.
+const STAR =
+  "100.0,4.0 114.2,19.2 132.8,9.8 141.0,29.0 161.7,26.5 162.8,47.3 183.1,52.0 177.1,72.0 194.5,83.3 182.0,100.0 194.5,116.7 177.1,128.0 183.1,148.0 162.8,152.7 161.7,173.5 141.0,171.0 132.8,190.2 114.2,180.8 100.0,196.0 85.8,180.8 67.2,190.2 59.0,171.0 38.3,173.5 37.2,152.7 16.9,148.0 22.9,128.0 5.5,116.7 18.0,100.0 5.5,83.3 22.9,72.0 16.9,52.0 37.2,47.3 38.3,26.5 59.0,29.0 67.2,9.8 85.8,19.2";
+const PAIRS = [
+  { bg: "#f1d3e3", ink: "#1b5a93", star: "#1f6fb2", starInk: "#f1d3e3" },
+  { bg: "#0b6845", ink: "#b9e35a", star: "#b9e35a", starInk: "#0b6845" },
+  { bg: "#f4eea6", ink: "#4e52a6", star: "#4e52a6", starInk: "#f4eea6" },
+  { bg: "#f7c55a", ink: "#a81b42", star: "#b31f47", starInk: "#f7c55a" },
+  { bg: "#1f6fb2", ink: "#ffffff", star: "#ffd27a", starInk: "#1f6fb2" },
+  { bg: "#b31f47", ink: "#ffd27a", star: "#ffd27a", starInk: "#b31f47" },
+  { bg: "#4e52a6", ink: "#f4eea6", star: "#f4eea6", starInk: "#4e52a6" },
+];
+const starSvg = (fill) =>
+  `<svg viewBox="0 0 200 200" aria-hidden="true"><polygon points="${STAR}" fill="${fill}"/></svg>`;
+const lockStar = `<svg class="star" viewBox="0 0 200 200" aria-hidden="true"><polygon points="${STAR}" fill="#ffd27a"/><g transform="translate(50 46) scale(4.2)" fill="none" stroke="#b31f47" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></svg>`;
+
 // ── Storage ──────────────────────────────────────────────────────────────────
 
 const store = {
@@ -91,22 +107,23 @@ function renderList(creds, query, token) {
   const container = document.getElementById("credList");
 
   if (!filtered.length) {
-    container.innerHTML = `<div class="state-center">${query ? "Sin resultados" : "Sin credenciales guardadas"}</div>`;
+    container.innerHTML = `<div class="state-center">${lockStar}${query ? "Sin resultados" : "Sin credenciales guardadas"}</div>`;
     return;
   }
 
   container.innerHTML = filtered
-    .map(
-      (c) => `
-    <div class="cred-item" data-id="${esc(c.id)}">
-      <div class="cred-icon">${esc(initial(c.service))}</div>
+    .map((c, i) => {
+      const p = PAIRS[i % PAIRS.length];
+      return `
+    <div class="cred-item" data-id="${esc(c.id)}" style="--bg:${p.bg};--ink:${p.ink};--star-ink:${p.starInk}">
+      <div class="cred-icon">${starSvg(p.star)}<span>${esc(initial(c.service))}</span></div>
       <div class="cred-info">
         <div class="cred-service">${esc(c.service)}</div>
         <div class="cred-user">${esc(c.username)}</div>
       </div>
       <button class="fill-btn">Llenar</button>
-    </div>`
-    )
+    </div>`;
+    })
     .join("");
 
   container.querySelectorAll(".cred-item").forEach((item) => {
@@ -127,12 +144,13 @@ function renderSetup() {
   document.getElementById("settingsPanel").style.display = "none";
   document.getElementById("app").innerHTML = `
     <div class="setup">
+      ${lockStar}
       <h2>Conectar tu bóveda</h2>
       <p>Genera un token de API en tu dashboard (Configuración → Tokens de API) y pégalo aquí para habilitar el autocompletado.</p>
       <input class="input" id="tokenInput" type="password"
         placeholder="kf1_xxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
       <button class="btn-primary" id="connectBtn">Conectar</button>
-      <a class="link-hint" href="https://kf1.kitifica.com/dashboard/settings" target="_blank">
+      <a class="link-hint" href="https://kf1.kitifica.com/dashboard/settings" target="_blank" rel="noopener noreferrer">
         Ir al dashboard para generar un token →
       </a>
     </div>

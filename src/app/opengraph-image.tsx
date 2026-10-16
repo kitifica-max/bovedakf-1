@@ -1,68 +1,35 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { ImageResponse } from "next/og";
+import { OG_SIZE, Star, display, label, ogImage } from "@/lib/og";
 
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = "image/png";
-export const alt = "Bóveda KF-1 — Tu IA accede a tus credenciales sin exponer contraseñas";
+export const alt = "Bóveda KF-1 — Chau Excel de contraseñas. La bóveda de las agencias.";
 
 export default function OpengraphImage() {
-  const logoSvg = readFileSync(join(process.cwd(), "public/logo-on-dark.svg"), "utf-8");
-  const logoDataUri = `data:image/svg+xml;base64,${Buffer.from(logoSvg).toString("base64")}`;
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "76px 88px",
-          background: "#0a1f33",
-          backgroundImage:
-            "radial-gradient(760px circle at 86% 14%, rgba(29,95,143,0.5), transparent 60%)",
-          fontFamily: "sans-serif",
-        }}
-      >
-        <img src={logoDataUri} width={360} height={51} alt="" />
-
-        <div
-          style={{
-            display: "flex",
-            fontSize: 56,
-            fontWeight: 700,
-            color: "#f2f5f8",
-            marginTop: 40,
-            maxWidth: 960,
-            lineHeight: 1.14,
-            letterSpacing: -1,
-          }}
-        >
-          Tu IA accede a tus credenciales. Sin exponer tus contraseñas.
+  return ogImage(
+    <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#b31f47" }}>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: 26, padding: "0 0 0 72px", width: 740 }}>
+        <div style={label(22, "#ffd27a")}>BÓVEDA KF-1</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={display(100, "#ffffff")}>Chau Excel</div>
+          <div style={display(100, "#ffd27a")}>de contraseñas</div>
         </div>
-
-        <div style={{ display: "flex", fontSize: 28, color: "#9fbdd2", marginTop: 26, maxWidth: 900 }}>
-          Conectá la Skill KF-1 a Claude Code — la contraseña nunca llega al modelo.
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            marginTop: 42,
-            fontSize: 22,
-            color: "#6f97b0",
-            letterSpacing: 1,
-          }}
-        >
-          <div style={{ display: "flex", width: 9, height: 9, borderRadius: 999, background: "#6f97b0" }} />
-          Skill · Zero-Knowledge · Auditoría
+        <div style={label(21, "#ffffff", { lineHeight: 1.5, maxWidth: 560, fontSize: 19 })}>CONTRASEÑAS Y CÓDIGOS 2FA DE CADA RED, ORDENADOS POR CLIENTE.</div>
+        <div style={{ display: "flex", gap: 14 }}>
+          <div style={label(17, "#a81b42", { background: "#ffd27a", borderRadius: 999, padding: "14px 26px" })}>SIN SUSCRIPCIÓN</div>
+          <div style={label(17, "#ffd27a", { border: "3px solid #ffd27a", borderRadius: 999, padding: "11px 26px" })}>CÓDIGOS 2FA</div>
         </div>
       </div>
-    ),
-    size
+
+      <div style={{ display: "flex", position: "absolute", left: 760, top: 0, width: 440, height: 630, background: "#ffd27a" }} />
+      <Star size={330} fill="#f1d3e3" style={{ left: 820, top: 36 }}>
+        <div style={display(132, "#1b5a93")}>PA</div>
+      </Star>
+      <Star size={250} fill="#b9e35a" style={{ left: 790, top: 360 }}>
+        <div style={display(100, "#0b4a31")}>CA</div>
+      </Star>
+      <Star size={210} fill="#b31f47" style={{ left: 985, top: 375 }}>
+        <div style={display(80, "#ffd27a")}>2FA</div>
+      </Star>
+    </div>,
   );
 }
