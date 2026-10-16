@@ -4,8 +4,8 @@
   "description": "Gestor de credenciales compartidas seguro para equipos",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0a0e15",
-  "theme_color": "#1d5f8f",
+  "background_color": "#ffd27a",
+  "theme_color": "#b31f47",
   "icons": [
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
