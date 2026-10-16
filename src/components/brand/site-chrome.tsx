@@ -1,3 +1,4 @@
+import { MotionToggle } from "./motion";
 import Link from "next/link";
 import { LogoBadge } from "./logo-badge";
 import { display, pill, pillSm } from "./styles";
@@ -56,7 +57,10 @@ export function BrandFooter() {
         </div>
       ))}
     </nav>
-    <div className="basis-full text-[13px] font-semibold tracking-[0.08em] text-white">© 2026 BÓVEDA KF-1 · KITIFICA</div>
+    <div className="flex basis-full flex-wrap items-center justify-between gap-x-6 text-[13px] font-semibold tracking-[0.08em] text-white">
+      <span>© 2026 BÓVEDA KF-1 · KITIFICA</span>
+      <MotionToggle className="min-h-11 cursor-pointer text-[13px] font-bold underline decoration-2 underline-offset-4 hover:opacity-80" />
+    </div>
   </footer>
   );
 }

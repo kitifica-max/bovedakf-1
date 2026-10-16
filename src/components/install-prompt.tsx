@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Mono, StarBadge } from "@/components/brand/shapes";
+import { display, pillBase } from "@/components/brand/styles";
 
 const ALLOWED = ["/login"];
 const DISMISS_KEY = "kap-install-dismissed";
@@ -16,7 +18,7 @@ export function InstallPrompt() {
     if (!ALLOWED.includes(pathname)) return;
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;
-    if ((navigator as any).standalone === true) return;
+    if ((navigator as Navigator & { standalone?: boolean }).standalone === true) return;
 
     function onPrompt(e: BeforeInstallPromptEvent) {
       e.preventDefault();
@@ -66,8 +68,8 @@ export function InstallPrompt() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Instalar App Directa"
-      className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center"
+      aria-labelledby="install-title"
+      className="fixed inset-0 z-[99999] flex items-end justify-center bg-kf-tinta/70 p-4 backdrop-blur-sm sm:items-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) dismiss();
       }}
@@ -75,49 +77,52 @@ export function InstallPrompt() {
         if (e.key === "Escape") dismiss();
       }}
     >
-      <div className="glass relative w-full max-w-sm rounded-2xl p-6 text-ink shadow-2xl">
+      <div className="relative flex w-full max-w-md flex-col gap-5 rounded-[40px] bg-kf-durazno p-7 font-brand-sans text-kf-tinta shadow-[0_30px_70px_rgba(0,0,0,0.35)] sm:p-9">
         <button
           type="button"
           aria-label="Cerrar"
           onClick={dismiss}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg text-ink-soft transition hover:bg-paper hover:text-ink"
+          className="absolute right-4 top-4 grid h-11 w-11 cursor-pointer place-items-center rounded-full text-kf-carmesi-hondo transition hover:bg-kf-carmesi-hondo/10"
         >
-          &#215;
+          <Mono name="close" className="h-5 w-5" />
         </button>
 
-        <div className="mb-3 flex items-center gap-2">
-          <span className="text-lg">&#128229;</span>
-          <h2 className="t-h3 text-ink">Instalar App Directa</h2>
+        <div className="flex items-center gap-4 pr-10">
+          <StarBadge fill="var(--kf-carmesi)" ink="var(--kf-manteca)" icon="download" className="h-20 w-20" />
+          <h2 id="install-title" className={`${display} m-0 text-[40px] leading-[1.04] text-kf-carmesi-hondo`}>
+            Instalar App Directa
+          </h2>
         </div>
 
-        <p className="mb-4 text-sm leading-relaxed text-ink-soft">
-          Instalá la app directamente en tu dispositivo, sin tiendas de apps.
-          Accedé a tu bóveda como una app nativa.
+        <p className="m-0 text-[15px] leading-relaxed font-semibold">
+          Instalá la app directamente en tu dispositivo, sin tiendas de apps. Accedé a tu bóveda como una app nativa.
         </p>
 
         {deferred ? (
           <button
             type="button"
+            ref={(n) => n?.focus()}
             onClick={install}
-            className="mb-3 inline-flex w-full cursor-pointer items-center justify-center rounded-full border-none bg-blue px-6 py-3 text-sm font-medium text-white transition hover:brightness-110 active:scale-[0.98]"
+            className={`${pillBase} min-h-13 w-full cursor-pointer bg-kf-carmesi-hondo px-6 text-[13px] tracking-[0.14em] text-white`}
           >
-            Instalar ahora &#8594;
+            INSTALAR AHORA
           </button>
         ) : (
           <Link
             href="https://kitifica.com/appdirecta/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mb-3 inline-flex w-full items-center justify-center rounded-full bg-blue px-6 py-3 text-sm font-medium text-white transition hover:brightness-110 active:scale-[0.98]"
+            ref={(n) => n?.focus()}
+            className={`${pillBase} min-h-13 w-full bg-kf-carmesi-hondo px-6 text-[13px] tracking-[0.14em] text-white`}
           >
-            Cómo instalar &#8594;
+            CÓMO INSTALAR
           </Link>
         )}
 
         <button
           type="button"
           onClick={dismiss}
-          className="w-full cursor-pointer border-none bg-transparent py-1 text-center text-xs text-ink-soft transition hover:text-ink"
+          className="min-h-11 w-full cursor-pointer text-center text-sm font-bold text-kf-carmesi-hondo underline decoration-2 underline-offset-4"
         >
           Ahora no
         </button>

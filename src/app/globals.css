@@ -262,3 +262,15 @@ button:not(:disabled):active {
     scroll-behavior: auto !important;
   }
 }
+
+/* GSAP targets (see components/brand/motion.tsx): hidden until revealed; shown if motion is off or gsap fails. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="off"]) [data-reveal],
+  html:not([data-motion="off"]) [data-stagger]:not([data-shown]) > * {
+    opacity: 0;
+  }
+  /* spinning/floating boxes can poke past the viewport edge for a moment; never let that scroll the page */
+  body {
+    overflow-x: clip;
+  }
+}

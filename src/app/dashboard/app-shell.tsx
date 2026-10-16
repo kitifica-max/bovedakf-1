@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/admin";
+import { MotionToggle } from "@/components/brand/motion";
 import { LogoBadge } from "@/components/brand/logo-badge";
 import { SignOutButton } from "./sign-out-button";
 
@@ -80,6 +81,7 @@ export async function AppShell({ active, children }: { active?: NavId; children:
           <span className="min-w-0 flex-1 truncate">{email}</span>
           <SignOutButton />
         </div>
+        <MotionToggle className="min-h-11 cursor-pointer self-start text-[13px] font-bold text-kf-tinta-suave underline decoration-2 underline-offset-4 hover:text-kf-tinta" />
       </aside>
       <main id="main" tabIndex={-1} className="flex min-w-0 flex-1 flex-col gap-7 p-5 md:p-10">{children}</main>
     </div>
