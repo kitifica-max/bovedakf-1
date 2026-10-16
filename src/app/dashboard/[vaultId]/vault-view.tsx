@@ -169,10 +169,21 @@ export function VaultView({
 
       <VerifyResult />
       {!emailVerified && <VerifyBanner />}
-      {showSurvey && <DashboardSurvey />}
+      {/* Not while the client is empty: the first task is saving an account. */}
+      {showSurvey && count > 0 && <DashboardSurvey />}
 
       {activeTab === "cuentas" && (
         <div className="flex flex-col gap-5">
+          {canEdit && count === 0 && (
+            <div className="flex flex-col gap-1 rounded-[28px] bg-kf-amarillo px-6 py-5 text-kf-lavanda">
+              <p className="m-0 text-xs font-extrabold tracking-[0.18em] uppercase">Paso 2 de 3</p>
+              <h3 className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">Guardá la primera cuenta de {vault.name}</h3>
+              <p className="m-0 text-sm font-bold">
+                Elegí la red, pegá usuario y contraseña. Si tiene verificación en dos pasos, pegá también su clave: el equipo verá
+                el código vigente sin pedirlo por chat.
+              </p>
+            </div>
+          )}
           {(showAddForm || (canEdit && count === 0)) && (
             <AddCredentialForm vaultId={vault.id} onDone={() => setShowAddForm(false)} />
           )}

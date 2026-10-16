@@ -14,6 +14,7 @@ import {
   passwordResetEmail,
   duplicateSignupEmail,
 } from "@/lib/email";
+import { DEFAULT_VAULT_NAME } from "@/lib/onboarding";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -62,7 +63,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
       passwordSalt: salt,
     },
   });
-  await db.vault.create({ data: { name: "Mi bóveda", ownerId: user.id } });
+  await db.vault.create({ data: { name: DEFAULT_VAULT_NAME, ownerId: user.id } });
 
   // Accept any invites already waiting for this address.
   const pendingInvites = await db.vaultInvite.findMany({

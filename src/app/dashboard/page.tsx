@@ -4,13 +4,25 @@ import { auth } from "@/lib/auth";
 import { AppShell } from "./app-shell";
 import { ClientGrid } from "./client-grid";
 import { listClients } from "./clients";
+import { getOnboarding } from "./onboarding";
+import { OnboardingChecklist } from "./onboarding-checklist";
+import { Welcome } from "./welcome";
 
-export default async function DashboardIndexPage({ searchParams }: { searchParams: Promise<{ nuevo?: string }> }) {
+export default async function DashboardIndexPage({ searchParams }: { searchParams: Promise<{ nuevo?: string; omitir?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
-  const clients = await listClients(session.user.id);
+  const [clients, onboarding] = await Promise.all([listClients(session.user.id), getOnboarding(session.user.id)]);
   if (clients.length === 0) redirect("/login");
-  const { nuevo } = await searchParams;
+  const { nuevo, omitir } = await searchParams;
+
+  // First visit: the untouched signup client becomes a guided "name your first client" step.
+  if (onboarding.firstRun && clients.length === 1 && onboarding.firstVaultId && omitir !== "1") {
+    return (
+      <AppShell active="clientes">
+        <Welcome vaultId={onboarding.firstVaultId} agency={session.user.companyName ?? ""} />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell active="clientes">
@@ -23,6 +35,7 @@ export default async function DashboardIndexPage({ searchParams }: { searchParam
           + NUEVO CLIENTE
         </Link>
       </div>
+      {!onboarding.allDone && <OnboardingChecklist steps={onboarding.steps} />}
       <ClientGrid clients={clients} openNew={nuevo === "1"} />
     </AppShell>
   );
