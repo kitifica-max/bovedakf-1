@@ -116,6 +116,7 @@ body::before {
   box-shadow: 0 0 0 3px #ffffff;
 }
 main:focus { outline: none; }
+.kf-app [aria-invalid="true"] { border-color: var(--kf-carmesi) !important; }
 /* Legacy type roles on brand pages: condensed uppercase headings (line-height ≥ 1.04 so
    Spanish accents on a second line never touch the line above), Montserrat kickers. */
 .kf-app .t-display,

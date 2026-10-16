@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { requestPasswordResetAction } from "../actions";
 import { CTAButton } from "@/components/site/cta-button";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 const inputCls =
   "h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm";
 
 export function ResetRequestForm() {
+  const v = useInlineValidation();
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!v.validateAll(e.currentTarget)) return;
     setPending(true);
     await requestPasswordResetAction(null, new FormData(e.currentTarget));
     setPending(false);
@@ -33,7 +36,7 @@ export function ResetRequestForm() {
           <p className="mt-1 text-sm text-ink-soft">
             Ingresá tu correo y te mandamos un enlace para elegir una nueva.
           </p>
-          <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
+          <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" {...v.formProps}>
             <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
               id="email"
@@ -44,6 +47,7 @@ export function ResetRequestForm() {
               required
               className={inputCls}
             />
+            <FieldMsg v={v} name="email" />
             <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
               {pending ? "Enviando..." : "Enviar enlace"}
             </CTAButton>

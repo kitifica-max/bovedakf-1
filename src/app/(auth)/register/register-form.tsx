@@ -7,6 +7,7 @@ import { registerAction } from "../actions";
 import { ChevronDownIcon } from "@/components/icons";
 import { CTAButton } from "@/components/site/cta-button";
 import { GIFT_LINKS } from "@/lib/packs";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 const INDUSTRIES = [
   "Tecnología / Software",
@@ -21,6 +22,7 @@ const INDUSTRIES = [
 ];
 
 export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; prefillEmail: string }) {
+  const v = useInlineValidation();
   const router = useRouter();
   // Only same-site paths: "//evil.com" would be protocol-relative.
   const dest = nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//") ? nextUrl : "/dashboard";
@@ -29,6 +31,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!v.validateAll(e.currentTarget)) return;
     setPending(true);
     setError(null);
 
@@ -56,7 +59,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
         <p className="mt-1 text-sm text-ink-soft">
           Gratis para tu equipo, con {GIFT_LINKS} links de regalo para compartir.
         </p>
-        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
+        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" {...v.formProps}>
           <div>
             <label htmlFor="companyName" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la empresa</label>
             <input
@@ -69,6 +72,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               maxLength={120}
               className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="companyName" />
           </div>
           <div>
             <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
@@ -82,6 +86,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               required
               className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="email" />
           </div>
           <div>
             <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
@@ -95,6 +100,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               minLength={10}
               className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="password" />
           </div>
           <div className="relative">
             <label htmlFor="industry" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Rubro de tu empresa</label>
@@ -112,6 +118,7 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
             </select>
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           </div>
+            <FieldMsg v={v} name="industry" />
           <div className="flex flex-col gap-2">
             <label htmlFor="bottleneck" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Qué tarea digital te quita más tiempo (opcional)</label>
             <textarea

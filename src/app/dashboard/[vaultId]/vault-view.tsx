@@ -24,6 +24,7 @@ import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
 import { PlatformIcon } from "@/components/brand/platform-icon";
 import { CLIENT_COLORS, PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
 type Tab = "cuentas" | "actividad" | "equipo";
@@ -206,6 +207,7 @@ export function VaultView({
 }
 
 function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () => void }) {
+  const v = useInlineValidation();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const idPrefix = useId();
@@ -213,9 +215,10 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
   return (
     <form
       className="flex flex-col gap-3 rounded-[28px] bg-kf-niebla p-5"
-      noValidate
+     
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         const formData = new FormData(e.currentTarget);
@@ -233,7 +236,8 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         (e.target as HTMLFormElement).reset();
         onDone?.();
       }}
-    >
+     {...v.formProps}
+   >
       <p className={kicker}>NUEVA CUENTA</p>
       <input type="hidden" name="vaultId" value={vaultId} />
       <div className="grid gap-3 sm:grid-cols-2">
@@ -246,26 +250,32 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
           </select>
           <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
         </div>
+          <FieldMsg v={v} name="platform" />
         <div>
           <label htmlFor={`${idPrefix}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
           <input id={`${idPrefix}-service`} name="service" placeholder="Nombre" required className={inputCls} />
+          <FieldMsg v={v} name="service" />
         </div>
         <div>
           <label htmlFor={`${idPrefix}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
           <input id={`${idPrefix}-username`} name="username" placeholder="Usuario o email" required className={inputCls} />
+          <FieldMsg v={v} name="username" />
         </div>
         <div>
           <label htmlFor={`${idPrefix}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
           <input id={`${idPrefix}-secret`} name="secret" placeholder="Contraseña" required className={inputCls} />
+          <FieldMsg v={v} name="secret" />
         </div>
       </div>
       <div>
         <label htmlFor={`${idPrefix}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
         <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login" className={inputCls} />
+        <FieldMsg v={v} name="loginUrl" />
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor={`${idPrefix}-totp`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Clave 2FA</label>
         <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA" className={`${inputCls} font-mono`} />
+        <FieldMsg v={v} name="totp" />
         <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
       </div>
       <div>
@@ -520,6 +530,7 @@ function EditCredentialForm({
   credential: CredentialWithLinks;
   onDone: () => void;
 }) {
+  const v = useInlineValidation();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const id = useId();
@@ -527,9 +538,10 @@ function EditCredentialForm({
   return (
     <form
       className="flex flex-col gap-3 rounded-[20px] bg-white p-4"
-      noValidate
+     
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         try {
@@ -541,7 +553,8 @@ function EditCredentialForm({
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <p className={kicker}>EDITAR CUENTA</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative">
@@ -556,10 +569,12 @@ function EditCredentialForm({
         <div>
           <label htmlFor={`${id}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
           <input id={`${id}-service`} name="service" defaultValue={credential.service} required className={inputCls} />
+          <FieldMsg v={v} name="service" />
         </div>
         <div>
           <label htmlFor={`${id}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
           <input id={`${id}-username`} name="username" defaultValue={credential.username} required className={inputCls} />
+          <FieldMsg v={v} name="username" />
         </div>
         <div>
           <label htmlFor={`${id}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña nueva</label>
@@ -569,6 +584,7 @@ function EditCredentialForm({
       <div>
         <label htmlFor={`${id}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
         <input id={`${id}-loginUrl`} name="loginUrl" type="url" defaultValue={credential.loginUrl ?? ""} placeholder="URL de login" className={inputCls} />
+        <FieldMsg v={v} name="loginUrl" />
       </div>
       <div>
         <label htmlFor={`${id}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas nuevas</label>
@@ -608,6 +624,7 @@ function EditClientForm({
   onDone: () => void;
   onDelete: () => void;
 }) {
+  const v = useInlineValidation();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const id = useId();
@@ -618,6 +635,7 @@ function EditClientForm({
       className="flex flex-col gap-4 rounded-[28px] bg-kf-niebla p-5"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         try {
@@ -629,11 +647,13 @@ function EditClientForm({
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <p className={kicker}>EDITAR CLIENTE</p>
       <div>
         <label htmlFor={`${id}-name`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre del cliente</label>
         <input id={`${id}-name`} name="name" required maxLength={60} defaultValue={name} className={inputCls} />
+        <FieldMsg v={v} name="name" />
       </div>
       <fieldset className="m-0 flex flex-wrap gap-2.5 border-0 p-0">
         <legend className={`${kicker} mb-1.5`}>COLOR</legend>
@@ -739,6 +759,7 @@ function TotpCode({ vaultId, credentialId }: { vaultId: string; credentialId: st
 }
 
 function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
+  const v = useInlineValidation();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -756,6 +777,7 @@ function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: str
       className="flex flex-col gap-2.5 rounded-[20px] bg-white p-4"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         const raw = String(new FormData(e.currentTarget).get("totp") ?? "");
@@ -767,9 +789,11 @@ function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: str
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <label htmlFor={id} className={kicker}>CLAVE 2FA DE ESTA CUENTA</label>
       <input id={id} name="totp" required autoFocus autoComplete="off" spellCheck={false} className={`${inputCls} font-mono`} />
+      <FieldMsg v={v} name="totp" />
       <p className="px-1 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
       {error && <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
       <div className="flex flex-wrap items-center gap-2">

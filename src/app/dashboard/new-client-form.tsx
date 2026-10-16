@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClientAction } from "./actions";
 import { CLIENT_COLORS } from "@/lib/platforms";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 export function NewClientForm({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const v = useInlineValidation();
   const router = useRouter();
   const [open, setOpen] = useState(defaultOpen);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,7 @@ export function NewClientForm({ defaultOpen = false }: { defaultOpen?: boolean }
       className="flex min-h-45 flex-col gap-4 rounded-[32px] border-2 border-kf-borde p-6"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         try {
@@ -40,7 +43,8 @@ export function NewClientForm({ defaultOpen = false }: { defaultOpen?: boolean }
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <label className="flex flex-col gap-1.5 text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave">
         NOMBRE DEL CLIENTE
         <input
@@ -51,6 +55,7 @@ export function NewClientForm({ defaultOpen = false }: { defaultOpen?: boolean }
           placeholder="Ej. Panadería Lula"
           className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold tracking-normal text-kf-tinta outline-none transition focus:border-kf-azul sm:text-sm"
         />
+        <FieldMsg v={v} name="name" />
       </label>
       <fieldset className="flex flex-wrap gap-2.5">
         <legend className="mb-1.5 text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave">COLOR</legend>

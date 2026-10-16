@@ -5,11 +5,13 @@ import { useSession } from "next-auth/react";
 import { updateCompanyNameAction } from "../actions";
 import { changePasswordAction, deleteAccountAction } from "./actions";
 import { fieldCls, kicker, pillFill, pillLine } from "@/components/brand/styles";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 const errorCls = "m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo";
 const okCls = "m-0 rounded-2xl bg-kf-lima px-4 py-2 text-sm font-bold text-kf-bosque-hondo";
 
 export function CompanyForm({ initialName }: { initialName: string }) {
+  const v = useInlineValidation();
   const { update } = useSession();
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [pending, setPending] = useState(false);
@@ -19,6 +21,7 @@ export function CompanyForm({ initialName }: { initialName: string }) {
       className="flex flex-col gap-3"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setStatus(null);
         const fd = new FormData(e.currentTarget);
@@ -27,10 +30,12 @@ export function CompanyForm({ initialName }: { initialName: string }) {
         setStatus(error ? { ok: false, msg: error } : { ok: true, msg: "Nombre guardado." });
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <label className="flex flex-col gap-1.5">
         <span className={kicker}>Nombre de la agencia</span>
         <input name="companyName" required maxLength={120} defaultValue={initialName} className={fieldCls} />
+        <FieldMsg v={v} name="companyName" />
       </label>
       {status && <p role={status.ok ? "status" : "alert"} className={status.ok ? okCls : errorCls}>{status.msg}</p>}
       <button disabled={pending} className={`${pillFill} self-start`}>
@@ -41,6 +46,7 @@ export function CompanyForm({ initialName }: { initialName: string }) {
 }
 
 export function PasswordForm() {
+  const v = useInlineValidation({ confirm: (value, form) => (value !== (form.elements.namedItem("next") as HTMLInputElement).value ? "Las contraseñas no coinciden" : null) });
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -49,6 +55,7 @@ export function PasswordForm() {
       className="flex flex-col gap-3"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         const form = e.currentTarget;
         setPending(true);
         setStatus(null);
@@ -64,19 +71,23 @@ export function PasswordForm() {
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
         <label className="flex min-w-0 flex-col gap-1.5">
           <span className={kicker}>Actual</span>
           <input name="current" type="password" required autoComplete="current-password" className={fieldCls} />
+          <FieldMsg v={v} name="current" />
         </label>
         <label className="flex min-w-0 flex-col gap-1.5">
           <span className={kicker}>Nueva (mín. 10)</span>
           <input name="next" type="password" required minLength={10} autoComplete="new-password" className={fieldCls} />
+          <FieldMsg v={v} name="next" />
         </label>
         <label className="flex min-w-0 flex-col gap-1.5">
           <span className={kicker}>Repetir nueva</span>
           <input name="confirm" type="password" required minLength={10} autoComplete="new-password" className={fieldCls} />
+          <FieldMsg v={v} name="confirm" />
         </label>
       </div>
       {status && <p role={status.ok ? "status" : "alert"} className={status.ok ? okCls : errorCls}>{status.msg}</p>}
@@ -88,6 +99,7 @@ export function PasswordForm() {
 }
 
 export function DeleteAccountForm({ email, ownedClients, sharedWith }: { email: string; ownedClients: number; sharedWith: number }) {
+  const v = useInlineValidation();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -105,6 +117,7 @@ export function DeleteAccountForm({ email, ownedClients, sharedWith }: { email: 
       className="flex flex-col gap-4 rounded-[28px] bg-kf-carmesi/10 p-5"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         try {
@@ -116,7 +129,8 @@ export function DeleteAccountForm({ email, ownedClients, sharedWith }: { email: 
         }
         setPending(false);
       }}
-    >
+     {...v.formProps}
+   >
       <div className="flex flex-col gap-2 text-sm font-semibold text-kf-carmesi-hondo">
         <p className="m-0 font-extrabold">Esto no se puede deshacer. Se borran para siempre:</p>
         <ul className="m-0 flex flex-col gap-1 pl-5">
@@ -135,10 +149,12 @@ export function DeleteAccountForm({ email, ownedClients, sharedWith }: { email: 
         <span className={kicker}>Escribí tu email para confirmar</span>
         <span className="text-sm font-bold break-all text-kf-carmesi-hondo">{email}</span>
         <input name="confirmEmail" type="email" required autoComplete="off" className={fieldCls} />
+        <FieldMsg v={v} name="confirmEmail" />
       </label>
       <label className="flex flex-col gap-1.5">
         <span className={kicker}>Tu contraseña</span>
         <input name="password" type="password" required autoComplete="current-password" className={fieldCls} />
+        <FieldMsg v={v} name="password" />
       </label>
       {error && <p role="alert" className={errorCls}>{error}</p>}
       <div className="flex flex-wrap items-center gap-2">

@@ -10,8 +10,11 @@ import { checkPasswordAction } from "../actions";
 import { FingerprintIcon } from "@/components/icons";
 import { VerifyResult } from "@/components/verify-result";
 import { CTAButton } from "@/components/site/cta-button";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 export function LoginForm() {
+  const vPw = useInlineValidation();
+  const vTotp = useInlineValidation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next");
@@ -91,6 +94,7 @@ export function LoginForm() {
 
   async function onSubmitPassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!vPw.validateAll(e.currentTarget)) return;
     setPending(true);
     setError(null);
 
@@ -123,6 +127,7 @@ export function LoginForm() {
 
   async function onSubmitTotp(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!vTotp.validateAll(e.currentTarget)) return;
     if (!creds) return;
     setPending(true);
     setError(null);
@@ -150,7 +155,7 @@ export function LoginForm() {
         <p className="mt-1 text-sm text-ink-soft">
           Ingresá el código de tu app de autenticación, o un código de respaldo.
         </p>
-        <form onSubmit={onSubmitTotp} className="mt-6 flex flex-col gap-3" noValidate>
+        <form onSubmit={onSubmitTotp} className="mt-6 flex flex-col gap-3" {...vTotp.formProps}>
           <div>
             <label htmlFor="code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código</label>
             <input
@@ -165,6 +170,7 @@ export function LoginForm() {
               maxLength={20}
               className="h-14 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-center font-mono text-xl tracking-[0.3em] text-kf-tinta outline-none transition focus:border-kf-azul"
             />
+            <FieldMsg v={vTotp} name="code" />
           </div>
           {error && (
             <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
@@ -194,7 +200,7 @@ export function LoginForm() {
         <div className="mt-4 empty:hidden">
           <VerifyResult />
         </div>
-        <form onSubmit={onSubmitPassword} className="mt-6 flex flex-col gap-3" noValidate>
+        <form onSubmit={onSubmitPassword} className="mt-6 flex flex-col gap-3" {...vPw.formProps}>
           <div>
             <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
@@ -208,6 +214,7 @@ export function LoginForm() {
               onChange={() => ssoAvailable && setSsoAvailable(false)}
               className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={vPw} name="email" />
           </div>
 
           {ssoAvailable ? (
@@ -248,6 +255,7 @@ export function LoginForm() {
                   required
                   className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
                 />
+                <FieldMsg v={vPw} name="password" />
               </div>
               {error && (
                 <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
