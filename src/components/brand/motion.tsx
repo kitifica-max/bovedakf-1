@@ -8,6 +8,7 @@ import { useEffect, useSyncExternalStore } from "react";
 //   data-spin[="seconds"]                      endless slow rotation (starbursts)
 //   data-float                                 endless gentle bob (stickers, seals)
 //   data-countdown                             endless draining ring (SVG circle, r=52)
+//   (no attribute)                             every rounded-full <a>/<button> leans toward the pointer
 // CSS hides the targets only under prefers-reduced-motion: no-preference; if gsap fails to load
 // we set <html data-motion="off"> and they simply show.
 
@@ -114,8 +115,38 @@ export function Motion() {
       document.documentElement.dataset.motion = "off";
     });
 
+    // Magnet: pills lean toward a fine pointer. Delegated, so every rounded-full button/link gets it.
+    const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let cur: HTMLElement | null = null;
+    const release = () => {
+      const el = cur;
+      cur = null;
+      if (!el) return;
+      import("gsap").then(({ gsap }) =>
+        gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.45)", onComplete: () => { el.style.transition = ""; gsap.set(el, { clearProps: "transform" }); } }),
+      );
+    };
+    const onMove = (e: PointerEvent) => {
+      const el = (e.target as Element).closest<HTMLElement>("a.rounded-full, button.rounded-full");
+      if (el !== cur) release();
+      if (!el || (el as HTMLButtonElement).disabled) return;
+      const r = el.getBoundingClientRect();
+      if (r.height < 40) return;
+      cur = el;
+      el.style.transition = "none"; // tailwind's transition would lag behind the tween
+      const dx = (e.clientX - (r.left + r.width / 2)) * 0.22;
+      const dy = (e.clientY - (r.top + r.height / 2)) * 0.32;
+      import("gsap").then(({ gsap }) => gsap.to(el, { x: dx, y: dy, duration: 0.35, ease: "power3.out", overwrite: "auto" }));
+    };
+    if (fine) {
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerleave", release);
+    }
+
     window.addEventListener(EVENT, syncLoops);
     return () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerleave", release);
       off = true;
       clearTimeout(failsafe);
       window.removeEventListener(EVENT, syncLoops);

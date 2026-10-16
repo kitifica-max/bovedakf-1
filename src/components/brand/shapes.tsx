@@ -17,6 +17,8 @@ export const ICONS = {
   refund: <><path d="M4 12a8 8 0 1 0 8-8" /><path d="M4 5v4h4" /><path d="M12 8v8M9.5 10.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4" /></>,
   puzzle: <><path d="M9 4h3a2 2 0 1 1 4 0h3v5a2 2 0 1 1 0 4v6h-6a2 2 0 1 0-4 0H4v-6a2 2 0 1 0 0-4V4z" /></>,
   spark: <><path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3" /></>,
+  close: <><path d="M6 6l12 12M18 6L6 18" /></>,
+  download: <><path d="M4 14v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" /><path d="M12 4v10M8 10.5l4 4 4-4" /></>,
   users: <><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><circle cx="17" cy="9" r="2.5" /><path d="M16.5 14.6c2.6.3 4.5 2.2 4.5 5" /></>,
 } as const;
 export type IconName = keyof typeof ICONS;
