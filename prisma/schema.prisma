@@ -182,6 +182,7 @@ model Vault {
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   credentials Credential[]
+  deletedCredentials DeletedCredential[]
   members     VaultMember[]
   invites     VaultInvite[]
   createdAt   DateTime     @default(now())
@@ -209,6 +210,28 @@ model Credential {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   shareLinks    ShareLink[]
+}
+
+// 60-second undo window for a deleted account. The row is really gone from Credential (so no reader
+// can leak it); this copy keeps the same AES-GCM ciphertext and is purged by deletedAt. Cascades
+// with the client (vault) so no secret outlives it. Share links are NOT restored: they stay revoked.
+model DeletedCredential {
+  id            String   @id // original Credential id, reused on restore
+  vaultId       String
+  vault         Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  service       String
+  username      String
+  platform      String
+  loginUrl      String?
+  hasTotp       Boolean
+  encryptedData String
+  notes         String?
+  aiAccessible  Boolean
+  createdAt     DateTime
+  deletedAt     DateTime @default(now())
+
+  @@index([deletedAt])
+  @@index([vaultId])
 }
 
 enum LinkPermission {

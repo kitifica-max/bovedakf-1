@@ -40,6 +40,7 @@ import { spendShareLink, userPlan } from "@/lib/plan";
 import { FREE_SEATS } from "@/lib/plan-state";
 import { findPack } from "@/lib/packs";
 import { createEnlacePago } from "@/lib/wompi";
+import { purgeDeletedCredentials, UNDO_WINDOW_MS } from "@/lib/credential-trash";
 import { patchPayload, readShareable, readTotp, withTotp, writePayload } from "@/lib/credential-payload";
 
 const NO_LINKS_ERROR = "Te quedaste sin links para compartir. Recargá desde Planes para seguir.";
@@ -196,15 +197,65 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
   return readShareable(credential.encryptedData);
 }
 
+// Deletes for real (nothing else needs to filter "deleted" rows) but keeps an encrypted copy for 60 s.
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
   const { email } = await requireVaultAccess(vaultId, "EDITOR");
-  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId }, select: { service: true } });
-  if (!credential) return;
-  await db.credential.deleteMany({ where: { id: credentialId, vaultId } });
-  await db.auditLog.create({
-    data: { vaultId, action: "credential_deleted", credentialService: credential.service, actorEmail: email },
-  });
+  const c = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!c) return;
+  await db.$transaction([
+    db.deletedCredential.upsert({
+      where: { id: c.id },
+      create: {
+        id: c.id,
+        vaultId,
+        service: c.service,
+        username: c.username,
+        platform: c.platform,
+        loginUrl: c.loginUrl,
+        hasTotp: c.hasTotp,
+        encryptedData: c.encryptedData,
+        notes: c.notes,
+        aiAccessible: c.aiAccessible,
+        createdAt: c.createdAt,
+      },
+      update: { deletedAt: new Date() },
+    }),
+    db.credential.deleteMany({ where: { id: c.id, vaultId } }),
+    db.auditLog.create({ data: { vaultId, action: "credential_deleted", credentialService: c.service, actorEmail: email } }),
+  ]);
+  await purgeDeletedCredentials();
   revalidatePath(`/dashboard/${vaultId}`);
+}
+
+// Restores an account deleted less than 60 s ago, with its encrypted data, 2FA seed and AI flag.
+// Its share links are not restored: they were revoked with the delete and stay that way.
+export async function undoDeleteCredentialAction(vaultId: string, credentialId: string) {
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const t = await db.deletedCredential.findFirst({
+    where: { id: credentialId, vaultId, deletedAt: { gte: new Date(Date.now() - UNDO_WINDOW_MS) } },
+  });
+  if (!t) return "Ya pasó el tiempo para deshacer. Creá la cuenta de nuevo.";
+  await db.$transaction([
+    db.credential.create({
+      data: {
+        id: t.id,
+        vaultId,
+        service: t.service,
+        username: t.username,
+        platform: t.platform,
+        loginUrl: t.loginUrl,
+        hasTotp: t.hasTotp,
+        encryptedData: t.encryptedData,
+        notes: t.notes,
+        aiAccessible: t.aiAccessible,
+        createdAt: t.createdAt,
+      },
+    }),
+    db.deletedCredential.delete({ where: { id: t.id } }),
+    db.auditLog.create({ data: { vaultId, action: "credential_restored", credentialService: t.service, actorEmail: email } }),
+  ]);
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
 }
 
 // Edit an account. Blank secret/notes keep the stored values; the 2FA seed is kept unless removed.

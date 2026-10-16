@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import type { AuditLog, Credential, ShareLink, Vault } from "@prisma/client";
 import {
   createCredentialAction,
@@ -13,6 +13,7 @@ import {
   updateCredentialAction,
   updateClientAction,
   deleteClientAction,
+  undoDeleteCredentialAction,
 } from "../actions";
 import { ConfirmDialog } from "@/components/brand/confirm-dialog";
 import { ChevronDownIcon } from "@/components/icons";
@@ -85,6 +86,8 @@ export function VaultView({
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingClient, setEditingClient] = useState(false);
   const [deletingClient, setDeletingClient] = useState(false);
+  const [undo, setUndo] = useState<{ id: string; service: string } | null>(null);
+  const closeUndo = useCallback(() => setUndo(null), []);
   const color = clientColor(vault.color);
   const count = vault.credentials.length;
   // Grouped in catalog order; platforms without credentials are skipped.
@@ -180,7 +183,7 @@ export function VaultView({
               </h3>
               <ul className="flex flex-col gap-3">
                 {credentials.map((c) => (
-                  <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} role={role} />
+                  <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} role={role} onDeleted={setUndo} />
                 ))}
               </ul>
             </div>
@@ -202,7 +205,61 @@ export function VaultView({
           <p className="text-sm font-semibold text-kf-tinta-suave">Solo el propietario puede gestionar el equipo.</p>
         ))}
 
+      <UndoToast key={undo?.id ?? "none"} vaultId={vault.id} undo={undo} onClose={closeUndo} />
     </section>
+  );
+}
+
+const UNDO_SECONDS = 10;
+
+// "Cuenta eliminada · Deshacer" for 10 s (the server keeps a copy for 60 s). Lives in VaultView because
+// the deleted row unmounts. role="status" announces it; the button is a real 44px target.
+function UndoToast({ vaultId, undo, onClose }: { vaultId: string; undo: { id: string; service: string } | null; onClose: () => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!undo) return;
+    const t = setTimeout(onClose, UNDO_SECONDS * 1000);
+    return () => clearTimeout(t);
+  }, [undo, onClose]);
+
+  if (!undo) return null;
+  return (
+    <div
+      role="status"
+      className="fixed right-4 bottom-4 z-50 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[24px] bg-kf-tinta py-2 pr-2 pl-5 text-sm font-semibold text-white shadow-xl"
+    >
+      <span className="min-w-0 break-words">{error ?? `«${undo.service}» eliminada`}</span>
+      {!error && (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={async () => {
+            setPending(true);
+            try {
+              const msg = await undoDeleteCredentialAction(vaultId, undo.id);
+              if (msg) setError(msg);
+              else onClose();
+            } catch {
+              setError("No se pudo deshacer. Recargá la página.");
+            }
+            setPending(false);
+          }}
+          className="inline-flex min-h-11 cursor-pointer items-center rounded-full bg-kf-manteca px-5 text-xs font-extrabold tracking-[0.12em] text-kf-tinta uppercase transition hover:opacity-90 disabled:opacity-50"
+        >
+          {pending ? "RESTAURANDO..." : "DESHACER"}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar aviso"
+        className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-lg text-white transition hover:bg-white/15"
+      >
+        ×
+      </button>
+    </div>
   );
 }
 
@@ -300,11 +357,13 @@ function CredentialRow({
   credential,
   canEdit,
   role,
+  onDeleted,
 }: {
   vaultId: string;
   credential: CredentialWithLinks;
   canEdit: boolean;
   role: Role;
+  onDeleted: (d: { id: string; service: string }) => void;
 }) {
   const [revealed, setRevealed] = useState<{ secret: string; notes: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -405,10 +464,13 @@ function CredentialRow({
         title={`Eliminar ${credential.service}`}
         confirmLabel="ELIMINAR CUENTA"
         onClose={() => setConfirmDelete(false)}
-        onConfirm={() => deleteCredentialAction(vaultId, credential.id)}
+        onConfirm={async () => {
+          await deleteCredentialAction(vaultId, credential.id);
+          onDeleted({ id: credential.id, service: credential.service });
+        }}
       >
-        Se borran la contraseña{credential.hasTotp ? ", el código 2FA" : ""} y sus links compartidos. Queda registrado en la
-        auditoría. No se puede deshacer.
+        Se borran la contraseña{credential.hasTotp ? ", el código 2FA" : ""} y se revocan sus links compartidos. Queda
+        registrado en la auditoría. Vas a tener unos segundos para deshacerlo (los links no se restauran).
       </ConfirmDialog>
 
       {revealed && (
@@ -815,6 +877,7 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   credential_updated: "Cuenta editada",
   credential_updated_totp_removed: "Cuenta editada (2FA quitado)",
   credential_deleted: "Cuenta eliminada",
+  credential_restored: "Cuenta restaurada",
   totp_code_viewed: "Código 2FA visto",
   ai_access_enabled: "Acceso AI habilitado",
   ai_access_disabled: "Acceso AI deshabilitado",

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AppShell } from "../app-shell";
 import { ClientGrid } from "../client-grid";
 import { listClients } from "../clients";
+import { purgeDeletedCredentials } from "@/lib/credential-trash";
 import { VaultView } from "./vault-view";
 
 export default async function VaultPage({
@@ -31,6 +32,7 @@ export default async function VaultPage({
   });
 
   if (!vault || !role || !meId) notFound();
+  await purgeDeletedCredentials();
 
   // Account panels (survey, verify banner) are the LOGGED-IN user's own settings — not the
   // vault owner's. 2FA and passkeys live in /dashboard/settings.
