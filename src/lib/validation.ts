@@ -1,3 +1,4 @@
+import { CLIENT_COLOR_IDS, PLATFORM_IDS } from "@/lib/platforms";
 import { z } from "zod";
 
 export const registerSchema = z.object({
@@ -42,6 +43,21 @@ export const credentialSchema = z.object({
   username: z.string().min(1, "Usuario requerido").max(200),
   secret: z.string().min(1, "Contraseña o secreto requerido"),
   notes: z.string().max(2000).optional(),
+  platform: z.enum(PLATFORM_IDS, { message: "Plataforma inválida" }).default("other"),
+  // Rendered as a link: only http(s) so a stored `javascript:` URL can never run.
+  loginUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .regex(/^https?:\/\/[^\s]+$/i, "La URL de login debe empezar con https://")
+    .optional(),
+  // Base32 key or otpauth:// URI; parsed by parseTotpInput.
+  totp: z.string().trim().max(600).optional(),
+});
+
+export const clientSchema = z.object({
+  name: z.string().trim().min(1, "Nombre del cliente requerido").max(60, "Máximo 60 caracteres"),
+  color: z.enum(CLIENT_COLOR_IDS, { message: "Color inválido" }),
 });
 
 export const shareLinkSchema = z.object({
@@ -49,3 +65,25 @@ export const shareLinkSchema = z.object({
   permission: z.enum(["READ", "DOWNLOAD"], { message: "Permiso inválido" }),
   expiresInHours: z.coerce.number({ message: "Expiración requerida" }).int().min(1).max(168), // 1h – 7d
 });
+
+export const changePasswordSchema = z
+  .object({
+    current: z.string().min(1, "Ingresá tu contraseña actual"),
+    next: z.string().min(10, "La nueva contraseña necesita al menos 10 caracteres"),
+    confirm: z.string(),
+  })
+  .refine((v) => v.next === v.confirm, { message: "Las contraseñas nuevas no coinciden", path: ["confirm"] })
+  .refine((v) => v.next !== v.current, { message: "La nueva contraseña tiene que ser distinta de la actual", path: ["next"] });
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Ingresá tu contraseña"),
+  confirmEmail: z.string().trim().toLowerCase().email("Escribí tu email para confirmar"),
+});
+
+// Edit form: secret and notes are optional — left blank, the stored (encrypted) values stay.
+export const credentialUpdateSchema = credentialSchema
+  .omit({ vaultId: true, secret: true, totp: true })
+  .extend({
+    secret: z.string().optional(),
+    removeTotp: z.boolean().default(false),
+  });

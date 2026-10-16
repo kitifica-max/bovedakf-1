@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero, StarDot, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Privacidad",
@@ -38,7 +39,6 @@ const sections = [
     h: "Cuánto tiempo guardamos tus datos",
     p: [
       "Mientras tu cuenta exista. Los links compartidos y su registro de auditoría se conservan aunque el link haya expirado, como historial de acceso.",
-      "Excepción: si tu prueba de un plan de pago termina y no elegís un plan dentro de los 15 días siguientes, eliminamos tus credenciales de forma permanente (ver Términos, sección 2). Tu cuenta y el registro de auditoría se conservan.",
     ],
   },
   {
@@ -55,14 +55,14 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">Privacidad</h1>
-      <p className="mt-2 text-sm text-ink-soft">Última actualización: 29 de septiembre de 2026.</p>
+    <>
+      <PageHero pair="amarillo" icon="eye" kicker="Última actualización: 29 de septiembre de 2026" title="Privacidad" />
+      <div className={pageCard}>
 
       <div className="mt-8 flex flex-col gap-6">
-        {sections.map((s) => (
+        {sections.map((s, si) => (
           <section key={s.h}>
-            <h2 className="t-h2 text-ink">{s.h}</h2>
+            <h2 className="t-h2 flex items-center gap-3"><StarDot i={si} />{s.h}</h2>
             <ul className="mt-2 flex flex-col gap-1.5">
               {s.p.map((para, i) => (
                 <li key={i} className="text-sm text-ink-soft">
@@ -73,6 +73,7 @@ export default function PrivacyPage() {
           </section>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

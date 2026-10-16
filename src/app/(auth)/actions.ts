@@ -8,14 +8,13 @@ import { loginSchema, registerSchema, emailSchema, resetPasswordSchema } from "@
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { createToken, consumeToken } from "@/lib/tokens";
 import { applyMembership } from "@/lib/vault-access";
-import { TRIAL_DAYS, DAY_MS } from "@/lib/plan-state";
-import { isPersonalEmail, TEAM_NEEDS_CORPORATE_EMAIL } from "@/lib/email-domains";
 import {
   sendEmail,
   verificationEmail,
   passwordResetEmail,
   duplicateSignupEmail,
 } from "@/lib/email";
+import { DEFAULT_VAULT_NAME } from "@/lib/onboarding";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -43,9 +42,6 @@ export async function registerAction(_prev: string | null, formData: FormData) {
 
   const { email, password, companyName, industry, bottleneck, currentSolution } = parsed.data;
 
-  const plan = formData.get("plan");
-  if (plan === "team" && isPersonalEmail(email)) return TEAM_NEEDS_CORPORATE_EMAIL;
-
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
     // Don't confirm the address exists to the caller — notify the real
@@ -67,20 +63,7 @@ export async function registerAction(_prev: string | null, formData: FormData) {
       passwordSalt: salt,
     },
   });
-  await db.vault.create({ data: { name: "Mi bóveda", ownerId: user.id } });
-
-  // Picking a paid plan on /#precios starts a card-free trial of that plan.
-  if (plan === "personal" || plan === "team") {
-    await db.subscription.create({
-      data: {
-        userId: user.id,
-        plan,
-        status: "TRIALING",
-        seats: plan === "team" ? 10 : 1,
-        currentPeriodEnd: new Date(Date.now() + TRIAL_DAYS * DAY_MS),
-      },
-    });
-  }
+  await db.vault.create({ data: { name: DEFAULT_VAULT_NAME, ownerId: user.id } });
 
   // Accept any invites already waiting for this address.
   const pendingInvites = await db.vaultInvite.findMany({

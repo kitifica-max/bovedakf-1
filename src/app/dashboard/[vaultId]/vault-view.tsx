@@ -1,7 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
-import { signOut } from "next-auth/react";
+import { useCallback, useEffect, useId, useState } from "react";
 import type { AuditLog, Credential, ShareLink, Vault } from "@prisma/client";
 import {
   createCredentialAction,
@@ -9,46 +8,40 @@ import {
   deleteCredentialAction,
   revealCredentialAction,
   revokeShareLinkAction,
+  setTotpAction,
+  totpCodeAction,
+  updateCredentialAction,
+  updateClientAction,
+  deleteClientAction,
+  undoDeleteCredentialAction,
 } from "../actions";
-import {
-  ActivityIcon,
-  ChevronDownIcon,
-  EyeIcon,
-  EyeOffIcon,
-  KeyRoundIcon,
-  Link2Icon,
-  LockIcon,
-  LogOutIcon,
-  PlusIcon,
-  Share2Icon,
-  ShieldCheckIcon,
-  Trash2Icon,
-  UsersIcon,
-  XCircleIcon,
-} from "@/components/icons";
-import Link from "next/link";
+import { ConfirmDialog } from "@/components/brand/confirm-dialog";
+import { ChevronDownIcon } from "@/components/icons";
 import { CopyButton } from "@/components/copy-button";
 import { DashboardSurvey } from "@/components/dashboard-survey";
 import { VerifyBanner } from "@/components/verify-banner";
 import { VerifyResult } from "@/components/verify-result";
-import { TwoFactorSettings } from "@/components/two-factor-settings";
-import { PasskeySettings } from "@/components/passkey-settings";
 import { VaultMembers } from "@/components/vault-members";
 import { AiAccessPanel } from "@/components/ai-access-panel";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { PlatformIcon } from "@/components/brand/platform-icon";
+import { CLIENT_COLORS, PLATFORMS, clientColor, platformOf } from "@/lib/platforms";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 type Role = "OWNER" | "EDITOR" | "VIEWER";
-type Tab = "credenciales" | "actividad" | "equipo" | "seguridad";
+type Tab = "cuentas" | "actividad" | "equipo";
 
 type CredentialWithLinks = Credential & { shareLinks: ShareLink[] };
 type VaultWithCredentials = Vault & { credentials: CredentialWithLinks[] };
 
+// Canvas building blocks: pill buttons (filled / outline / quiet), pill inputs, kicker labels.
+const pill = "inline-flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-full px-5 text-xs font-extrabold tracking-[0.12em] transition disabled:cursor-not-allowed disabled:opacity-50";
+const pillFill = `${pill} bg-kf-azul text-white hover:opacity-90`;
+const pillLine = `${pill} border-2 border-kf-azul bg-white text-kf-azul hover:bg-kf-azul hover:text-white`;
+const pillDanger = `${pill} border-2 border-kf-carmesi bg-white text-kf-carmesi hover:bg-kf-carmesi hover:text-white`;
+const quietBtn = "inline-flex h-11 cursor-pointer items-center px-3 text-[13px] font-bold text-kf-tinta transition hover:text-kf-azul";
 const inputCls =
-  "w-full rounded-2xl border border-border-soft bg-gray/40 px-3 py-2 text-base sm:text-sm outline-none transition focus:border-ink";
-const linkBtnCls =
-  "flex cursor-pointer items-center gap-1 text-ink-soft underline decoration-border-soft underline-offset-4 transition hover:text-ink";
-const dangerLinkBtnCls =
-  "flex cursor-pointer items-center gap-1 text-danger underline decoration-danger/30 underline-offset-4 transition hover:decoration-danger";
+  "h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm";
+const kicker = "text-xs font-extrabold tracking-[0.18em] text-kf-tinta-suave";
 
 const ROLE_LABEL: Record<Role, string> = {
   OWNER: "Propietario",
@@ -56,376 +49,244 @@ const ROLE_LABEL: Record<Role, string> = {
   VIEWER: "Lector",
 };
 
-const TABS: { id: Tab; label: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }[] = [
-  { id: "credenciales", label: "Credenciales", Icon: KeyRoundIcon },
-  { id: "actividad", label: "Actividad", Icon: ActivityIcon },
-  { id: "equipo", label: "Equipo", Icon: UsersIcon },
-  { id: "seguridad", label: "Seguridad", Icon: LockIcon },
+const TABS: { id: Tab; label: string }[] = [
+  { id: "cuentas", label: "Cuentas" },
+  { id: "actividad", label: "Auditoría" },
+  { id: "equipo", label: "Equipo" },
 ];
+
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
 
 export function VaultView({
   vault,
   auditLogs,
   showSurvey,
-  totpEnabled,
   emailVerified,
-  passkeys,
   role,
   members,
   invites,
-  userEmail,
-  isAdminUser,
-  isOrgAdmin,
 }: {
   vault: VaultWithCredentials;
   auditLogs: AuditLog[];
   showSurvey: boolean;
-  totpEnabled: boolean;
   emailVerified: boolean;
-  passkeys: { credentialID: string; credentialDeviceType: string; createdAt: Date }[];
   role: Role;
   members: { id: string; email: string; role: Role }[];
   invites: { id: string; email: string; role: Role }[];
-  userEmail: string;
-  isAdminUser: boolean;
-  isOrgAdmin: boolean;
 }) {
   const canEdit = role === "OWNER" || role === "EDITOR";
-  const [activeTab, setActiveTab] = useState<Tab>("credenciales");
+  const [activeTab, setActiveTab] = useState<Tab>("cuentas");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  const activeLinks = vault.credentials
-    .flatMap((c) => c.shareLinks)
-    .filter((l) => !l.revokedAt && l.expiresAt > new Date()).length;
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const eventsToday = auditLogs.filter((l) => l.createdAt >= todayStart).length;
-  const initials = userEmail.slice(0, 2).toUpperCase();
-  const tabLabel = TABS.find((t) => t.id === activeTab)?.label ?? "";
+  const [editingClient, setEditingClient] = useState(false);
+  const [deletingClient, setDeletingClient] = useState(false);
+  const [undo, setUndo] = useState<{ id: string; service: string } | null>(null);
+  const closeUndo = useCallback(() => setUndo(null), []);
+  const color = clientColor(vault.color);
+  const count = vault.credentials.length;
+  // Grouped in catalog order; platforms without credentials are skipped.
+  const groups = PLATFORMS.map((p) => ({
+    platform: p,
+    credentials: vault.credentials.filter((c) => platformOf(c.platform).id === p.id),
+  })).filter((g) => g.credentials.length > 0);
 
   return (
-    <div className="flex h-dvh overflow-hidden">
-      {/* ── Desktop sidebar ───────────────────── */}
-      <aside className="hidden md:flex w-52 flex-col border-r border-border-soft bg-paper/40 backdrop-blur-xl">
-        <div className="flex h-14 items-center px-4 border-b border-border-soft">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-on-dark.svg" alt="KF-1" className="h-5 w-auto" />
-        </div>
-
-        <div className="px-3 pt-4 pb-2">
-          <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-blue/[0.07] border border-blue/20">
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-blue text-white">
-              <ShieldCheckIcon className="h-3 w-3" />
+    <section className="flex min-w-0 flex-[999_1_520px] flex-col gap-5 rounded-[40px] border-2 border-kf-borde p-5 sm:p-7">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span
+            style={{ background: color.bg, color: color.ink }}
+            className="grid h-14 w-14 shrink-0 place-items-center rounded-[20px] font-brand text-[28px] font-extrabold"
+            aria-hidden="true"
+          >
+            {initialsOf(vault.name)}
+          </span>
+          <div className="flex min-w-0 flex-col">
+            <h2 style={{ color: color.text }} className="font-brand text-[40px] leading-[1.04] font-extrabold break-words uppercase">
+              {vault.name}
+            </h2>
+            <span className="text-[13px] font-semibold text-kf-tinta-suave">
+              {count} cuenta{count === 1 ? "" : "s"} · {members.length + 1} persona{members.length ? "s" : ""} · {ROLE_LABEL[role]}
             </span>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-ink truncate">{vault.name}</p>
-              <p className="text-[10px] text-ink-soft">{ROLE_LABEL[role]}</p>
-            </div>
           </div>
         </div>
-
-        <nav className="flex flex-col gap-0.5 px-3 pt-1 flex-1">
-          <p className="px-2.5 py-1.5 text-[10px] font-bold tracking-widest text-ink-soft/50 uppercase">
-            Secciones
-          </p>
-          {TABS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium transition-all text-left w-full ${
-                activeTab === id
-                  ? "bg-blue/[0.12] text-blue border border-blue/20"
-                  : "text-ink-soft hover:bg-paper hover:text-ink border border-transparent"
-              }`}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              {label}
+        <div className="flex flex-wrap gap-2">
+          {role === "OWNER" && (
+            <button type="button" className={pillLine} aria-expanded={editingClient} onClick={() => setEditingClient((v) => !v)}>
+              EDITAR CLIENTE
             </button>
-          ))}
-          {isOrgAdmin && (
-            <Link
-              href="/dashboard/org"
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
-            >
-              Mi organización
-            </Link>
           )}
-          {isAdminUser && (
-            <Link
-              href="/admin"
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
-            >
-              Admin
-            </Link>
+          {canEdit && activeTab === "cuentas" && (
+            <button type="button" className={pillFill} aria-expanded={showAddForm} onClick={() => setShowAddForm((v) => !v)}>
+              + CUENTA
+            </button>
           )}
-          {isAdminUser && (
-            <Link
-              href="/admin/orgs/auth"
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all"
-            >
-              Organizaciones
-            </Link>
-          )}
-          <Link
-            href="/dashboard/plans"
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
-          >
-            Planes
-          </Link>
-          <Link
-            href="/dashboard/billing"
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
-          >
-            Facturación
-          </Link>
-          <Link
-            href="/extension"
-            className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm font-medium text-ink-soft hover:bg-paper hover:text-ink border border-transparent transition-all mt-1"
-          >
-            Extensión Chrome
-          </Link>
-        </nav>
-
-        <div className="px-3 py-3 border-t border-border-soft">
-          <div className="flex items-center gap-2 px-1.5">
-            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue/15 border border-border-soft text-[11px] font-bold text-blue">
-              {initials}
-            </div>
-            <p className="flex-1 min-w-0 text-xs font-medium text-ink truncate">{userEmail}</p>
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              aria-label="Cerrar sesión"
-              className="cursor-pointer rounded-lg p-1 text-ink-soft transition-colors hover:bg-danger/10 hover:text-danger"
-            >
-              <LogOutIcon className="h-4 w-4" />
-            </button>
-          </div>
         </div>
-      </aside>
-
-      {/* ── Main column ───────────────────────── */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border-soft bg-paper/60 backdrop-blur-xl relative">
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-on-dark.svg" alt="KF-1" className="h-5 w-auto" />
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue/[0.07] border border-blue/20">
-              <ShieldCheckIcon className="h-3 w-3 text-blue shrink-0" />
-              <span className="text-[11px] font-medium text-ink-soft">{ROLE_LABEL[role]}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2" ref={userMenuRef}>
-            <button
-              onClick={() => setShowUserMenu((v) => !v)}
-              className="grid h-7 w-7 place-items-center rounded-full bg-blue/15 border border-border-soft text-[10px] font-bold text-blue"
-              aria-label="Menú de cuenta"
-              aria-expanded={showUserMenu}
-            >
-              {initials}
-            </button>
-            {showUserMenu && (
-              <div className="absolute top-full right-4 z-50 mt-1 min-w-[180px] rounded-2xl border border-border-soft bg-paper/95 backdrop-blur-xl shadow-lg overflow-hidden">
-                <div className="px-3.5 py-2.5 border-b border-border-soft">
-                  <p className="text-[11px] text-ink-soft truncate">{userEmail}</p>
-                </div>
-                {role === "OWNER" && (
-                  <Link
-                    href="/dashboard/ai"
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Conectar IA
-                  </Link>
-                )}
-                {isOrgAdmin && (
-                  <Link
-                    href="/dashboard/org"
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Mi organización
-                  </Link>
-                )}
-                {isAdminUser && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Admin
-                  </Link>
-                )}
-                {isAdminUser && (
-                  <Link
-                    href="/admin/orgs/auth"
-                    className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Organizaciones
-                  </Link>
-                )}
-                <Link
-                  href="/dashboard/plans"
-                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  Planes
-                </Link>
-                <Link
-                  href="/dashboard/billing"
-                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  Facturación
-                </Link>
-                <Link
-                  href="/extension"
-                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink hover:bg-gray/40 transition-colors"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  Extensión Chrome
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="flex w-full items-center gap-2 px-3.5 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors border-t border-border-soft"
-                >
-                  <LogOutIcon className="h-3.5 w-3.5" />
-                  Cerrar sesión
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* Desktop section header */}
-        <div className="hidden md:flex items-center justify-between px-6 py-3.5 border-b border-border-soft">
-          <h1 className="font-display text-base font-bold text-ink">{tabLabel}</h1>
-          <div className="flex items-center gap-2">
-            {role === "OWNER" && (
-              <Link
-                href="/dashboard/ai"
-                className="rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-ink-soft transition hover:text-ink"
-              >
-                Conectar IA →
-              </Link>
-            )}
-            {activeTab === "credenciales" && canEdit && (
-              <button
-                onClick={() => setShowAddForm((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-xs font-medium text-gray transition hover:bg-ink/90"
-              >
-                <PlusIcon className="h-3.5 w-3.5" />
-                Añadir
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Stats row — 2×2 mobile, 4×1 desktop */}
-        <div className="grid grid-cols-2 gap-2 px-4 py-3 border-b border-border-soft md:grid-cols-4 md:px-6">
-          {[
-            { value: vault.credentials.length, label: "Credenciales" },
-            { value: activeLinks, label: "Links activos" },
-            { value: members.length, label: "Miembros" },
-            { value: eventsToday, label: "Eventos hoy" },
-          ].map(({ value, label }) => (
-            <div key={label} className="rounded-xl border border-border-soft bg-paper/60 px-4 py-3">
-              <p className="font-display text-xl font-bold leading-none text-ink">{value}</p>
-              <p className="mt-1 text-[11px] text-ink-soft">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-4 py-5 md:px-6">
-            <VerifyResult />
-            {!emailVerified && <VerifyBanner />}
-            {showSurvey && <DashboardSurvey />}
-
-            {activeTab === "credenciales" && (
-              <div className="flex flex-col gap-4">
-                {(showAddForm || (canEdit && vault.credentials.length === 0)) && (
-                  <AddCredentialForm vaultId={vault.id} onDone={() => setShowAddForm(false)} />
-                )}
-                <ul className="flex flex-col gap-3">
-                  {vault.credentials.map((c) => (
-                    <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} role={role} />
-                  ))}
-                  {vault.credentials.length === 0 && !showAddForm && (
-                    <p className="rounded-3xl border border-dashed border-border-soft p-6 text-center text-sm text-ink-soft">
-                      Sin credenciales todavía.
-                    </p>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {activeTab === "actividad" && <AuditLogTable logs={auditLogs} />}
-
-            {activeTab === "equipo" &&
-              (role === "OWNER" ? (
-                <VaultMembers vaultId={vault.id} members={members} invites={invites} />
-              ) : (
-                <p className="text-sm text-ink-soft">Solo el propietario puede gestionar el equipo.</p>
-              ))}
-
-            {activeTab === "seguridad" && (
-              <div className="flex flex-col gap-4">
-                <ErrorBoundary>
-                  <PasskeySettings initialPasskeys={passkeys} />
-                </ErrorBoundary>
-                <TwoFactorSettings initialEnabled={totpEnabled} />
-              </div>
-            )}
-          </div>
-        </main>
-
-        {/* Mobile bottom tab bar */}
-        <nav className="md:hidden flex border-t border-border-soft bg-paper/80 backdrop-blur-xl">
-          {TABS.map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[9px] font-bold tracking-widest uppercase transition-colors ${
-                activeTab === id ? "text-blue" : "text-ink-soft"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </button>
-          ))}
-        </nav>
       </div>
 
-      {/* Mobile FAB */}
-      {activeTab === "credenciales" && canEdit && (
+      {editingClient && (
+        <EditClientForm
+          vaultId={vault.id}
+          name={vault.name}
+          color={vault.color}
+          onDone={() => setEditingClient(false)}
+          onDelete={() => setDeletingClient(true)}
+        />
+      )}
+      <ConfirmDialog
+        open={deletingClient}
+        title="Eliminar cliente"
+        confirmLabel="ELIMINAR CLIENTE"
+        requireText={vault.name}
+        onClose={() => setDeletingClient(false)}
+        onConfirm={(typed) => deleteClientAction(vault.id, typed)}
+      >
+        Se borran para siempre sus {count === 1 ? "1 cuenta" : `${count} cuentas`}, códigos 2FA, links compartidos y auditoría, y el
+        acceso de su equipo. No se puede deshacer.
+      </ConfirmDialog>
+
+      <nav aria-label="Secciones del cliente" className="flex flex-wrap gap-2">
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            aria-current={activeTab === id ? "page" : undefined}
+            onClick={() => setActiveTab(id)}
+            className={`h-11 cursor-pointer rounded-full px-5 font-brand text-xl font-extrabold uppercase transition ${
+              activeTab === id ? "bg-kf-azul text-white" : "bg-kf-niebla text-kf-azul hover:bg-kf-borde"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      <VerifyResult />
+      {!emailVerified && <VerifyBanner />}
+      {/* Not while the client is empty: the first task is saving an account. */}
+      {showSurvey && count > 0 && <DashboardSurvey />}
+
+      {activeTab === "cuentas" && (
+        <div className="flex flex-col gap-5">
+          {canEdit && count === 0 && (
+            <div className="flex flex-col gap-1 rounded-[28px] bg-kf-amarillo px-6 py-5 text-kf-lavanda">
+              <p className="m-0 text-xs font-extrabold tracking-[0.18em] uppercase">Paso 2 de 3</p>
+              <h3 className="m-0 font-brand text-[28px] leading-[1.04] font-extrabold uppercase">Guardá la primera cuenta de {vault.name}</h3>
+              <p className="m-0 text-sm font-bold">
+                Elegí la red, pegá usuario y contraseña. Si tiene verificación en dos pasos, pegá también su clave: el equipo verá
+                el código vigente sin pedirlo por chat.
+              </p>
+            </div>
+          )}
+          {(showAddForm || (canEdit && count === 0)) && (
+            <AddCredentialForm vaultId={vault.id} onDone={() => setShowAddForm(false)} />
+          )}
+          {groups.map(({ platform, credentials }) => (
+            <div key={platform.id} className="flex flex-col gap-3">
+              <h3 className={kicker}>
+                {platform.label.toUpperCase()} · {credentials.length}
+              </h3>
+              <ul className="flex flex-col gap-3">
+                {credentials.map((c) => (
+                  <CredentialRow key={c.id} vaultId={vault.id} credential={c} canEdit={canEdit} role={role} onDeleted={setUndo} />
+                ))}
+              </ul>
+            </div>
+          ))}
+          {count === 0 && !canEdit && (
+            <p className="rounded-[28px] border-3 border-dashed border-[#c9cedd] p-6 text-center text-sm font-semibold text-kf-tinta-suave">
+              Este cliente todavía no tiene cuentas.
+            </p>
+          )}
+        </div>
+      )}
+
+      {activeTab === "actividad" && <AuditLogTable logs={auditLogs} />}
+
+      {activeTab === "equipo" &&
+        (role === "OWNER" ? (
+          <VaultMembers vaultId={vault.id} members={members} invites={invites} />
+        ) : (
+          <p className="text-sm font-semibold text-kf-tinta-suave">Solo el propietario puede gestionar el equipo.</p>
+        ))}
+
+      <UndoToast key={undo?.id ?? "none"} vaultId={vault.id} undo={undo} onClose={closeUndo} />
+    </section>
+  );
+}
+
+const UNDO_SECONDS = 10;
+
+// "Cuenta eliminada · Deshacer" for 10 s (the server keeps a copy for 60 s). Lives in VaultView because
+// the deleted row unmounts. role="status" announces it; the button is a real 44px target.
+function UndoToast({ vaultId, undo, onClose }: { vaultId: string; undo: { id: string; service: string } | null; onClose: () => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!undo) return;
+    const t = setTimeout(onClose, UNDO_SECONDS * 1000);
+    return () => clearTimeout(t);
+  }, [undo, onClose]);
+
+  if (!undo) return null;
+  return (
+    <div
+      role="status"
+      className="fixed right-4 bottom-4 z-50 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-x-3 gap-y-1 rounded-[24px] bg-kf-tinta py-2 pr-2 pl-5 text-sm font-semibold text-white shadow-xl"
+    >
+      <span className="min-w-0 break-words">{error ?? `«${undo.service}» eliminada`}</span>
+      {!error && (
         <button
-          onClick={() => setShowAddForm((v) => !v)}
-          className="md:hidden fixed bottom-[68px] right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue text-white shadow-lg shadow-blue/40 transition hover:bg-blue/90 active:scale-95"
-          aria-label="Añadir credencial"
+          type="button"
+          disabled={pending}
+          onClick={async () => {
+            setPending(true);
+            try {
+              const msg = await undoDeleteCredentialAction(vaultId, undo.id);
+              if (msg) setError(msg);
+              else onClose();
+            } catch {
+              setError("No se pudo deshacer. Recargá la página.");
+            }
+            setPending(false);
+          }}
+          className="inline-flex min-h-11 cursor-pointer items-center rounded-full bg-kf-manteca px-5 text-xs font-extrabold tracking-[0.12em] text-kf-tinta uppercase transition hover:opacity-90 disabled:opacity-50"
         >
-          <PlusIcon className="h-5 w-5" />
+          {pending ? "RESTAURANDO..." : "DESHACER"}
         </button>
       )}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar aviso"
+        className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-lg text-white transition hover:bg-white/15"
+      >
+        ×
+      </button>
     </div>
   );
 }
 
 function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () => void }) {
+  const v = useInlineValidation();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const idPrefix = useId();
 
   return (
     <form
-      className="flex flex-col gap-2 rounded-2xl border border-border-soft bg-paper p-5"
-      noValidate
+      className="flex flex-col gap-3 rounded-[28px] bg-kf-niebla p-5"
+     
       onSubmit={async (e) => {
         e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
         setPending(true);
         setError(null);
         const formData = new FormData(e.currentTarget);
@@ -443,32 +304,60 @@ function AddCredentialForm({ vaultId, onDone }: { vaultId: string; onDone?: () =
         (e.target as HTMLFormElement).reset();
         onDone?.();
       }}
-    >
+     {...v.formProps}
+   >
+      <p className={kicker}>NUEVA CUENTA</p>
       <input type="hidden" name="vaultId" value={vaultId} />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="relative">
+          <label htmlFor={`${idPrefix}-platform`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Plataforma</label>
+          <select id={`${idPrefix}-platform`} name="platform" defaultValue="instagram" className={`${inputCls} cursor-pointer appearance-none pr-11`}>
+            {PLATFORMS.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+          <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
+        </div>
+          <FieldMsg v={v} name="platform" />
         <div>
-          <label htmlFor={`${idPrefix}-service`} className="sr-only">Servicio</label>
-          <input id={`${idPrefix}-service`} name="service" placeholder="Servicio (ej. AWS)" required className={inputCls} />
+          <label htmlFor={`${idPrefix}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
+          <input id={`${idPrefix}-service`} name="service" placeholder="Nombre" required className={inputCls} />
+          <FieldMsg v={v} name="service" />
         </div>
         <div>
-          <label htmlFor={`${idPrefix}-username`} className="sr-only">Usuario</label>
-          <input id={`${idPrefix}-username`} name="username" placeholder="Usuario" required className={inputCls} />
+          <label htmlFor={`${idPrefix}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
+          <input id={`${idPrefix}-username`} name="username" placeholder="Usuario o email" required className={inputCls} />
+          <FieldMsg v={v} name="username" />
+        </div>
+        <div>
+          <label htmlFor={`${idPrefix}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
+          <input id={`${idPrefix}-secret`} name="secret" placeholder="Contraseña" required className={inputCls} />
+          <FieldMsg v={v} name="secret" />
         </div>
       </div>
       <div>
-        <label htmlFor={`${idPrefix}-secret`} className="sr-only">Contraseña o secreto</label>
-        <input id={`${idPrefix}-secret`} name="secret" placeholder="Contraseña / secreto" required className={inputCls} />
+        <label htmlFor={`${idPrefix}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
+        <input id={`${idPrefix}-loginUrl`} name="loginUrl" type="url" placeholder="URL de login" className={inputCls} />
+        <FieldMsg v={v} name="loginUrl" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${idPrefix}-totp`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Clave 2FA</label>
+        <input id={`${idPrefix}-totp`} name="totp" autoComplete="off" spellCheck={false} placeholder="Clave 2FA" className={`${inputCls} font-mono`} />
+        <FieldMsg v={v} name="totp" />
+        <p className="px-5 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
       </div>
       <div>
-        <label htmlFor={`${idPrefix}-notes`} className="sr-only">Notas</label>
-        <textarea id={`${idPrefix}-notes`} name="notes" placeholder="Notas (opcional)" className={inputCls} />
+        <label htmlFor={`${idPrefix}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas</label>
+        <textarea
+          id={`${idPrefix}-notes`}
+          name="notes"
+          placeholder="Notas (opcional)"
+          className="min-h-20 w-full rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
+        />
       </div>
-      {error && <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
-      <button
-        disabled={pending}
-        className="mt-1 cursor-pointer self-start rounded-full bg-ink px-4 py-2 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {pending ? "Guardando..." : "Añadir credencial"}
+      {error && <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <button disabled={pending} className={`${pillFill} self-start`}>
+        {pending ? "GUARDANDO..." : "GUARDAR CUENTA"}
       </button>
     </form>
   );
@@ -479,262 +368,512 @@ function CredentialRow({
   credential,
   canEdit,
   role,
+  onDeleted,
 }: {
   vaultId: string;
   credential: CredentialWithLinks;
   canEdit: boolean;
   role: Role;
+  onDeleted: (d: { id: string; service: string }) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [revealed, setRevealed] = useState<{ secret: string; notes: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
   const idPrefix = useId();
+  const [now] = useState(() => Date.now());
+  const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const activeLinks = credential.shareLinks.filter((l) => !l.revokedAt && l.expiresAt.getTime() > now);
 
-  function toggleExpanded() {
-    setExpanded((wasExpanded) => {
-      if (wasExpanded) {
-        setRevealed(null);
-        setSharing(false);
-        setShareUrl(null);
-        setShareError(null);
-      }
-      return !wasExpanded;
-    });
+  async function reveal() {
+    try {
+      const data = await revealCredentialAction(vaultId, credential.id);
+      setRevealed(data);
+      return data;
+    } catch {
+      return null; /* session expired — page will redirect */
+    }
+  }
+
+  async function newLink(fd: FormData) {
+    setShareError(null);
+    fd.set("credentialId", credential.id);
+    try {
+      const result = await createShareLinkAction(vaultId, fd);
+      if (typeof result === "string") return setShareError(result);
+      setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
+    } catch {
+      setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
+    }
   }
 
   return (
-    <li className="rounded-2xl border border-blue/25 bg-blue/[0.07] p-5">
-      <button
-        type="button"
-        className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
-        aria-expanded={expanded}
-        onClick={toggleExpanded}
-      >
-        <div>
-          <p className="font-display text-lg font-semibold text-ink">{credential.service}</p>
-          <p className="text-sm text-ink-soft">{credential.username}</p>
+    <li className="flex flex-col gap-4 rounded-[28px] bg-kf-niebla p-5">
+      <div className="flex flex-wrap items-center gap-3.5">
+        <PlatformIcon id={credential.platform} />
+        <div className="flex min-w-0 flex-[1_1_200px] flex-col">
+          <b className="text-[17px]">{credential.service}</b>
+          <span className="truncate font-mono text-sm text-kf-tinta-suave">{credential.username}</span>
         </div>
-        <ChevronDownIcon
-          aria-hidden="true"
-          className={`h-4 w-4 shrink-0 text-ink-soft transition-transform ${expanded ? "rotate-180" : ""}`}
-        />
-      </button>
+        {credential.loginUrl && (
+          // loginUrl is validated http(s) on write (credentialSchema).
+          <a
+            href={credential.loginUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center text-[13px] font-bold text-kf-azul underline decoration-2 underline-offset-4"
+          >
+            Abrir login ↗
+          <span className="sr-only"> (se abre en otra pestaña)</span></a>
+        )}
+        {credential.hasTotp && <TotpCode vaultId={vaultId} credentialId={credential.id} />}
+      </div>
 
-      {expanded && (
-        <>
-          <div className="mt-4 flex justify-end gap-3 border-t border-border-soft pt-4 text-sm">
-            <button
-              className={linkBtnCls}
-              aria-expanded={!!revealed}
-              onClick={async () => {
-                if (revealed) return setRevealed(null);
-                try {
-                  const data = await revealCredentialAction(vaultId, credential.id);
-                  setRevealed(data);
-                } catch {
-                  /* session expired — page will redirect */
-                }
-              }}
-            >
-              {revealed ? (
-                <EyeOffIcon aria-hidden="true" className="h-3.5 w-3.5" />
-              ) : (
-                <EyeIcon aria-hidden="true" className="h-3.5 w-3.5" />
-              )}
-              {revealed ? "Ocultar" : "Ver"}
-            </button>
-            {canEdit && (
-              <>
-                <button className={linkBtnCls} aria-expanded={sharing} onClick={() => setSharing((s) => !s)}>
-                  <Share2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-                  Compartir
-                </button>
-                <button
-                  className={dangerLinkBtnCls}
-                  onClick={() => deleteCredentialAction(vaultId, credential.id)}
-                >
-                  <Trash2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-                  Eliminar
-                </button>
-              </>
-            )}
+      <div className="flex flex-wrap gap-2.5">
+        <button
+          type="button"
+          className={pillFill}
+          onClick={async () => {
+            const data = revealed ?? (await reveal());
+            if (!data) return;
+            await navigator.clipboard.writeText(data.secret);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+        >
+          {copied ? "¡COPIADA!" : "COPIAR CONTRASEÑA"}
+        </button>
+        {canEdit && (
+          <button type="button" className={pillLine} aria-expanded={sharing} onClick={() => setSharing((s) => !s)}>
+            COMPARTIR LINK
+          </button>
+        )}
+        <button type="button" className={quietBtn} aria-expanded={!!revealed} onClick={() => (revealed ? setRevealed(null) : reveal())}>
+          {revealed ? "Ocultar contraseña" : "Ver contraseña"}
+        </button>
+        {canEdit && (
+          <button type="button" className={quietBtn} aria-expanded={editing} onClick={() => setEditing((v) => !v)}>
+            Editar
+          </button>
+        )}
+        {canEdit && (
+          <button
+            type="button"
+            className={`${quietBtn} text-kf-carmesi hover:text-kf-carmesi-hondo`}
+            onClick={() => setConfirmDelete(true)}
+          >
+            Eliminar
+          </button>
+        )}
+      </div>
+
+      {canEdit && editing && <EditCredentialForm vaultId={vaultId} credential={credential} onDone={() => setEditing(false)} />}
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Eliminar ${credential.service}`}
+        confirmLabel="ELIMINAR CUENTA"
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={async () => {
+          await deleteCredentialAction(vaultId, credential.id);
+          onDeleted({ id: credential.id, service: credential.service });
+        }}
+      >
+        Se borran la contraseña{credential.hasTotp ? ", el código 2FA" : ""} y se revocan sus links compartidos. Queda
+        registrado en la auditoría. Vas a tener unos segundos para deshacerlo (los links no se restauran).
+      </ConfirmDialog>
+
+      {revealed && (
+        <div className="flex flex-col gap-2 rounded-[20px] bg-white p-4 text-sm">
+          <div className="flex items-center justify-between gap-2">
+            <code className="min-w-0 font-mono text-base break-all select-all">{revealed.secret}</code>
+            <CopyButton value={revealed.secret} label="Copiar contraseña" />
           </div>
-
-          {revealed && (
-            <div className="mt-4 flex flex-col gap-1.5 rounded-2xl bg-gray/60 p-3 text-sm">
-              <div className="flex items-center justify-between gap-2">
-                <p>
-                  <span className="text-ink-soft">Secreto:</span>{" "}
-                  <code className="select-all rounded bg-paper px-1.5 py-0.5">{revealed.secret}</code>
-                </p>
-                <CopyButton value={revealed.secret} label="Copiar secreto" />
-              </div>
-              {revealed.notes && (
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-ink-soft">Notas: {revealed.notes}</p>
-                  <CopyButton value={revealed.notes} label="Copiar notas" />
-                </div>
-              )}
+          {revealed.notes && (
+            <div className="flex items-center justify-between gap-2 border-t-2 border-kf-borde pt-2">
+              <p className="font-semibold text-kf-tinta-suave">{revealed.notes}</p>
+              <CopyButton value={revealed.notes} label="Copiar notas" />
             </div>
           )}
+        </div>
+      )}
 
-          {canEdit && sharing && (
-            <form
-              className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border-soft pt-4"
-              noValidate
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setShareError(null);
-                const formData = new FormData(e.currentTarget);
-                formData.set("credentialId", credential.id);
-                try {
-                  const result = await createShareLinkAction(vaultId, formData);
-                  if (typeof result === "string") {
-                    setShareError(result);
-                    return;
-                  }
-                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
-                } catch {
-                  setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
-                }
-              }}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <label htmlFor={`${idPrefix}-permission`} className="sr-only">Permiso del link</label>
-                <div className="relative w-auto">
-                  <select
-                    id={`${idPrefix}-permission`}
-                    name="permission"
-                    className={`${inputCls} w-auto cursor-pointer appearance-none py-1.5 pr-9`}
-                  >
-                    <option value="READ">Solo lectura</option>
-                    <option value="DOWNLOAD">Lectura + descarga</option>
-                  </select>
-                  <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-ink-soft" />
-                </div>
-                <label htmlFor={`${idPrefix}-expires`} className="sr-only">Expiración del link</label>
-                <div className="relative w-auto">
-                  <select
-                    id={`${idPrefix}-expires`}
-                    name="expiresInHours"
-                    defaultValue="24"
-                    className={`${inputCls} w-auto cursor-pointer appearance-none py-1.5 pr-9`}
-                  >
-                    <option value="1">1 hora</option>
-                    <option value="24">24 horas</option>
-                    <option value="72">3 días</option>
-                    <option value="168">7 días</option>
-                  </select>
-                  <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-ink-soft" />
-                </div>
-              </div>
-              <button className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue-soft px-4 py-1.5 text-sm font-medium text-ink-reverse transition hover:brightness-95">
-                <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-                Generar link
-              </button>
-              {shareError && (
-                <p role="alert" className="w-full rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">
-                  {shareError}
-                </p>
-              )}
-            </form>
+      {canEdit && sharing && (
+        <form
+          className="flex flex-wrap items-center gap-2.5 rounded-[20px] bg-white p-4"
+          noValidate
+          onSubmit={async (e) => {
+            e.preventDefault();
+            await newLink(new FormData(e.currentTarget));
+          }}
+        >
+          <label htmlFor={`${idPrefix}-permission`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Permiso del link</label>
+          <div className="relative">
+            <select id={`${idPrefix}-permission`} name="permission" className={`${inputCls} h-11 w-auto cursor-pointer appearance-none pr-11`}>
+              <option value="READ">Solo lectura</option>
+              <option value="DOWNLOAD">Lectura + descarga</option>
+            </select>
+            <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
+          </div>
+          <label htmlFor={`${idPrefix}-expires`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Expiración del link</label>
+          <div className="relative">
+            <select id={`${idPrefix}-expires`} name="expiresInHours" defaultValue="24" className={`${inputCls} h-11 w-auto cursor-pointer appearance-none pr-11`}>
+              <option value="1">1 hora</option>
+              <option value="24">24 horas</option>
+              <option value="72">3 días</option>
+              <option value="168">7 días</option>
+            </select>
+            <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
+          </div>
+          <button className={pillFill}>GENERAR LINK</button>
+          <p className="w-full text-xs font-semibold text-kf-tinta-suave">Usa 1 link de tu saldo.</p>
+          {shareError && (
+            <p role="alert" className="w-full rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">
+              {shareError}
+            </p>
           )}
+        </form>
+      )}
 
-          {shareUrl && (
-            <div className="mt-3 rounded-2xl border border-blue bg-blue/10 p-3 text-sm">
-              <p className="mb-1.5 text-ink">
-                Copia este link ahora — la clave de descifrado no se guarda, no podrás verla otra vez.
-              </p>
-              <div className="flex items-center gap-1.5 rounded-xl border border-border-soft bg-paper pr-1.5">
-                <label htmlFor={`${idPrefix}-share-url`} className="sr-only">Link compartible</label>
-                <input
-                  id={`${idPrefix}-share-url`}
-                  readOnly
-                  value={shareUrl}
-                  className="w-full min-w-0 bg-transparent px-3 py-2 text-xs outline-none"
-                  onFocus={(e) => e.currentTarget.select()}
-                />
-                <CopyButton value={shareUrl} label="Copiar link" />
-              </div>
-            </div>
-          )}
-
-          {credential.shareLinks.length > 0 && (
-            <div className="mt-4 border-t border-border-soft pt-4 text-sm">
-              <p className="mb-2 text-ink-soft">Links generados</p>
-              <ul className="flex flex-col gap-1.5">
-                {credential.shareLinks.map((l) => {
-                  const status = l.revokedAt ? "revocado" : l.expiresAt < new Date() ? "expirado" : "activo";
-                  const badgeCls =
-                    status === "activo"
-                      ? "bg-blue-soft text-ink-reverse"
-                      : status === "expirado"
-                        ? "bg-gray text-ink-soft"
-                        : "bg-danger/10 text-danger";
-                  return (
-                    <li key={l.id} className="flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-2">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeCls}`}>
-                          {status}
-                        </span>
-                        <span className="text-ink-soft">
-                          {l.permission === "READ" ? "Lectura" : "Descarga"} · expira{" "}
-                          {l.expiresAt.toLocaleString()}
-                        </span>
-                      </span>
-                      {canEdit && status === "activo" && (
-                        <span className="flex shrink-0 items-center gap-3">
-                          <button
-                            type="button"
-                            className={linkBtnCls}
-                            title="La clave del link original no se guarda — esto genera uno nuevo con los mismos permisos."
-                            onClick={async () => {
-                              const fd = new FormData();
-                              fd.set("credentialId", credential.id);
-                              fd.set("permission", l.permission);
-                              const hrs = Math.min(
-                                168,
-                                Math.max(1, Math.ceil((l.expiresAt.getTime() - Date.now()) / 3_600_000))
-                              );
-                              fd.set("expiresInHours", String(hrs));
-                              try {
-                                const result = await createShareLinkAction(vaultId, fd);
-                                if (typeof result !== "string") {
-                                  setShareUrl(`${window.location.origin}/s/${result.publicId}#k=${result.key}`);
-                                }
-                              } catch {
-                                setShareError("Error al generar el link. Recargá la página e intentá de nuevo.");
-                              }
-                            }}
-                          >
-                            <Link2Icon aria-hidden="true" className="h-3.5 w-3.5" />
-                            Nuevo link
-                          </button>
-                          <button className={dangerLinkBtnCls} onClick={async () => { try { await revokeShareLinkAction(vaultId, l.id); } catch { /* session expired — page will redirect */ } }}>
-                            <XCircleIcon aria-hidden="true" className="h-3.5 w-3.5" />
-                            Revocar
-                          </button>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {role === "OWNER" && (
-            <AiAccessPanel
-              credentialId={credential.id}
-              credentialService={credential.service}
-              initialAiAccessible={credential.aiAccessible}
+      {shareUrl && (
+        <div className="flex flex-col gap-2 rounded-[20px] bg-kf-lima p-4 text-sm text-kf-bosque-hondo">
+          <p className="font-bold">Copiá este link ahora: la clave no se guarda y no vas a poder verla otra vez.</p>
+          <div className="flex items-center gap-1.5 rounded-full bg-white pr-1.5">
+            <label htmlFor={`${idPrefix}-share-url`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Link compartible</label>
+            <input
+              id={`${idPrefix}-share-url`}
+              readOnly
+              value={shareUrl}
+              className="h-11 w-full min-w-0 rounded-full bg-transparent px-4 font-mono text-xs text-kf-tinta outline-none"
+              onFocus={(e) => e.currentTarget.select()}
             />
-          )}
-        </>
+            <CopyButton value={shareUrl} label="Copiar link" />
+          </div>
+        </div>
+      )}
+
+      {activeLinks.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-[28px] border-2 border-kf-borde bg-white px-5 py-4">
+          <p className={kicker}>LINKS ACTIVOS</p>
+          {activeLinks.map((l) => {
+            const hours = Math.max(1, Math.round((l.expiresAt.getTime() - now) / 3_600_000));
+            return (
+              <div key={l.id} className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-kf-lima px-3 py-1.5 text-xs font-extrabold tracking-widest text-kf-bosque-hondo">ACTIVO</span>
+                <span className="min-w-0 flex-[1_1_200px] text-sm font-semibold">
+                  {l.permission === "READ" ? "Solo lectura" : "Lectura + descarga"} · expira en {hours} h
+                </span>
+                {canEdit && (
+                  <button
+                    type="button"
+                    className={`${pillDanger} h-10`}
+                    onClick={async () => {
+                      try {
+                        await revokeShareLinkAction(vaultId, l.id);
+                      } catch {
+                        /* session expired — page will redirect */
+                      }
+                    }}
+                  >
+                    REVOCAR
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!credential.hasTotp && canEdit && <AddTotp vaultId={vaultId} credentialId={credential.id} />}
+
+      {role === "OWNER" && (
+        <AiAccessPanel credentialId={credential.id} credentialService={credential.service} initialAiAccessible={credential.aiAccessible} />
       )}
     </li>
+  );
+}
+
+function EditCredentialForm({
+  vaultId,
+  credential,
+  onDone,
+}: {
+  vaultId: string;
+  credential: CredentialWithLinks;
+  onDone: () => void;
+}) {
+  const v = useInlineValidation();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+
+  return (
+    <form
+      className="flex flex-col gap-3 rounded-[20px] bg-white p-4"
+     
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
+        setPending(true);
+        setError(null);
+        try {
+          const result = await updateCredentialAction(vaultId, credential.id, new FormData(e.currentTarget));
+          if (result) setError(result);
+          else return onDone();
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+     {...v.formProps}
+   >
+      <p className={kicker}>EDITAR CUENTA</p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="relative">
+          <label htmlFor={`${id}-platform`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Plataforma</label>
+          <select id={`${id}-platform`} name="platform" defaultValue={platformOf(credential.platform).id} className={`${inputCls} cursor-pointer appearance-none pr-11`}>
+            {PLATFORMS.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+          <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-5 h-4 w-4 -translate-y-1/2 text-kf-tinta-suave" />
+        </div>
+        <div>
+          <label htmlFor={`${id}-service`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la cuenta</label>
+          <input id={`${id}-service`} name="service" defaultValue={credential.service} required className={inputCls} />
+          <FieldMsg v={v} name="service" />
+        </div>
+        <div>
+          <label htmlFor={`${id}-username`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Usuario</label>
+          <input id={`${id}-username`} name="username" defaultValue={credential.username} required className={inputCls} />
+          <FieldMsg v={v} name="username" />
+        </div>
+        <div>
+          <label htmlFor={`${id}-secret`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña nueva</label>
+          <input id={`${id}-secret`} name="secret" autoComplete="off" placeholder="Clave nueva" className={inputCls} />
+        </div>
+      </div>
+      <div>
+        <label htmlFor={`${id}-loginUrl`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">URL de login</label>
+        <input id={`${id}-loginUrl`} name="loginUrl" type="url" defaultValue={credential.loginUrl ?? ""} placeholder="URL de login" className={inputCls} />
+        <FieldMsg v={v} name="loginUrl" />
+      </div>
+      <div>
+        <label htmlFor={`${id}-notes`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Notas nuevas</label>
+        <textarea
+          id={`${id}-notes`}
+          name="notes"
+          placeholder="Notas nuevas (opcional; reemplazan las actuales)"
+          className="min-h-20 w-full rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
+        />
+      </div>
+      <p className="m-0 px-1 text-xs font-semibold text-kf-tinta-suave">Lo que dejes vacío en contraseña y notas no cambia.</p>
+      {credential.hasTotp && (
+        <label className="flex cursor-pointer items-center gap-2.5 px-1 text-sm font-bold text-kf-carmesi-hondo">
+          <input type="checkbox" name="removeTotp" className="h-5 w-5 accent-kf-carmesi" />
+          Quitar el código 2FA de esta cuenta
+        </label>
+      )}
+      {error && <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR CAMBIOS"}</button>
+        <button type="button" onClick={onDone} className={quietBtn}>Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+function EditClientForm({
+  vaultId,
+  name,
+  color,
+  onDone,
+  onDelete,
+}: {
+  vaultId: string;
+  name: string;
+  color: string | null;
+  onDone: () => void;
+  onDelete: () => void;
+}) {
+  const v = useInlineValidation();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+  const current = clientColor(color).id;
+
+  return (
+    <form
+      className="flex flex-col gap-4 rounded-[28px] bg-kf-niebla p-5"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
+        setPending(true);
+        setError(null);
+        try {
+          const result = await updateClientAction(vaultId, new FormData(e.currentTarget));
+          if (result) setError(result);
+          else return onDone();
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+     {...v.formProps}
+   >
+      <p className={kicker}>EDITAR CLIENTE</p>
+      <div>
+        <label htmlFor={`${id}-name`} className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre del cliente</label>
+        <input id={`${id}-name`} name="name" required maxLength={60} defaultValue={name} className={inputCls} />
+        <FieldMsg v={v} name="name" />
+      </div>
+      <fieldset className="m-0 flex flex-wrap gap-2.5 border-0 p-0">
+        <legend className={`${kicker} mb-1.5`}>COLOR</legend>
+        {CLIENT_COLORS.map((c) => (
+          <label key={c.id} className="cursor-pointer" title={c.label}>
+            <input type="radio" name="color" value={c.id} defaultChecked={c.id === current} className="peer sr-only" />
+            <span
+              style={{ background: c.bg, color: c.ink }}
+              className="grid h-11 w-11 place-items-center rounded-full font-brand text-lg font-extrabold ring-kf-tinta ring-offset-2 peer-checked:ring-3 peer-focus-visible:ring-3"
+              aria-hidden="true"
+            >
+              Aa
+            </span>
+            <span className="sr-only">{c.label}</span>
+          </label>
+        ))}
+      </fieldset>
+      {error && <p role="alert" className="m-0 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR"}</button>
+        <button type="button" onClick={onDone} className={quietBtn}>Cancelar</button>
+        <button type="button" onClick={onDelete} className={`${quietBtn} ml-auto text-kf-carmesi hover:text-kf-carmesi-hondo`}>
+          Eliminar cliente
+        </button>
+      </div>
+    </form>
+  );
+}
+
+const TOTP_HINT = "En la red social: Seguridad → Autenticación en dos pasos → app de autenticación → «¿No podés escanear?». Pegá esa clave o el link otpauth://.";
+
+// Live code from the server (the seed never reaches the browser). Refetches at each period boundary
+// while open and closes itself after 5 minutes.
+function TotpCode({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
+  const [state, setState] = useState<{ code: string; secondsLeft: number; period: number } | null>(null);
+  const [openedAt, setOpenedAt] = useState(0);
+  const [error, setError] = useState(false);
+
+  async function load() {
+    try {
+      setState(await totpCodeAction(vaultId, credentialId));
+      setError(false);
+    } catch {
+      setError(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!state) return;
+    const t = setTimeout(() => {
+      if (Date.now() - openedAt > 5 * 60_000) return setState(null);
+      if (state.secondsLeft <= 1) return void load();
+      setState({ ...state, secondsLeft: state.secondsLeft - 1 });
+    }, 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load is stable for this credential
+  }, [state, openedAt]);
+
+  if (!state) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setOpenedAt(Date.now());
+          load();
+        }}
+        className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-kf-bosque px-5 text-xs font-extrabold tracking-[0.12em] text-kf-lima transition hover:opacity-90"
+      >
+        {error ? "REINTENTAR 2FA" : "VER CÓDIGO 2FA"}
+      </button>
+    );
+  }
+
+  const circumference = 50.3; // 2π·8
+  const offset = circumference * (1 - state.secondsLeft / state.period);
+  const spaced = state.code.length === 6 ? `${state.code.slice(0, 3)} ${state.code.slice(3)}` : state.code;
+  return (
+    <div className="flex items-center gap-3 rounded-[22px] bg-kf-bosque py-2.5 pr-2 pl-4 text-kf-lima">
+      <svg width="30" height="30" viewBox="0 0 20 20" role="img" aria-label={`Quedan ${state.secondsLeft} segundos`}>
+        <circle cx="10" cy="10" r="8" fill="none" stroke="#2e8a62" strokeWidth="3" />
+        <circle
+          cx="10"
+          cy="10"
+          r="8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform="rotate(-90 10 10)"
+          className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+        />
+      </svg>
+      <div className="flex flex-col">
+        <span className="text-[10px] font-extrabold tracking-[0.16em]">CÓDIGO 2FA</span>
+        <span className="font-mono text-[26px] leading-tight font-semibold tracking-[0.06em]" aria-live="polite">
+          {spaced}
+        </span>
+      </div>
+      <CopyButton value={state.code} label="Copiar código 2FA" className="h-11 w-11 text-kf-lima! hover:bg-white/10!" />
+    </div>
+  );
+}
+
+function AddTotp({ vaultId, credentialId }: { vaultId: string; credentialId: string }) {
+  const v = useInlineValidation();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const id = useId();
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className={`${quietBtn} self-start px-0 text-kf-bosque`}>
+        + Agregar código 2FA
+      </button>
+    );
+  }
+  return (
+    <form
+      className="flex flex-col gap-2.5 rounded-[20px] bg-white p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!v.validateAll(e.currentTarget)) return;
+        setPending(true);
+        setError(null);
+        const raw = String(new FormData(e.currentTarget).get("totp") ?? "");
+        try {
+          const result = await setTotpAction(vaultId, credentialId, raw);
+          if (result) setError(result);
+        } catch {
+          setError("Error al guardar. Recargá la página e intentá de nuevo.");
+        }
+        setPending(false);
+      }}
+     {...v.formProps}
+   >
+      <label htmlFor={id} className={kicker}>CLAVE 2FA DE ESTA CUENTA</label>
+      <input id={id} name="totp" required autoFocus autoComplete="off" spellCheck={false} className={`${inputCls} font-mono`} />
+      <FieldMsg v={v} name="totp" />
+      <p className="px-1 text-xs font-semibold text-kf-tinta-suave">{TOTP_HINT}</p>
+      {error && <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button disabled={pending} className={pillFill}>{pending ? "GUARDANDO..." : "GUARDAR 2FA"}</button>
+        <button type="button" onClick={() => setOpen(false)} className={quietBtn}>Cancelar</button>
+      </div>
+    </form>
   );
 }
 
@@ -745,6 +884,12 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
   link_denied_expired_or_revoked: "Acceso denegado (expirado o revocado)",
   link_denied_not_found: "Acceso denegado (link inexistente)",
   credential_viewed: "Credencial vista",
+  totp_added: "2FA agregado",
+  credential_updated: "Cuenta editada",
+  credential_updated_totp_removed: "Cuenta editada (2FA quitado)",
+  credential_deleted: "Cuenta eliminada",
+  credential_restored: "Cuenta restaurada",
+  totp_code_viewed: "Código 2FA visto",
   ai_access_enabled: "Acceso AI habilitado",
   ai_access_disabled: "Acceso AI deshabilitado",
   ai_credential_accessed: "Credencial accedida por AI",
@@ -789,9 +934,9 @@ function AuditLogTable({ logs }: { logs: AuditLog[] }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border-soft bg-paper p-5">
+    <div className="rounded-[28px] border-2 border-kf-borde bg-white p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-semibold text-ink">Auditoría</h2>
+        <h3 className="text-xs font-extrabold tracking-[0.18em] text-kf-tinta-suave">AUDITORÍA</h3>
         <div className="flex flex-wrap items-center gap-2">
           <input
             type="date"

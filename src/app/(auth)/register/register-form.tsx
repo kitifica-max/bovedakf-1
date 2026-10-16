@@ -6,6 +6,8 @@ import { signIn } from "next-auth/react";
 import { registerAction } from "../actions";
 import { ChevronDownIcon } from "@/components/icons";
 import { CTAButton } from "@/components/site/cta-button";
+import { GIFT_LINKS } from "@/lib/packs";
+import { FieldMsg, useInlineValidation } from "@/components/use-inline-validation";
 
 const INDUSTRIES = [
   "Tecnología / Software",
@@ -20,15 +22,16 @@ const INDUSTRIES = [
 ];
 
 export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; prefillEmail: string }) {
+  const v = useInlineValidation();
   const router = useRouter();
-  // /checkout?plan=X → start that plan's trial and skip checkout; pay later from the dashboard.
-  const trialPlan = nextUrl?.match(/^\/checkout\?plan=(personal|team)$/)?.[1] ?? null;
-  const dest = trialPlan ? "/dashboard" : nextUrl && nextUrl.startsWith("/") ? nextUrl : "/dashboard";
+  // Only same-site paths: "//evil.com" would be protocol-relative.
+  const dest = nextUrl && nextUrl.startsWith("/") && !nextUrl.startsWith("//") ? nextUrl : "/dashboard";
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!v.validateAll(e.currentTarget)) return;
     setPending(true);
     setError(null);
 
@@ -49,19 +52,16 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
   }
 
   return (
-      <div className="glass w-full max-w-sm rounded-2xl p-8">
-        <h1 className="t-display text-ink">
-          Crear bóveda
+      <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
+        <h1 className="font-brand text-5xl leading-[1.04] font-extrabold text-kf-azul uppercase">
+          Crear cuenta
         </h1>
         <p className="mt-1 text-sm text-ink-soft">
-          {trialPlan
-            ? `Empezás con 30 días gratis del plan ${trialPlan === "team" ? "Equipo" : "Personal"}. Sin tarjeta.`
-            : "Un espacio encriptado para tu equipo."}
+          Gratis para tu equipo, con {GIFT_LINKS} links de regalo para compartir.
         </p>
-        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" noValidate>
-          {trialPlan && <input type="hidden" name="plan" value={trialPlan} />}
+        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3" {...v.formProps}>
           <div>
-            <label htmlFor="companyName" className="sr-only">Nombre de la empresa</label>
+            <label htmlFor="companyName" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Nombre de la empresa</label>
             <input
               id="companyName"
               name="companyName"
@@ -70,11 +70,12 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="Nombre de la empresa"
               required
               maxLength={120}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="companyName" />
           </div>
           <div>
-            <label htmlFor="email" className="sr-only">Email</label>
+            <label htmlFor="email" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Email</label>
             <input
               id="email"
               name="email"
@@ -83,66 +84,69 @@ export function RegisterForm({ nextUrl, prefillEmail }: { nextUrl?: string; pref
               placeholder="email@empresa.com"
               defaultValue={prefillEmail}
               required
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="email" />
           </div>
           <div>
-            <label htmlFor="password" className="sr-only">Contraseña</label>
+            <label htmlFor="password" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Contraseña</label>
             <input
               id="password"
               name="password"
               type="password"
               autoComplete="new-password"
-              placeholder="Contraseña (mín. 10 caracteres)"
+              placeholder="Contraseña (mín. 10)"
               required
               minLength={10}
-              className="w-full rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
+            <FieldMsg v={v} name="password" />
           </div>
           <div className="relative">
-            <label htmlFor="industry" className="sr-only">Rubro de tu empresa</label>
+            <label htmlFor="industry" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Rubro de tu empresa</label>
             <select
               id="industry"
               name="industry"
               required
               defaultValue=""
-              className="w-full cursor-pointer appearance-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 pr-10 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="h-12 w-full cursor-pointer appearance-none pr-11 rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             >
-              <option value="" disabled>¿En qué rubro opera tu empresa?</option>
+              <option value="" disabled>Tu rubro</option>
               {INDUSTRIES.map((i) => (
                 <option key={i} value={i}>{i}</option>
               ))}
             </select>
             <ChevronDownIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-ink-soft" />
           </div>
+            <FieldMsg v={v} name="industry" />
           <div className="flex flex-col gap-2">
-            <label htmlFor="bottleneck" className="sr-only">Qué tarea digital te quita más tiempo (opcional)</label>
+            <label htmlFor="bottleneck" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Qué tarea digital te quita más tiempo (opcional)</label>
             <textarea
               id="bottleneck"
               name="bottleneck"
               placeholder="¿Qué tarea digital te quita más tiempo? (opcional)"
               maxLength={500}
               rows={2}
-              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="w-full resize-none rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
-            <label htmlFor="currentSolution" className="sr-only">Cómo lo resolvés hoy (opcional)</label>
+            <label htmlFor="currentSolution" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Cómo lo resolvés hoy (opcional)</label>
             <textarea
               id="currentSolution"
               name="currentSolution"
               placeholder="¿Cómo lo resolvés hoy? (opcional)"
               maxLength={500}
               rows={2}
-              className="w-full resize-none rounded-2xl border border-border-soft bg-gray/40 px-4 py-3 text-base sm:text-sm outline-none transition focus:border-ink"
+              className="w-full resize-none rounded-[20px] border-2 border-kf-borde bg-white px-5 py-3 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
             />
             <p className="mt-0.5 px-1 text-xs text-ink-soft">
               Contanos qué te gustaría simplificar. Esto nos ayuda a crear nuevas herramientas gratuitas.
             </p>
           </div>
           {error && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
           )}
           <CTAButton type="submit" disabled={pending} className="mt-2 w-full">
-            {pending ? "Creando..." : "Crear bóveda"}
+            {pending ? "Creando..." : "Crear cuenta"}
           </CTAButton>
         </form>
         <CTAButton href="/login" variant="secondary" className="mt-5 w-full">

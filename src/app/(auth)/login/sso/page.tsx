@@ -36,7 +36,7 @@ export default function SsoLoginPage() {
   }
 
   return (
-    <div className="glass w-full max-w-sm rounded-2xl p-8">
+    <div className="w-full max-w-md rounded-[40px] border-2 border-kf-borde bg-white p-6 sm:p-10">
       <p className="text-xs font-semibold uppercase tracking-widest text-blue">
         Login corporativo
       </p>
@@ -66,7 +66,7 @@ export default function SsoLoginPage() {
             placeholder="vos@tuempresa.com"
             required
             disabled={loading}
-            className="w-full rounded-xl border border-border-soft bg-paper px-4 py-3 text-sm text-ink placeholder:text-ink-soft focus:border-blue focus:outline-none disabled:opacity-50"
+            className="h-12 w-full rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm disabled:opacity-50"
           />
         </div>
 

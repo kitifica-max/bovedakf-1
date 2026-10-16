@@ -65,12 +65,12 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
 
   if (enrollment) {
     return (
-      <div className="rounded-2xl border border-border-soft bg-paper p-5">
+      <div className="rounded-[28px] bg-kf-niebla p-5">
         <p className="font-display text-lg font-semibold text-ink">Activar 2FA</p>
         <p className="mt-1 text-sm text-ink-soft">
           Escaneá el código con tu app de autenticación (Google Authenticator, Authy, etc.).
         </p>
-        <div className="mt-4 flex flex-col items-center gap-2 rounded-2xl bg-gray/60 p-4">
+        <div className="mt-4 flex flex-col items-center gap-2 rounded-[22px] bg-white p-4">
           {/* eslint-disable-next-line @next/next/no-img-element -- data URI, not an optimizable image */}
           <img src={enrollment.qrDataUrl} alt="Código QR para configurar 2FA" width={180} height={180} />
           <div className="flex items-center gap-1.5 text-xs text-ink-soft">
@@ -79,7 +79,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-blue bg-blue/10 p-3">
+        <div className="mt-4 rounded-[22px] bg-kf-amarillo p-4 text-kf-lavanda">
           <p className="text-sm text-ink">
             Guardá estos códigos de respaldo — cada uno sirve una sola vez si perdés el
             dispositivo. No se muestran de nuevo.
@@ -95,7 +95,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
         </div>
 
         <form onSubmit={confirmEnrollment} className="mt-4 flex flex-col gap-2" noValidate>
-          <label htmlFor="confirm-code" className="sr-only">Código de verificación</label>
+          <label htmlFor="confirm-code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código de verificación</label>
           <input
             id="confirm-code"
             name="code"
@@ -108,19 +108,19 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
             className={`${inputCls} text-center tracking-[0.3em]`}
           />
           {error && (
-            <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+            <p role="alert" className="rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
           )}
           <div className="flex gap-2">
             <button
               disabled={pending}
-              className="flex-1 cursor-pointer rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 min-h-11 cursor-pointer rounded-full bg-kf-azul px-5 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {pending ? "Verificando..." : "Confirmar y activar"}
             </button>
             <button
               type="button"
               onClick={() => { setEnrollment(null); setError(null); }}
-              className="cursor-pointer rounded-full border border-border-soft px-4 py-2.5 text-sm text-ink-soft transition hover:bg-gray/60"
+              className="min-h-11 cursor-pointer rounded-full border-2 border-kf-azul bg-white px-5 text-xs font-extrabold tracking-[0.12em] text-kf-azul uppercase transition hover:bg-kf-azul hover:text-white"
             >
               Cancelar
             </button>
@@ -131,16 +131,16 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
   }
 
   return (
-    <div className="rounded-2xl border border-border-soft bg-paper p-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className="rounded-[28px] bg-kf-niebla p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-[1_1_200px] items-center gap-3">
           <span
             aria-hidden="true"
-            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${enabled ? "bg-blue text-paper" : "bg-gray/60 text-ink-soft"}`}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-[14px] ${enabled ? "bg-kf-bosque text-kf-lima" : "bg-white text-kf-tinta-suave"}`}
           >
             {enabled ? <ShieldCheckIcon className="h-4 w-4" /> : <ShieldOffIcon className="h-4 w-4" />}
           </span>
-          <div>
+          <div className="min-w-0">
             <p className="font-display text-lg font-semibold text-ink">Autenticación en dos pasos</p>
             <p className="text-sm text-ink-soft">
               {enabled ? "Activa — se pide un código al entrar." : "No está activa."}
@@ -151,7 +151,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
           <button
             onClick={startEnrollment}
             disabled={pending}
-            className="shrink-0 cursor-pointer rounded-full bg-ink px-4 py-2 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="shrink-0 min-h-11 cursor-pointer rounded-full bg-kf-azul px-5 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Generando..." : "Activar"}
           </button>
@@ -159,7 +159,7 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
         {enabled && !disabling && (
           <button
             onClick={() => setDisabling(true)}
-            className="shrink-0 cursor-pointer rounded-full border border-danger/30 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger/10"
+            className="shrink-0 min-h-11 cursor-pointer rounded-full border-2 border-kf-carmesi bg-white px-5 text-xs font-extrabold tracking-[0.12em] text-kf-carmesi uppercase transition hover:bg-kf-carmesi hover:text-white"
           >
             Desactivar
           </button>
@@ -167,12 +167,12 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
       </div>
 
       {error && !enrollment && (
-        <p role="alert" className="mt-3 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        <p role="alert" className="mt-3 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
       )}
 
       {disabling && (
         <form onSubmit={submitDisable} className="mt-4 flex flex-wrap items-center gap-2 border-t border-border-soft pt-4" noValidate>
-          <label htmlFor="disable-code" className="sr-only">Código para confirmar</label>
+          <label htmlFor="disable-code" className="mb-1.5 block text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">Código para confirmar</label>
           <input
             id="disable-code"
             name="code"
@@ -186,14 +186,14 @@ export function TwoFactorSettings({ initialEnabled }: { initialEnabled: boolean 
           />
           <button
             disabled={pending}
-            className="cursor-pointer rounded-full bg-danger px-4 py-2 text-sm font-medium text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 cursor-pointer rounded-full bg-kf-carmesi px-5 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "..." : "Confirmar desactivación"}
           </button>
           <button
             type="button"
             onClick={() => { setDisabling(false); setError(null); }}
-            className="cursor-pointer rounded-full border border-border-soft px-4 py-2 text-sm text-ink-soft transition hover:bg-gray/60"
+            className="min-h-11 cursor-pointer rounded-full border-2 border-kf-azul bg-white px-5 text-xs font-extrabold tracking-[0.12em] text-kf-azul uppercase transition hover:bg-kf-azul hover:text-white"
           >
             Cancelar
           </button>

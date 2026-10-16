@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateCliToken } from "@/lib/cli-auth";
 import { db } from "@/lib/db";
-import { decryptAtRest } from "@/lib/crypto";
+import { readShareable } from "@/lib/credential-payload";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function GET(
@@ -29,7 +29,7 @@ export async function GET(
 
   if (!credential) return NextResponse.json({ error: "Credencial no encontrada" }, { status: 404 });
 
-  const decrypted = JSON.parse(decryptAtRest(credential.encryptedData)) as { secret: string; notes?: string };
+  const decrypted = readShareable(credential.encryptedData);
 
   return NextResponse.json({
     id: credential.id,

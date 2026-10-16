@@ -2,6 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import QRCode from "qrcode";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -19,20 +20,30 @@ import {
   generateBackupCodes,
   generateTotpSecret,
   matchBackupCode,
+  parseTotpInput,
+  sharedTotpNow,
   totpAuthUrl,
   verifyTotp,
   type BackupCode,
 } from "@/lib/totp";
 import {
+  clientSchema,
   credentialSchema,
+  credentialUpdateSchema,
   dashboardSurveySchema,
   shareLinkSchema,
   totpCodeSchema,
   updateCompanyNameSchema,
 } from "@/lib/validation";
 import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
-import { userPlan, vaultOwnerPlan } from "@/lib/plan";
-import { FREE_CREDENTIAL_LIMIT, FREE_SEATS, GRACE_ERROR } from "@/lib/plan-state";
+import { spendShareLink, userPlan } from "@/lib/plan";
+import { FREE_SEATS } from "@/lib/plan-state";
+import { findPack } from "@/lib/packs";
+import { createEnlacePago } from "@/lib/wompi";
+import { purgeDeletedCredentials, UNDO_WINDOW_MS } from "@/lib/credential-trash";
+import { patchPayload, readShareable, readTotp, withTotp, writePayload } from "@/lib/credential-payload";
+
+const NO_LINKS_ERROR = "Te quedaste sin links para compartir. Recargá desde Planes para seguir.";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function updateCompanyNameAction(formData: FormData) {
@@ -83,28 +94,92 @@ export async function createCredentialAction(formData: FormData) {
     username: formData.get("username") ?? "",
     secret: formData.get("secret") ?? "",
     notes: formData.get("notes") || undefined,
+    platform: formData.get("platform") || undefined,
+    loginUrl: formData.get("loginUrl") || undefined,
+    totp: formData.get("totp") || undefined,
   });
   if (!parsed.success) return parsed.error.issues[0].message;
 
-  const { vaultId, service, username, secret, notes } = parsed.data;
+  const { vaultId, service, username, secret, notes, platform, loginUrl } = parsed.data;
+  const totp = parsed.data.totp ? parseTotpInput(parsed.data.totp) : undefined;
+  if (totp === null) return TOTP_INVALID;
   await requireVaultAccess(vaultId, "EDITOR");
 
-  const plan = await vaultOwnerPlan(vaultId);
-  if (plan.kind === "grace") return GRACE_ERROR;
-  if (plan.kind === "free") {
-    const count = await db.credential.count({ where: { vaultId } });
-    if (count >= FREE_CREDENTIAL_LIMIT) {
-      return `El plan gratuito permite hasta ${FREE_CREDENTIAL_LIMIT} credenciales. Suscribite para agregar más.`;
-    }
-  }
-
-  const payload = JSON.stringify({ secret, notes: notes ?? "" });
   await db.credential.create({
-    data: { vaultId, service, username, encryptedData: encryptAtRest(payload) },
+    data: {
+      vaultId,
+      service,
+      username,
+      platform,
+      loginUrl,
+      hasTotp: !!totp,
+      encryptedData: writePayload({ secret, notes: notes ?? "", totp }),
+    },
   });
 
   revalidatePath(`/dashboard/${vaultId}`);
   return null;
+}
+
+// New client = new vault owned by the caller. Clients are unlimited; the cap only stops runaway scripts.
+export async function createClientAction(formData: FormData): Promise<{ error: string } | { error: null; id: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autenticado" };
+  const parsed = clientSchema.safeParse({ name: formData.get("name") ?? "", color: formData.get("color") ?? "" });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const userId = session.user.id;
+  if ((await db.vault.count({ where: { ownerId: userId } })) >= 500) {
+    return { error: "Llegaste al máximo de clientes. Escribinos a hola@kitifica.com." };
+  }
+  const client = await db.vault.create({ data: { ...parsed.data, ownerId: userId } });
+  revalidatePath("/dashboard");
+  return { error: null, id: client.id };
+}
+
+const TOTP_INVALID = "Esa clave 2FA no es válida. Pegá la clave de texto (letras A-Z y números 2-7) o el link otpauth:// del QR.";
+
+// Adds or replaces a client account's 2FA seed (e.g. "¿No podés escanear?" key from Instagram).
+export async function setTotpAction(vaultId: string, credentialId: string, raw: string) {
+  const totp = parseTotpInput(raw);
+  if (!totp) return TOTP_INVALID;
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!credential) return "Credencial no encontrada";
+  await db.credential.update({
+    where: { id: credential.id },
+    data: { hasTotp: true, encryptedData: withTotp(credential.encryptedData, totp) },
+  });
+  await db.auditLog.create({
+    data: { vaultId, action: "totp_added", credentialService: credential.service, actorEmail: email },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+// Current code only — the seed never leaves the server. The UI polls this while the code is open,
+// so the audit entry is deduped to one per person, account and 10 minutes.
+export async function totpCodeAction(vaultId: string, credentialId: string) {
+  const { email } = await requireVaultAccess(vaultId, "VIEWER");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  const totp = credential?.hasTotp ? readTotp(credential.encryptedData) : null;
+  if (!credential || !totp) throw new Error("Esta cuenta no tiene 2FA");
+  const recent = await db.auditLog.findFirst({
+    where: {
+      vaultId,
+      action: "totp_code_viewed",
+      credentialService: credential.service,
+      actorEmail: email,
+      createdAt: { gt: new Date(Date.now() - 10 * 60_000) },
+    },
+    select: { id: true },
+  });
+  if (!recent) {
+    await db.auditLog.create({
+      data: { vaultId, action: "totp_code_viewed", credentialService: credential.service, actorEmail: email },
+    });
+  }
+  return sharedTotpNow(totp);
 }
 
 export async function revealCredentialAction(vaultId: string, credentialId: string) {
@@ -119,16 +194,130 @@ export async function revealCredentialAction(vaultId: string, credentialId: stri
       actorEmail: email,
     },
   });
-  return JSON.parse(decryptAtRest(credential.encryptedData)) as {
-    secret: string;
-    notes: string;
-  };
+  return readShareable(credential.encryptedData);
 }
 
+// Deletes for real (nothing else needs to filter "deleted" rows) but keeps an encrypted copy for 60 s.
 export async function deleteCredentialAction(vaultId: string, credentialId: string) {
-  await requireVaultAccess(vaultId, "EDITOR");
-  await db.credential.deleteMany({ where: { id: credentialId, vaultId } });
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const c = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!c) return;
+  await db.$transaction([
+    db.deletedCredential.upsert({
+      where: { id: c.id },
+      create: {
+        id: c.id,
+        vaultId,
+        service: c.service,
+        username: c.username,
+        platform: c.platform,
+        loginUrl: c.loginUrl,
+        hasTotp: c.hasTotp,
+        encryptedData: c.encryptedData,
+        notes: c.notes,
+        aiAccessible: c.aiAccessible,
+        createdAt: c.createdAt,
+      },
+      update: { deletedAt: new Date() },
+    }),
+    db.credential.deleteMany({ where: { id: c.id, vaultId } }),
+    db.auditLog.create({ data: { vaultId, action: "credential_deleted", credentialService: c.service, actorEmail: email } }),
+  ]);
+  await purgeDeletedCredentials();
   revalidatePath(`/dashboard/${vaultId}`);
+}
+
+// Restores an account deleted less than 60 s ago, with its encrypted data, 2FA seed and AI flag.
+// Its share links are not restored: they were revoked with the delete and stay that way.
+export async function undoDeleteCredentialAction(vaultId: string, credentialId: string) {
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const t = await db.deletedCredential.findFirst({
+    where: { id: credentialId, vaultId, deletedAt: { gte: new Date(Date.now() - UNDO_WINDOW_MS) } },
+  });
+  if (!t) return "Ya pasó el tiempo para deshacer. Creá la cuenta de nuevo.";
+  await db.$transaction([
+    db.credential.create({
+      data: {
+        id: t.id,
+        vaultId,
+        service: t.service,
+        username: t.username,
+        platform: t.platform,
+        loginUrl: t.loginUrl,
+        hasTotp: t.hasTotp,
+        encryptedData: t.encryptedData,
+        notes: t.notes,
+        aiAccessible: t.aiAccessible,
+        createdAt: t.createdAt,
+      },
+    }),
+    db.deletedCredential.delete({ where: { id: t.id } }),
+    db.auditLog.create({ data: { vaultId, action: "credential_restored", credentialService: t.service, actorEmail: email } }),
+  ]);
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+// Edit an account. Blank secret/notes keep the stored values; the 2FA seed is kept unless removed.
+export async function updateCredentialAction(vaultId: string, credentialId: string, formData: FormData) {
+  const parsed = credentialUpdateSchema.safeParse({
+    service: formData.get("service") ?? "",
+    username: formData.get("username") ?? "",
+    secret: formData.get("secret") || undefined,
+    notes: formData.get("notes") || undefined,
+    platform: formData.get("platform") || undefined,
+    loginUrl: formData.get("loginUrl") || undefined,
+    removeTotp: formData.get("removeTotp") === "on",
+  });
+  if (!parsed.success) return parsed.error.issues[0].message;
+  const { email } = await requireVaultAccess(vaultId, "EDITOR");
+  const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
+  if (!credential) return "Cuenta no encontrada";
+
+  const { service, username, platform, loginUrl, secret, notes, removeTotp } = parsed.data;
+  await db.credential.update({
+    where: { id: credential.id },
+    data: {
+      service,
+      username,
+      platform,
+      loginUrl: loginUrl ?? null,
+      ...(removeTotp ? { hasTotp: false } : {}),
+      encryptedData: patchPayload(credential.encryptedData, { secret, notes, ...(removeTotp ? { totp: null } : {}) }),
+    },
+  });
+  await db.auditLog.create({
+    data: {
+      vaultId,
+      action: removeTotp && credential.hasTotp ? "credential_updated_totp_removed" : "credential_updated",
+      credentialService: service,
+      actorEmail: email,
+    },
+  });
+  revalidatePath(`/dashboard/${vaultId}`);
+  return null;
+}
+
+// Rename / recolor a client (vault). Owner only.
+export async function updateClientAction(vaultId: string, formData: FormData) {
+  const parsed = clientSchema.safeParse({ name: formData.get("name") ?? "", color: formData.get("color") ?? "" });
+  if (!parsed.success) return parsed.error.issues[0].message;
+  await requireVaultAccess(vaultId, "OWNER");
+  await db.vault.update({ where: { id: vaultId }, data: parsed.data });
+  revalidatePath("/dashboard", "layout");
+  return null;
+}
+
+// Deletes a client with all its accounts, links, members and audit (schema cascades). Owner only;
+// the typed name must match so a stray click can't do it.
+export async function deleteClientAction(vaultId: string, confirmName: string) {
+  await requireVaultAccess(vaultId, "OWNER");
+  const vault = await db.vault.findUnique({ where: { id: vaultId }, select: { name: true } });
+  if (!vault) return "Cliente no encontrado";
+  if (confirmName.trim().toLowerCase() !== vault.name.trim().toLowerCase()) return "El nombre no coincide";
+  await db.vault.delete({ where: { id: vaultId } });
+  revalidatePath("/dashboard", "layout");
+  redirect("/dashboard");
 }
 
 export async function createShareLinkAction(vaultId: string, formData: FormData) {
@@ -140,7 +329,6 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   if (!parsed.success) return parsed.error.issues[0].message;
 
   const { email: actorEmail } = await requireVaultAccess(vaultId, "EDITOR");
-  if ((await vaultOwnerPlan(vaultId)).kind === "grace") return GRACE_ERROR;
   const { credentialId, permission, expiresInHours } = parsed.data;
 
   const credential = await db.credential.findFirst({ where: { id: credentialId, vaultId } });
@@ -149,21 +337,30 @@ export async function createShareLinkAction(vaultId: string, formData: FormData)
   const plaintext = JSON.stringify({
     service: credential.service,
     username: credential.username,
-    ...JSON.parse(decryptAtRest(credential.encryptedData)),
+    ...readShareable(credential.encryptedData),
   });
 
   const linkKey = generateLinkKey();
   const publicId = generatePublicId();
 
-  const created = await db.shareLink.create({
-    data: {
-      publicId,
-      credentialId,
-      permission,
-      payload: encryptForLink(plaintext, linkKey),
-      expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000),
-    },
-  });
+  const charge = await spendShareLink(vaultId);
+  if (!charge.ok) return NO_LINKS_ERROR;
+
+  let created;
+  try {
+    created = await db.shareLink.create({
+      data: {
+        publicId,
+        credentialId,
+        permission,
+        payload: encryptForLink(plaintext, linkKey),
+        expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000),
+      },
+    });
+  } catch (err) {
+    await charge.refund();
+    throw err;
+  }
 
   await db.auditLog.create({
     data: {
@@ -310,18 +507,21 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
 
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
-  // Seat enforcement: free tier = 2 total (owner + 1), paid/trial = sub.seats.
-  const [plan, currentCount] = await Promise.all([
+  // Seats are people per ACCOUNT (owner included), across every client vault the owner has.
+  // Someone already in another of the owner's vaults doesn't take a new seat. Legacy subscriptions
+  // keep their seat count when it's higher than the free account's.
+  const [plan, members] = await Promise.all([
     userPlan(userId),
-    db.vaultMember.count({ where: { vaultId } }),
+    db.vaultMember.findMany({
+      where: { vault: { ownerId: userId }, userId: { not: userId } },
+      select: { user: { select: { email: true } } },
+      distinct: ["userId"],
+    }),
   ]);
-  if (plan.kind === "grace") return GRACE_ERROR;
-  const maxSeats = plan.kind === "free" ? FREE_SEATS : plan.seats;
-  // currentCount = existing members (excluding owner). Total = currentCount + 1 (owner).
-  if (currentCount + 1 >= maxSeats) {
-    return plan.kind === "free"
-      ? "El plan gratuito permite 1 miembro adicional. Suscribite para agregar más."
-      : `Tu plan permite hasta ${maxSeats} miembros. Actualizá tu plan para agregar más.`;
+  const maxSeats = Math.max(FREE_SEATS, plan.kind === "free" ? 0 : plan.seats);
+  const people = new Set(members.map((m) => m.user.email.toLowerCase()));
+  if (!people.has(email) && people.size + 1 >= maxSeats) {
+    return `Tu cuenta permite hasta ${maxSeats} personas. Quitá a alguien de otro cliente para sumar a esta persona.`;
   }
 
   // Case-insensitive: emails may be stored with mixed case from older signups.
@@ -484,43 +684,35 @@ export async function acceptInviteAction(
   return { ok: true, vaultId: invite.vaultId };
 }
 
-// ── Trial ────────────────────────────────────────────────────────────
+// ── Link packs (one-time Wompi payments) ─────────────────────────────
 
-// Ends a trial (or grace) and keeps all data on the free plan. Free limits
-// then block new credentials/invites until the vault is back under them.
-export async function switchToFreeAction(): Promise<string | null> {
+export async function buyLinksAction(links: number): Promise<{ error: string } | { error: null; url: string }> {
   const session = await auth();
-  if (!session?.user?.id) return "No autenticado";
-  await db.subscription.deleteMany({ where: { userId: session.user.id, status: "TRIALING" } });
-  revalidatePath("/dashboard", "layout");
-  return null;
-}
-
-// Plaintext export of every credential in vaults the caller OWNS — lets a
-// user in grace take their data before it's purged. Audited per vault.
-export async function exportMyCredentialsAction(): Promise<
-  { error: string } | { error: null; rows: { vault: string; service: string; username: string; secret: string; notes: string }[] }
-> {
-  const session = await auth();
-  if (!session?.user?.id || !session.user.email) return { error: "No autenticado" };
-  if (!(await rateLimit(`export:${session.user.id}`, 3)).success) {
+  if (!session?.user?.id) return { error: "No autenticado" };
+  const pack = findPack(links);
+  if (!pack) return { error: "Paquete inválido." };
+  if (!(await rateLimit(`buy-links:${session.user.id}`, 5)).success) {
     return { error: "Demasiados intentos. Esperá un minuto." };
   }
 
-  const vaults = await db.vault.findMany({
-    where: { ownerId: session.user.id },
-    select: { id: true, name: true, credentials: { orderBy: { service: "asc" } } },
+  const purchase = await db.linkPurchase.create({
+    data: { userId: session.user.id, links: pack.links, amountCents: pack.cents },
   });
-  const rows = vaults.flatMap((v) =>
-    v.credentials.map((c) => {
-      const { secret, notes } = JSON.parse(decryptAtRest(c.encryptedData)) as { secret: string; notes: string };
-      return { vault: v.name, service: c.service, username: c.username, secret, notes };
-    }),
-  );
-  await db.auditLog.createMany({
-    data: vaults.map((v) => ({ vaultId: v.id, action: "vault_exported", actorEmail: session.user!.email! })),
-  });
-  return { error: null, rows };
+  try {
+    const enlace = await createEnlacePago({
+      ref: purchase.id,
+      amountCents: pack.cents,
+      productName: `${pack.links} links para compartir · Bóveda KF-1`,
+      redirectUrl: `${APP_URL}/dashboard/plans?compra=${purchase.id}`,
+      webhookUrl: `${APP_URL}/api/wompi/webhook`,
+    });
+    await db.linkPurchase.update({ where: { id: purchase.id }, data: { wompiLinkId: enlace.idEnlace } });
+    return { error: null, url: enlace.urlEnlace };
+  } catch (err) {
+    console.error("[buyLinks] Wompi EnlacePago failed:", err);
+    await db.linkPurchase.delete({ where: { id: purchase.id } });
+    return { error: "No pudimos iniciar el pago. Probá de nuevo en unos minutos." };
+  }
 }
 
 // ── AI Access (MCP) ──────────────────────────────────────────────────

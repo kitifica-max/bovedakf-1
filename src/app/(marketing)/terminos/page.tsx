@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero, StarDot, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Términos y condiciones",
@@ -16,8 +17,8 @@ const sections = [
   {
     h: "2. Qué es Bóveda KF-1",
     p: [
-      "Bóveda KF-1 es un gestor de credenciales compartidas: te permite guardar accesos de equipo de forma encriptada y compartirlos mediante links con expiración configurable. El plan gratuito incluye hasta 10 credenciales por bóveda.",
-      "Si al registrarte elegís un plan de pago, empezás con 30 días de prueba gratis sin tarjeta. Al terminar la prueba, tu bóveda pasa a solo lectura durante 15 días: podés ver y exportar tus credenciales, suscribirte o pasarte al plan gratuito conservando todos tus datos. Te avisamos por email los días 4, 8 y 12 de ese período. Si al día 15 no elegiste ninguna opción, tus credenciales se eliminan de forma permanente y la cuenta queda en el plan gratuito.",
+      "Bóveda KF-1 es un gestor de credenciales compartidas: te permite guardar accesos de equipo de forma encriptada y compartirlos mediante links con expiración configurable. La cuenta es gratuita e incluye hasta 5 personas y clientes y credenciales ilimitados.",
+      "Cada link para compartir una credencial con alguien de afuera consume 1 link de tu saldo. Las cuentas nuevas reciben 5 links de regalo y podés recargar más con pagos únicos (sin suscripción ni cobros automáticos). Ver contraseñas y códigos dentro de tu equipo no consume links. Las cuentas con una suscripción anterior activa conservan los links ilimitados mientras siga activa.",
     ],
   },
   {
@@ -72,20 +73,18 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">
-        Términos y condiciones
-      </h1>
-      <p className="mt-2 text-sm text-ink-soft">Última actualización: 29 de septiembre de 2026.</p>
+    <>
+      <PageHero pair="rosa" icon="doc" kicker="Última actualización: 29 de septiembre de 2026" title="Términos y condiciones" />
+      <div className={pageCard}>
       <p className="mt-4 bg-blue/10 px-4 py-3 text-sm text-ink-soft">
         Bóveda KF-1 está en etapa temprana. Este documento es un marco general de uso — si tu
         organización necesita un acuerdo formal (DPA, SLA), escribinos.
       </p>
 
       <div className="mt-8 flex flex-col gap-6">
-        {sections.map((s) => (
+        {sections.map((s, si) => (
           <section key={s.h}>
-            <h2 className="t-h2 text-ink">{s.h}</h2>
+            <h2 className="t-h2 flex items-center gap-3"><StarDot i={si} />{s.h}</h2>
             {s.p.map((para, i) => (
               <p key={i} className="mt-2 text-sm text-ink-soft">
                 {para}
@@ -94,6 +93,7 @@ export default function TermsPage() {
           </section>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

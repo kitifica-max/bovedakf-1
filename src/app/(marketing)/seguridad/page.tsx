@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PAIRS, PageHero, pageCard, type PairName } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Seguridad — Bóveda KF-1",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 function IconShield() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
     </svg>
   );
@@ -20,7 +21,7 @@ function IconShield() {
 
 function IconLock() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
     </svg>
   );
@@ -28,7 +29,7 @@ function IconLock() {
 
 function IconLink() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
     </svg>
   );
@@ -36,7 +37,7 @@ function IconLink() {
 
 function IconClipboard() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
     </svg>
   );
@@ -44,7 +45,7 @@ function IconClipboard() {
 
 function IconCode() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
     </svg>
   );
@@ -52,7 +53,7 @@ function IconCode() {
 
 function IconCheck() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" className="h-4 w-4">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
@@ -65,7 +66,9 @@ function SectionCard({
   kicker,
   title,
   children,
+  pair,
 }: {
+  pair: PairName;
   icon: React.ReactNode;
   kicker: string;
   title: string;
@@ -74,15 +77,15 @@ function SectionCard({
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue/10 text-blue">
+        <span style={{ background: PAIRS[pair].bg, color: PAIRS[pair].ink }} className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px]">
           {icon}
         </span>
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-blue">{kicker}</p>
+        <div className="min-w-0">
+          <p className="m-0 text-[11px] font-extrabold tracking-[0.18em] text-kf-tinta-suave uppercase">{kicker}</p>
           <h2 className="t-h2 text-ink">{title}</h2>
         </div>
       </div>
-      <div className="ml-12 flex flex-col gap-3 text-sm leading-relaxed text-ink-soft">
+      <div className="flex flex-col gap-3 text-sm leading-relaxed text-ink-soft sm:ml-15">
         {children}
       </div>
     </section>
@@ -91,20 +94,24 @@ function SectionCard({
 
 // ── Badge component ───────────────────────────────────────────────────────────
 
-function Badge({ grade, label, sub, href }: { grade: string; label: string; sub: string; href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3 transition hover:border-blue/30 hover:bg-blue/5"
-    >
-      <span className="font-display text-2xl font-bold text-blue group-hover:text-blue/80">{grade}</span>
-      <div>
-        <p className="text-xs font-semibold text-ink">{label}</p>
-        <p className="text-[11px] text-ink-soft">{sub}</p>
-      </div>
-    </a>
+function Badge({ pair, grade, label, sub, href }: { pair: PairName; grade: string; label: string; sub: string; href?: string }) {
+  const body = (
+    <>
+      <span className="font-brand text-5xl leading-none font-extrabold">{grade}</span>
+      <p className="m-0 text-sm font-extrabold break-words">{label}</p>
+      <p className="m-0 text-xs font-semibold break-words opacity-90">{sub}</p>
+    </>
+  );
+  const style = { background: PAIRS[pair].bg, color: PAIRS[pair].ink };
+  const cls = "flex min-w-0 flex-col gap-1 rounded-[28px] px-5 py-5 no-underline";
+  return href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={style} className={`${cls} transition hover:-translate-y-0.5`}>
+      {body}
+    <span className="sr-only"> (se abre en otra pestaña)</span></a>
+  ) : (
+    <div style={style} className={cls}>
+      {body}
+    </div>
   );
 }
 
@@ -112,46 +119,34 @@ function Badge({ grade, label, sub, href }: { grade: string; label: string; sub:
 
 export default function SecurityPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">Seguridad</h1>
-      <p className="mt-2 text-sm text-ink-soft">
-        Cómo protegemos tus credenciales — con especificaciones técnicas verificables.
-      </p>
+    <>
+      <PageHero pair="bosque" icon="shield" kicker="Seguridad" title="Seguridad nivel banco" lead="Cómo protegemos las cuentas de tus clientes, con especificaciones técnicas verificables." />
+      <div className={pageCard}>
 
       {/* Badges */}
-      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
         <Badge
+          pair="azul"
           grade="A+"
           label="SSL Labs"
           sub="TLS 1.3 · HSTS · OCSP Stapling"
           href="https://www.ssllabs.com/ssltest/analyze.html?d=kf1.kitifica.com"
         />
         <Badge
+          pair="durazno"
           grade="A+"
           label="HTTP Observatory"
           sub="120 / 100 · 12 / 12 tests"
           href="https://developer.mozilla.org/en-US/observatory/analyze?host=kf1.kitifica.com"
         />
-        <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
-          <span className="font-display text-2xl font-bold text-blue">ZK</span>
-          <div>
-            <p className="text-xs font-semibold text-ink">Zero-Knowledge Links</p>
-            <p className="text-[11px] text-ink-soft">Clave nunca toca el servidor</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-xl border border-border-soft bg-gray/30 px-4 py-3">
-          <span className="font-display text-2xl font-bold text-blue">10/10</span>
-          <div>
-            <p className="text-xs font-semibold text-ink">OWASP ZAP</p>
-            <p className="text-[11px] text-ink-soft">0 críticos · 0 altos · scan pasivo</p>
-          </div>
-        </div>
+        <Badge pair="carmesi" grade="ZK" label="Zero-Knowledge Links" sub="La clave nunca toca el servidor" />
+        <Badge pair="amarillo" grade="10/10" label="OWASP ZAP" sub="0 críticos · 0 altos · scan pasivo" />
       </div>
 
       <div className="mt-10 flex flex-col gap-10">
 
         {/* 1 — Promesa */}
-        <SectionCard icon={<IconShield />} kicker="Privacidad y cifrado" title="Cómo protegemos tus credenciales">
+        <SectionCard pair="carmesi" icon={<IconShield />} kicker="Privacidad y cifrado" title="Cómo protegemos tus credenciales">
           <p>
             Las credenciales que guardás se cifran en el servidor con{" "}
             <strong className="text-ink">AES-256-GCM</strong> antes de almacenarse en la base de
@@ -171,7 +166,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 2 — Cifrado */}
-        <SectionCard icon={<IconLock />} kicker="Arquitectura de cifrado" title="Cifrado en reposo y en tránsito">
+        <SectionCard pair="bosque" icon={<IconLock />} kicker="Arquitectura de cifrado" title="Cifrado en reposo y en tránsito">
           <p>
             Las credenciales viajan sobre <strong className="text-ink">TLS 1.3</strong> y se
             cifran en el servidor con <strong className="text-ink">AES-256-GCM</strong> antes de
@@ -216,7 +211,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 3 — Links dinámicos */}
-        <SectionCard icon={<IconLink />} kicker="Compartir sin riesgos" title="Links a prueba de intrusos">
+        <SectionCard pair="durazno" icon={<IconLink />} kicker="Compartir sin riesgos" title="Links a prueba de intrusos">
           <p>
             Cuando compartís una credencial — con un compañero o con un asistente de IA — Bóveda KF-1
             nunca expone la contraseña en texto plano. En su lugar, genera un{" "}
@@ -259,7 +254,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 4 — Auditoría */}
-        <SectionCard icon={<IconClipboard />} kicker="Control y auditoría" title="Control total desde tu panel">
+        <SectionCard pair="lavanda" icon={<IconClipboard />} kicker="Control y auditoría" title="Control total desde tu panel">
           <p>
             Cada acción sobre una credencial compartida queda registrada en el audit log. El
             dashboard te muestra exactamente qué pasó, quién lo hizo, y desde dónde.
@@ -291,7 +286,7 @@ export default function SecurityPage() {
         <hr className="border-border-soft" />
 
         {/* 5 — Transparencia técnica */}
-        <SectionCard icon={<IconCode />} kicker="Para usuarios avanzados" title="Transparencia tecnológica">
+        <SectionCard pair="azul" icon={<IconCode />} kicker="Para usuarios avanzados" title="Transparencia tecnológica">
           <p>
             El sistema opera sin infraestructuras intermedias innecesarias. No hay proxies
             propietarios, no hay servicios de terceros con acceso a tus datos cifrados.
@@ -320,20 +315,20 @@ export default function SecurityPage() {
               href="https://www.ssllabs.com/ssltest/analyze.html?d=kf1.kitifica.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg border border-border-soft bg-paper px-3 py-2 text-[11px] transition hover:border-blue/30 hover:bg-blue/5"
+              className="flex min-h-11 items-center gap-2 rounded-lg border border-border-soft bg-paper px-3 py-2 text-[11px] transition hover:border-blue/30 hover:bg-blue/5"
             >
               <span className="font-bold text-blue">A+</span>
               <span className="text-ink-soft">Ver reporte SSL Labs →</span>
-            </a>
+            <span className="sr-only"> (se abre en otra pestaña)</span></a>
             <a
               href="https://developer.mozilla.org/en-US/observatory/analyze?host=kf1.kitifica.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-lg border border-border-soft bg-paper px-3 py-2 text-[11px] transition hover:border-blue/30 hover:bg-blue/5"
+              className="flex min-h-11 items-center gap-2 rounded-lg border border-border-soft bg-paper px-3 py-2 text-[11px] transition hover:border-blue/30 hover:bg-blue/5"
             >
               <span className="font-bold text-blue">120</span>
               <span className="text-ink-soft">Ver reporte HTTP Observatory →</span>
-            </a>
+            <span className="sr-only"> (se abre en otra pestaña)</span></a>
           </div>
         </SectionCard>
 
@@ -350,6 +345,7 @@ export default function SecurityPage() {
           Política de privacidad
         </Link>
       </p>
-    </div>
+      </div>
+    </>
   );
 }

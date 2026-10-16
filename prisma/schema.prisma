@@ -37,6 +37,28 @@ model Subscription {
   updatedAt        DateTime           @updatedAt
 }
 
+enum LinkPurchaseStatus {
+  PENDING
+  PAID
+}
+
+// One-time Wompi payment for a pack of share links. `id` is sent to Wompi as
+// identificadorEnlaceComercio, so the webhook credits the exact account.
+model LinkPurchase {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links         Int
+  amountCents   Int
+  status        LinkPurchaseStatus @default(PENDING)
+  wompiLinkId   Int?
+  transactionId String?            @unique
+  createdAt     DateTime           @default(now())
+  paidAt        DateTime?
+
+  @@index([userId])
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -75,6 +97,9 @@ model User {
   authenticators Authenticator[]
   cliTokens     CliToken[]
   subscription    Subscription?
+  // Prepaid share-link balance. New accounts start with 5 gift links.
+  linkCredits     Int            @default(5)
+  linkPurchases   LinkPurchase[]
   organizationId  String?
   organization    Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   orgRole         OrgRole?
@@ -152,9 +177,12 @@ model CliToken {
 model Vault {
   id          String       @id @default(cuid())
   name        String
+  // Client "flavor" id from src/lib/platforms.ts CLIENT_COLORS (null = default).
+  color       String?
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   credentials Credential[]
+  deletedCredentials DeletedCredential[]
   members     VaultMember[]
   invites     VaultInvite[]
   createdAt   DateTime     @default(now())
@@ -169,6 +197,11 @@ model Credential {
   vault         Vault       @relation(fields: [vaultId], references: [id], onDelete: Cascade)
   service       String
   username      String
+  // Platform id from src/lib/platforms.ts PLATFORMS; validated in the app.
+  platform      String      @default("other")
+  loginUrl      String?
+  // True when the encrypted payload holds a 2FA seed (src/lib/credential-payload.ts).
+  hasTotp       Boolean     @default(false)
   // AES-256-GCM at rest, base64: iv(12) + tag(16) + ciphertext, key = env ENCRYPTION_KEY
   encryptedData String
   notes         String?
@@ -177,6 +210,28 @@ model Credential {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   shareLinks    ShareLink[]
+}
+
+// 60-second undo window for a deleted account. The row is really gone from Credential (so no reader
+// can leak it); this copy keeps the same AES-GCM ciphertext and is purged by deletedAt. Cascades
+// with the client (vault) so no secret outlives it. Share links are NOT restored: they stay revoked.
+model DeletedCredential {
+  id            String   @id // original Credential id, reused on restore
+  vaultId       String
+  vault         Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  service       String
+  username      String
+  platform      String
+  loginUrl      String?
+  hasTotp       Boolean
+  encryptedData String
+  notes         String?
+  aiAccessible  Boolean
+  createdAt     DateTime
+  deletedAt     DateTime @default(now())
+
+  @@index([deletedAt])
+  @@index([vaultId])
 }
 
 enum LinkPermission {

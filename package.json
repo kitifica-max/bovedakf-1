@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:local": "sh scripts/dev-local.sh",
     "build": "node scripts/check-vault-authz.mjs && next build",
     "start": "next start",
     "lint": "eslint",

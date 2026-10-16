@@ -79,13 +79,13 @@ export function CliTokenManager() {
   return (
     <div className="mt-4">
       {newToken && (
-        <div className="mb-4 rounded-xl border border-blue bg-blue/10 p-4">
-          <p className="mb-2 text-sm font-medium text-ink">Token generado</p>
-          <p className="mb-3 text-xs text-ink-soft">
+        <div className="mb-4 rounded-[22px] bg-kf-lima p-5 text-kf-bosque-hondo">
+          <p className="mb-2 text-sm font-extrabold">Token generado</p>
+          <p className="mb-3 text-xs font-semibold">
             Copiá este token ahora — no lo vas a poder ver otra vez.
           </p>
-          <div className="flex items-center gap-2 rounded-lg border border-border-soft bg-paper pr-2">
-            <code className="flex-1 truncate px-3 py-2 font-mono text-xs text-ink">{newToken}</code>
+          <div className="flex items-center gap-2 rounded-full bg-white pr-2">
+            <code className="flex-1 truncate px-4 py-3 font-mono text-xs text-kf-tinta">{newToken}</code>
             <CopyButton value={newToken} label="Copiar" />
           </div>
           <button
@@ -98,36 +98,40 @@ export function CliTokenManager() {
         </div>
       )}
 
-      <form onSubmit={handleGenerate} className="flex gap-2">
+      <form onSubmit={handleGenerate} className="flex flex-wrap items-end gap-2.5">
+        <label htmlFor="cli-token-name" className="w-full text-xs font-extrabold tracking-[0.14em] text-kf-tinta-suave uppercase">
+          Nombre del token
+        </label>
         <input
+          id="cli-token-name"
           type="text"
           value={tokenName}
           onChange={(e) => setTokenName(e.target.value)}
-          placeholder="Nombre del token (ej. Mi Mac)"
-          className="flex-1 rounded-xl border border-border-soft bg-gray/40 px-3 py-2 text-sm outline-none transition focus:border-ink"
+          placeholder="Nombre (ej. Mi Mac)"
+          className="h-12 min-w-0 flex-[1_1_200px] rounded-full border-2 border-kf-borde bg-white px-5 text-base font-semibold text-kf-tinta outline-none transition placeholder:font-medium placeholder:text-kf-tinta-suave focus:border-kf-azul sm:text-sm"
           disabled={loading}
         />
         <button
           type="submit"
           disabled={loading || !tokenName.trim()}
-          className="cursor-pointer rounded-full bg-ink px-4 py-2 text-sm font-medium text-gray transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="min-h-12 cursor-pointer rounded-full bg-kf-azul px-6 text-xs font-extrabold tracking-[0.12em] text-white uppercase transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Generando..." : "Generar"}
         </button>
       </form>
 
       {error && (
-        <p className="mt-2 rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="mt-2 rounded-2xl bg-kf-carmesi/10 px-4 py-2 text-sm font-semibold text-kf-carmesi-hondo">{error}</p>
       )}
 
       {tokens.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs text-ink-soft">Tokens activos</p>
+          <p className="mb-2 text-xs font-extrabold tracking-[0.18em] text-kf-tinta-suave uppercase">Tokens activos</p>
           <ul className="flex flex-col gap-2">
             {tokens.map((t) => (
-              <li key={t.id} className="flex items-center justify-between rounded-xl bg-gray/40 px-4 py-2.5">
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[22px] bg-kf-niebla px-5 py-3.5">
                 <div>
-                  <p className="text-sm font-medium text-ink">{t.name}</p>
+                  <p className="text-sm font-extrabold text-kf-tinta">{t.name}</p>
                   <p className="text-xs text-ink-soft">
                     Creado: {new Date(t.createdAt).toLocaleDateString()} · Expira:{" "}
                     {new Date(t.expiresAt).toLocaleDateString()}

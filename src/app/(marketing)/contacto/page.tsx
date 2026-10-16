@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MailIcon, ShieldAlertIcon } from "@/components/icons";
+import { PageHero, pageCard } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
   title: "Contacto",
@@ -24,12 +25,9 @@ const channels = [
 
 export default function ContactPage() {
   return (
-    <div>
-      <h1 className="t-display text-ink">Contacto</h1>
-      <p className="mt-3 text-ink-soft">
-        ¿Preguntas sobre seguridad, un bug, o algo comercial? Escribinos directamente — leemos
-        todo, respondemos en persona.
-      </p>
+    <>
+      <PageHero pair="carmesi" icon="chat" kicker="Contacto" title="Hablemos" lead="¿Preguntas sobre seguridad, un bug o algo comercial? Escribinos: leemos todo y respondemos en persona." />
+      <div className={pageCard}>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {channels.map(({ title, email, href, Icon }) => (
@@ -56,6 +54,7 @@ export default function ContactPage() {
         Bóveda KF-1 es un producto en etapa temprana — respondemos personalmente, así que puede
         tomar hasta 48h hábiles.
       </p>
-    </div>
+      </div>
+    </>
   );
 }
