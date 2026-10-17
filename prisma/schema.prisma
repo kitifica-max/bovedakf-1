@@ -8,35 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum SubscriptionPlan {
-  starter
-  team
-  personal
-}
-
-enum SubscriptionStatus {
-  PENDING
-  TRIALING
-  ACTIVE
-  CANCELLED
-  SUSPENDED
-  EXPIRED
-}
-
-model Subscription {
-  id               String             @id @default(cuid())
-  userId           String             @unique
-  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan             SubscriptionPlan
-  status           SubscriptionStatus
-  seats            Int
-  // For TRIALING: when the trial ends. Grace (read-only) runs GRACE_DAYS after it.
-  currentPeriodEnd DateTime
-  remindersSent    Int                @default(0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-}
-
 enum LinkPurchaseStatus {
   PENDING
   PAID
@@ -96,7 +67,6 @@ model User {
   sessions      Session[]
   authenticators Authenticator[]
   cliTokens     CliToken[]
-  subscription    Subscription?
   // Prepaid share-link balance. New accounts start with 5 gift links.
   linkCredits     Int            @default(5)
   linkPurchases   LinkPurchase[]
