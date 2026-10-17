@@ -34,21 +34,6 @@ async function wompiRequest<T>(path: string, method = "GET", body?: object): Pro
   return res.json() as Promise<T>;
 }
 
-export async function listEnlacesPagoRecurrentes() {
-  return wompiRequest<Array<{
-    idEnlace: string;
-    nombre: string;
-    urlEnlace: string;
-    estaProductivo: boolean;
-  }>>("/EnlacePagoRecurrente");
-}
-
-export async function getEnlaceSuscripciones(idEnlace: string) {
-  return wompiRequest<{
-    items: Array<{ email: string; nombre: string; activo: boolean }>;
-  }>(`/EnlacePagoRecurrente/${idEnlace}/suscripciones`);
-}
-
 // One-time payment link, usable for a single successful payment. `ref` comes back in the
 // webhook as EnlacePago.IdentificadorEnlaceComercio, so the purchase is matched by id, not email.
 export async function createEnlacePago(opts: {

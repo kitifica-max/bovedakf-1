@@ -36,7 +36,7 @@ import {
   updateCompanyNameSchema,
 } from "@/lib/validation";
 import { applyMembership, requireVaultAccess } from "@/lib/vault-access";
-import { spendShareLink, userPlan } from "@/lib/plan";
+import { spendShareLink } from "@/lib/plan";
 import { FREE_SEATS } from "@/lib/plan-state";
 import { findPack } from "@/lib/packs";
 import { createEnlacePago } from "@/lib/wompi";
@@ -508,17 +508,13 @@ export async function inviteMemberAction(vaultId: string, formData: FormData): P
   if (email === actorEmail.toLowerCase()) return "Ese sos vos.";
 
   // Seats are people per ACCOUNT (owner included), across every client vault the owner has.
-  // Someone already in another of the owner's vaults doesn't take a new seat. Legacy subscriptions
-  // keep their seat count when it's higher than the free account's.
-  const [plan, members] = await Promise.all([
-    userPlan(userId),
-    db.vaultMember.findMany({
-      where: { vault: { ownerId: userId }, userId: { not: userId } },
-      select: { user: { select: { email: true } } },
-      distinct: ["userId"],
-    }),
-  ]);
-  const maxSeats = Math.max(FREE_SEATS, plan.kind === "free" ? 0 : plan.seats);
+  // Someone already in another of the owner's vaults doesn't take a new seat.
+  const members = await db.vaultMember.findMany({
+    where: { vault: { ownerId: userId }, userId: { not: userId } },
+    select: { user: { select: { email: true } } },
+    distinct: ["userId"],
+  });
+  const maxSeats = FREE_SEATS;
   const people = new Set(members.map((m) => m.user.email.toLowerCase()));
   if (!people.has(email) && people.size + 1 >= maxSeats) {
     return `Tu cuenta permite hasta ${maxSeats} personas. Quitá a alguien de otro cliente para sumar a esta persona.`;

@@ -49,17 +49,13 @@ export async function deleteAccountAction(formData: FormData): Promise<{ error: 
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, email: true, passwordHash: true, passwordSalt: true, orgRole: true, subscription: { select: { status: true } } },
+    select: { id: true, email: true, passwordHash: true, passwordSalt: true, orgRole: true },
   });
   if (!user || !verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt)) {
     return { error: "La contraseña no es correcta" };
   }
   if (parsed.data.confirmEmail !== user.email.toLowerCase()) {
     return { error: "El email no coincide con el de tu cuenta" };
-  }
-  // A recurring Wompi charge would keep billing a deleted account.
-  if (user.subscription?.status === "ACTIVE") {
-    return { error: "Tenés un plan mensual activo. Cancelalo en panel.wompi.sv/Recurrentes y después eliminá la cuenta." };
   }
   if (user.orgRole === "OWNER") {
     return { error: "Sos dueño de una organización. Pasale ese rol a otra persona antes de eliminar tu cuenta." };

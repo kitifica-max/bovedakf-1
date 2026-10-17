@@ -3,9 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { planState } from "@/lib/plan-state";
 import { PACKS, perLink, usd } from "@/lib/packs";
-import { PLAN_DISPLAY } from "@/lib/plans";
 import { BuyPackButton, PurchasePoller } from "./buy-pack-button";
 import { AppShell } from "../app-shell";
 import { PAIRS, PageHero, type PairName } from "@/components/brand/shapes";
@@ -23,7 +21,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
   const { compra } = await searchParams;
 
   const [user, purchases, returned] = await Promise.all([
-    db.user.findUnique({ where: { id: session.user.id }, select: { linkCredits: true, subscription: true } }),
+    db.user.findUnique({ where: { id: session.user.id }, select: { linkCredits: true } }),
     db.linkPurchase.findMany({
       where: { userId: session.user.id, status: "PAID" },
       orderBy: { paidAt: "desc" },
@@ -32,8 +30,6 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
     compra ? db.linkPurchase.findFirst({ where: { id: compra, userId: session.user.id } }) : null,
   ]);
 
-  const plan = planState(user?.subscription);
-  const unlimited = plan.kind === "paid";
   const credits = user?.linkCredits ?? 0;
   const best = PACKS[PACKS.length - 1].links;
 
@@ -43,12 +39,8 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
         pair="durazno"
         icon="link"
         kicker="Links para compartir"
-        title={unlimited ? "Links ilimitados" : credits === 1 ? "Te queda 1 link" : `Te quedan ${credits} links`}
-        lead={
-          unlimited
-            ? `Tu plan ${PLAN_DISPLAY[user!.subscription!.plan] ?? user!.subscription!.plan} incluye links ilimitados mientras siga activo.`
-            : "Cada link comparte una cuenta con alguien de afuera y descuenta 1. Ver contraseñas y códigos 2FA dentro de tu equipo es gratis."
-        }
+        title={credits === 1 ? "Te queda 1 link" : `Te quedan ${credits} links`}
+        lead="Cada link comparte una cuenta con alguien de afuera y descuenta 1. Ver contraseñas y códigos 2FA dentro de tu equipo es gratis."
       />
 
       {returned?.status === "PAID" && (

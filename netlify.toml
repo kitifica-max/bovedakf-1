@@ -2,11 +2,6 @@
   command = "npm run build"
   publish = ".next"
 
-[[scheduled-functions]]
-  name = "check-subscriptions"
-  schedule = "0 8 * * *"
-  path = "/api/cron/check-subscriptions"
-
 [[edge_functions]]
   function = "waf"
   path = "/*"
