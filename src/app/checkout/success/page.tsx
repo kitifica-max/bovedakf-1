@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { SuccessPoller } from "./success-poller";
 
 export const metadata: Metadata = {
-  title: "Confirmando pago — Bóveda KF-1",
+  title: "Confirmando pago",
   robots: { index: false },
 };
 

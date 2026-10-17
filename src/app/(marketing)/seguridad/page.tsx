@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PAIRS, PageHero, pageCard, type PairName } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
-  title: "Seguridad — Bóveda KF-1",
+  title: "Seguridad",
   description:
     "Arquitectura Zero-Knowledge, cifrado AES-256-GCM en el cliente, y auditoría completa. Solo vos tenés la llave.",
   alternates: { canonical: "/seguridad" },
