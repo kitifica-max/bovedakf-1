@@ -16,7 +16,7 @@ const sections = [
     h: "1. Pagos únicos, sin suscripción",
     p: [
       "Bóveda KF-1 no es una suscripción. La cuenta es gratuita y solo pagás cuando recargás links para compartir credenciales con alguien de afuera. Cada recarga es un pago único procesado mediante Wompi.",
-      "Las recargas nuevas nunca generan cobros automáticos ni renovaciones: si no volvés a recargar, no se te cobra nada y no hay nada que cancelar. (Los planes mensuales anteriores tienen su propia sección más abajo.)",
+      "Nunca generamos cobros automáticos ni renovaciones: si no volvés a recargar, no se te cobra nada y no hay nada que cancelar.",
     ],
   },
   {
@@ -35,7 +35,6 @@ const sections = [
       "Se realizó un cobro duplicado.",
       "El pago fue aprobado pero los links no se acreditaron en tu saldo.",
       "Un fallo técnico de la plataforma te impidió usar los links que compraste.",
-      "Plan mensual anterior: se te cobró después de que lo cancelaras correctamente.",
     ],
   },
   {
@@ -45,21 +44,14 @@ const sections = [
     ],
   },
   {
-    h: "5. Si tenías un plan mensual anterior",
-    p: [
-      "Antes de pasar a links prepagos vendimos planes mensuales. Si tenés uno activo, se mantiene hasta que lo canceles y conservás los links ilimitados mientras siga activo. Podés cancelarlo cuando quieras desde el panel de Wompi en panel.wompi.sv/Recurrentes; la cancelación es efectiva al final del período en curso y no se generan cargos adicionales.",
-      "Si un cobro del plan mensual no se aprueba (tarjeta vencida, saldo insuficiente, etc.), el plan queda suspendido y te avisamos por correo. Tus datos no se eliminan: actualizá tu tarjeta en panel.wompi.sv/Recurrentes y tu acceso se restaura al aprobarse el pago.",
-    ],
-  },
-  {
-    h: "6. Cómo solicitar un reembolso",
+    h: "5. Cómo solicitar un reembolso",
     p: [
       "Si creés que tu caso es un error técnico de los del punto 3, escribinos a hola@kitifica.com con el asunto «Solicitud de reembolso» e incluí tu correo de cuenta y el ID de transacción de Wompi.",
       "Respondemos en un plazo máximo de 5 días hábiles. Los reembolsos aprobados pueden tardar de 3 a 7 días hábiles en reflejarse según tu banco.",
     ],
   },
   {
-    h: "7. Cambios a esta política",
+    h: "6. Cambios a esta política",
     p: [
       "Nos reservamos el derecho de modificar esta política. Publicaremos los cambios en esta página con al menos 15 días de anticipación. El uso continuado del servicio implica la aceptación de la política vigente.",
     ],
