@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { IdleSessionGuard } from "@/components/idle-session-guard";
-import { PlanBanner } from "@/components/plan-banner";
 
 export const metadata: Metadata = {
   title: "Mi bóveda",
@@ -15,7 +14,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="kf-app flex min-h-dvh flex-col">
       <IdleSessionGuard />
-      <PlanBanner userId={session.user.id} />
       {children}
     </div>
   );

@@ -14,7 +14,7 @@ export async function generateReceipt(opts: {
   amount: string;
   currency: string;
   transactionId: string;
-  reference: string; // our purchase id (or the legacy Wompi link id)
+  reference: string; // our purchase id
   date: Date;
 }): Promise<Buffer> {
   const doc = await PDFDocument.create();
