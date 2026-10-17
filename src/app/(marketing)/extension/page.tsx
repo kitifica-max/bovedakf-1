@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/brand/shapes";
 
 export const metadata: Metadata = {
-  title: "Extensión de Chrome — Bóveda KF-1",
+  title: "Extensión de Chrome",
   description:
     "Instalá la extensión de Chrome de Bóveda KF-1 y rellená tus credenciales en cualquier formulario de login con un solo click.",
 };

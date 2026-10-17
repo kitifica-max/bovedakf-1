@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CopyCodeBlock } from "@/components/copy-code-block";
 
 export const metadata = {
-  title: "Conectar agente de IA — Boveda KF-1",
+  title: "Conectar agente de IA",
   description:
     "Conecta Claude u otro agente de IA a tu Boveda KF-1 para acceder a credenciales de forma segura.",
 };

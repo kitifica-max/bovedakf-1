@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: "Facturación — Bóveda KF-1",
+  title: "Facturación",
 };
 
 const planLabels: Record<string, string> = { personal: "Personal", starter: "Personal", team: "Equipo" };
