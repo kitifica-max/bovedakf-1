@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/brand/shapes";
 
+// TODO(store): cuando la extensión esté publicada, reemplazar por la URL exacta
+// del listing: https://chromewebstore.google.com/detail/boveda-kf-1/<EXTENSION_ID>
+const CWS_URL = "https://chromewebstore.google.com/search/B%C3%B3veda%20KF-1";
+
 export const metadata: Metadata = {
   title: "Extensión de Chrome",
   description:
-    "Instalá la extensión de Chrome de Bóveda KF-1 y rellená tus credenciales en cualquier formulario de login con un solo click.",
+    "Instalá la extensión de Chrome de Bóveda KF-1 desde la Chrome Web Store y rellená tus credenciales en cualquier formulario de login con un solo click.",
 };
 
 export default function ExtensionPage() {
@@ -21,16 +25,17 @@ export default function ExtensionPage() {
         >
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href="/kf1-extension.zip"
-              download="kf1-extension.zip"
+              href={CWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex min-h-13 items-center gap-2.5 rounded-full bg-kf-manteca px-7 text-[13px] font-extrabold tracking-[0.14em] text-kf-azul-hondo no-underline transition hover:opacity-90"
             >
               <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M8 2v8M4 7l4 4 4-4M2 13h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
               </svg>
-              DESCARGAR EXTENSIÓN
+              AGREGAR A CHROME
             </a>
-            <span className="text-xs font-bold tracking-[0.12em]">CHROME · GRATIS · V1.0</span>
+            <span className="text-xs font-bold tracking-[0.12em]">CHROME WEB STORE · GRATIS · V1.1</span>
           </div>
         </PageHero>
 
@@ -44,48 +49,39 @@ export default function ExtensionPage() {
                 01
               </span>
               <div>
-                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Descargá la extensión</h2>
-                <p className="text-xs text-ink-soft">Un archivo ZIP con todo lo necesario</p>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Andá a la Chrome Web Store</h2>
+                <p className="text-xs text-ink-soft">La tienda oficial de extensiones de Google</p>
               </div>
             </div>
             <div className="flex flex-col gap-3">
               <p className="text-sm leading-relaxed text-ink-soft">
-                Hacé click en <strong className="text-ink">&ldquo;Descargar extensión&rdquo;</strong> arriba. Se
-                guardará un archivo{" "}
-                <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
-                  kf1-extension.zip
-                </code>{" "}
-                en tu carpeta de descargas.
-              </p>
-              <p className="text-sm leading-relaxed text-ink-soft">
-                <strong className="text-ink">Importante:</strong> Antes de instalar, descomprimí el
-                archivo haciendo doble click sobre él. Obtenés una carpeta llamada{" "}
-                <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
-                  chrome-extension
-                </code>
-                . No la muevas ni la borres — Chrome la va a necesitar en esa ubicación para
-                siempre.
+                Hacé click en <strong className="text-ink">&ldquo;Agregar a Chrome&rdquo;</strong>{" "}
+                arriba. Se abre el listing de <strong className="text-ink">Bóveda KF-1</strong> en la
+                Chrome Web Store — nada de modos raros ni archivos sueltos.
               </p>
 
-              {/* Visual: zip → folder */}
-              <div className="flex items-center justify-center gap-6 rounded-xl border border-border-soft bg-gray/30 py-6">
-                <div className="flex flex-col items-center gap-2">
-                  <svg aria-hidden="true" width="40" height="48" viewBox="0 0 40 48" fill="none">
-                    <rect x="1" y="1" width="38" height="46" rx="4" fill="#2d3548" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
-                    <path d="M26 1L36 11H26V1Z" fill="rgba(255,255,255,0.18)"/>
-                    <text x="20" y="33" textAnchor="middle" fontSize="9" fontFamily="monospace" fill="#edf0f4">.zip</text>
-                  </svg>
-                  <span className="text-xs text-ink-soft">kf1-extension.zip</span>
-                </div>
-                <svg aria-hidden="true" width="28" height="14" viewBox="0 0 28 14" fill="none">
-                  <path d="M1 7h24M19 1l6 6-6 6" stroke="#6bb5d6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <div className="flex flex-col items-center gap-2">
-                  <svg aria-hidden="true" width="44" height="44" viewBox="0 0 44 44" fill="none">
-                    <path d="M2 14C2 11.8 3.8 10 6 10H22L28 16H38C40.2 16 42 17.8 42 20V38C42 40.2 40.2 42 38 42H6C3.8 42 2 40.2 2 38V14Z" fill="#1d5f8f" opacity="0.4" stroke="#6bb5d6" strokeWidth="1.5"/>
-                    <path d="M22 24v8M19 29l3 3 3-3" stroke="#6bb5d6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span className="text-xs text-ink-soft">chrome-extension/</span>
+              {/* Visual: store listing card */}
+              <div className="flex items-center justify-center rounded-xl border border-border-soft bg-gray/30 py-6">
+                <div className="w-full max-w-sm rounded-xl border border-border-soft bg-white p-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-blue">
+                      <svg aria-hidden="true" width="20" height="24" viewBox="0 0 10 12" fill="none">
+                        <path d="M5 1L1 2.5V6C1 8.5 2.8 10.7 5 11.5C7.2 10.7 9 8.5 9 6V2.5L5 1Z" fill="white" opacity="0.9"/>
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-ink">Bóveda KF-1</p>
+                      <p className="text-xs text-ink-soft">Autocompletá logins en un clic</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-semibold tracking-wide text-bosque">
+                      Ofrecido por kitifica.com
+                    </span>
+                    <span className="rounded-md bg-blue px-3 py-1.5 text-xs font-bold text-white">
+                      Agregar a Chrome
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -98,35 +94,23 @@ export default function ExtensionPage() {
                 02
               </span>
               <div>
-                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Instalá en Chrome</h2>
-                <p className="text-xs text-ink-soft">Cuatro clics y listo</p>
+                <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Confirmá la instalación</h2>
+                <p className="text-xs text-ink-soft">Un clic en el diálogo de Chrome</p>
               </div>
             </div>
             <ol className="mb-5 flex flex-col gap-3">
               {[
                 <>
-                  Abrí Chrome y en la barra de direcciones escribí{" "}
-                  <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs font-bold text-kf-azul">
-                    chrome://extensions
-                  </code>{" "}
-                  y presioná Enter.
-                </>,
-                <>
-                  En la esquina superior derecha activá el interruptor{" "}
-                  <strong className="text-ink">&ldquo;Modo de desarrollador&rdquo;</strong>. Se va a
-                  poner azul.
-                </>,
-                <>
-                  Hacé click en el botón{" "}
-                  <strong className="text-ink">&ldquo;Cargar sin empaquetar&rdquo;</strong> que
-                  aparece arriba a la izquierda.
-                </>,
-                <>
-                  Navegá hasta la carpeta{" "}
+                  Chrome muestra un diálogo <strong className="text-ink">&ldquo;¿Agregar Bóveda KF-1?&rdquo;</strong>{" "}
+                  con lo que la extensión necesita. Acá no hay letra chica: solo pide acceso a{" "}
                   <code className="rounded bg-kf-niebla px-1.5 py-0.5 font-mono text-xs text-kf-azul">
-                    chrome-extension
-                  </code>{" "}
-                  que descomprimiste y hacé click en <strong className="text-ink">Abrir</strong>.
+                    kf1.kitifica.com
+                  </code>
+                  , no a todos los sitios.
+                </>,
+                <>
+                  Hacé click en <strong className="text-ink">&ldquo;Agregar extensión&rdquo;</strong> y
+                  Chrome la instala en un segundo. El ícono de Bóveda KF-1 aparece en tu navegador.
                 </>,
               ].map((text, i) => (
                 <li key={i} className="flex items-start gap-3">
@@ -138,7 +122,7 @@ export default function ExtensionPage() {
               ))}
             </ol>
 
-            {/* Chrome extensions page mockup */}
+            {/* Chrome install dialog mockup */}
             <div className="overflow-hidden rounded-xl border border-border-soft">
               {/* Chrome window chrome */}
               <div className="flex items-center gap-2 bg-[#292a2c] px-4 py-2.5">
@@ -148,22 +132,28 @@ export default function ExtensionPage() {
                   <div className="h-3 w-3 rounded-full bg-[#28C840]" />
                 </div>
                 <div className="mx-2 flex h-6 flex-1 items-center rounded-full bg-[#1e1f21] px-3">
-                  <span className="font-mono text-xs text-[#9aa0aa]">chrome://extensions</span>
+                  <span className="font-mono text-xs text-[#9aa0aa]">chromewebstore.google.com</span>
                 </div>
               </div>
-              {/* Page body */}
+              {/* Dialog body */}
               <div className="bg-[#292a2c] p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#c8cdd6]">Extensiones</span>
-                  <div className="flex items-center gap-1.5 rounded-full border border-[#1d5f8f] bg-[#1d5f8f]/80 px-2.5 py-1">
-                    <span className="text-[10px] font-semibold text-white">Modo desarrollador</span>
-                    <div className="relative h-3 w-5 rounded-full bg-white/30">
-                      <div className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-white" />
-                    </div>
+                <div className="mx-auto max-w-xs rounded-xl bg-white p-4 shadow-lg">
+                  <p className="text-sm font-semibold text-ink">¿Agregar &ldquo;Bóveda KF-1&rdquo;?</p>
+                  <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-gray/50 px-2.5 py-2">
+                    <span className="mt-px text-xs">🔐</span>
+                    <p className="text-xs leading-relaxed text-ink-soft">
+                      Esta extensión podrá leer y modificar los datos de{" "}
+                      <span className="font-mono text-[11px] text-kf-azul">kf1.kitifica.com</span>
+                    </p>
                   </div>
-                </div>
-                <div className="w-fit rounded-lg border border-[#1d5f8f] bg-transparent px-3 py-1.5 text-xs font-semibold text-[#6bb5d6]">
-                  Cargar sin empaquetar
+                  <div className="mt-3 flex justify-end gap-2">
+                    <span className="rounded-md px-3 py-1.5 text-xs font-semibold text-ink-soft">
+                      Cancelar
+                    </span>
+                    <span className="rounded-md bg-blue px-3 py-1.5 text-xs font-bold text-white">
+                      Agregar extensión
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -295,8 +285,8 @@ export default function ExtensionPage() {
           <h2 className="font-brand text-2xl leading-[1.04] font-extrabold text-kf-azul-hondo uppercase">Preguntas frecuentes</h2>
           {[
             {
-              q: "¿Por qué necesita el modo desarrollador?",
-              a: "Chrome requiere el modo desarrollador para instalar extensiones que no están en la Chrome Web Store. Es temporal — la extensión estará en la tienda oficial próximamente.",
+              q: "¿La extensión lee lo que hago en las páginas que visito?",
+              a: "No. No lee, guarda ni transmite el contenido de las páginas ni tu historial. Solo escribe el usuario y la contraseña en el formulario de login cuando vos hacés clic en “Llenar”, y no tiene permisos sobre los sitios que visitás.",
             },
             {
               q: "¿Mis contraseñas son seguras al hacer autofill?",
@@ -308,7 +298,7 @@ export default function ExtensionPage() {
             },
             {
               q: "¿Qué pasa si pierdo el token?",
-              a: 'Podés generar uno nuevo en Conectar IA dentro de tu bóveda. El token viejo deja de funcionar automáticamente.',
+              a: 'Podés generar uno nuevo en Conectar IA dentro de tu bóveda y revocar el viejo desde la sección Token CLI. El token viejo deja de funcionar automáticamente.',
             },
           ].map(({ q, a }) => (
             <div key={q} className="rounded-xl border border-border-soft bg-paper p-4 sm:p-5">
