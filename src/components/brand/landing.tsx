@@ -72,9 +72,11 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
         <main id="main" tabIndex={-1} className="flex flex-col gap-10">
           {/* Hero */}
           <section className="flex flex-wrap overflow-hidden rounded-[48px] bg-kf-carmesi">
-            <div className="flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
-              <h1 data-reveal className={`${display} m-0 text-[clamp(36px,11vw,104px)] leading-[1] text-white`}>
-                Chau Excel <span className="text-kf-manteca">de contraseñas</span>
+            {/* @container: the headline sizes itself off this column (cqw), so every wrap fits — no orphan words. */}
+            <div className="@container flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
+              <h1 data-reveal className={`${display} m-0 text-[clamp(16px,15cqw,104px)] leading-[0.96] text-white`}>
+                <span className="block">Chau Excel</span>
+                <span className="block text-kf-manteca">de contraseñas</span>
               </h1>
               <p data-reveal data-delay=".12" className="m-0 text-[15px] font-extrabold leading-relaxed tracking-[0.16em] text-white sm:text-[20px]">
                 CONTRASEÑAS Y CÓDIGOS 2FA DE CADA RED, <span className="text-kf-manteca">ORDENADOS POR CLIENTE.</span>
