@@ -30,6 +30,17 @@ const sections = [
     ],
   },
   {
+    h: "Extensión de Chrome",
+    p: [
+      "La extensión Bóveda KF-1 tiene una sola función: completar el formulario de inicio de sesión de la pestaña activa con las credenciales de tu bóveda, cuando hacés clic en \"Llenar\".",
+      "Qué se guarda en tu equipo: el token de API que pegás vos, en el almacenamiento local de Chrome (chrome.storage.local). No lo almacenamos en ningún otro lado; se borra cuando cerrás sesión desde la extensión o cuando la desinstalás.",
+      "A dónde habla: únicamente a kf1.kitifica.com, por HTTPS, usando tu token como autenticación. Pide la lista de credenciales de tus bóvedas (servicio y usuario) y, cuando elegís una, esa credencial para llenarla. No hay llamadas a otros servicios ni a terceros.",
+      "Qué toca en la página: al hacer clic en \"Llenar\", un script escribe el usuario y la contraseña en el formulario de login de esa pestaña. No lee, guarda ni transmite el contenido de la página, lo que escribís ni tu historial de navegación. El único dato de la pestaña que usa es el dominio (hostname), en memoria, para ordenar primero las credenciales que coinciden con ese sitio.",
+      "Sin código remoto ni analítica: todo el código y las fuentes van dentro del paquete de la extensión. No hay rastreadores, SDKs de analítica ni publicidad.",
+      "Cómo revocar el acceso: cerrá sesión desde la extensión, revocá el token desde la app web (sección \"Token CLI\"), o desinstalá la extensión. Los tokens además expiran solos a los 30 días.",
+    ],
+  },
+  {
     h: "Cookies",
     p: [
       "Usamos una única cookie de sesión, necesaria para mantenerte conectado. No usamos cookies de rastreo ni de publicidad.",
@@ -56,7 +67,7 @@ const sections = [
 export default function PrivacyPage() {
   return (
     <>
-      <PageHero pair="amarillo" icon="eye" kicker="Última actualización: 29 de septiembre de 2026" title="Privacidad" />
+      <PageHero pair="amarillo" icon="eye" kicker="Última actualización: 27 de octubre de 2026" title="Privacidad" />
       <div className={pageCard}>
 
       <div className="mt-8 flex flex-col gap-6">
