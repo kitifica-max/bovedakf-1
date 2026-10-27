@@ -68,29 +68,92 @@ function initial(service) {
 async function doFill(token, credId, btn) {
   btn.classList.add("filling");
   btn.textContent = "...";
-  try {
-    const cred = await apiFetch(`/api/extension/credentials/${credId}`, token);
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    chrome.tabs.sendMessage(
-      tab.id,
-      { type: "kf1-fill", username: cred.username, password: cred.password },
-      (resp) => {
-        if (chrome.runtime.lastError || !resp?.ok) {
-          toast("No se encontró formulario de login en esta página", "error");
-          btn.classList.remove("filling");
-          btn.textContent = "Llenar";
-        } else {
-          toast("¡Campos llenados!");
-          setTimeout(() => window.close(), 900);
-        }
-      }
-    );
+  let cred;
+  try {
+    cred = await apiFetch(`/api/extension/credentials/${credId}`, token);
   } catch {
     toast("Error al obtener credencial", "error");
     btn.classList.remove("filling");
     btn.textContent = "Llenar";
+    return;
   }
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  // Injected on demand (activeTab), so no <all_urls> content script is needed.
+  // The function is serialized into the page; it must be fully self-contained.
+  let res;
+  try {
+    [res] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (username, password) => {
+        const pwField = document.querySelector('input[type="password"]');
+        if (!pwField) return { ok: false, error: "no-password-field" };
+
+        const form = pwField.closest("form");
+        const root = form ?? document;
+
+        const userSelectors = [
+          'input[type="email"]',
+          'input[autocomplete="username"]',
+          'input[autocomplete="email"]',
+          'input[name*="email" i]',
+          'input[name*="user" i]',
+          'input[name*="login" i]',
+          'input[id*="email" i]',
+          'input[id*="user" i]',
+          'input[type="text"]',
+        ];
+
+        let unameField = null;
+        for (const sel of userSelectors) {
+          const el = root.querySelector(sel);
+          if (el && el !== pwField) {
+            unameField = el;
+            break;
+          }
+        }
+
+        // React-compatible fill: use the native setter to bypass value tracking
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          "value"
+        )?.set;
+
+        const fillField = (el, value) => {
+          if (nativeSetter) {
+            nativeSetter.call(el, value);
+          } else {
+            el.value = value;
+          }
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+          el.focus();
+        };
+
+        if (unameField) fillField(unameField, username);
+        fillField(pwField, password);
+        return { ok: true };
+      },
+      args: [cred.username, cred.password],
+    });
+  } catch {
+    toast("No se pudo escribir en esta página", "error");
+    btn.classList.remove("filling");
+    btn.textContent = "Llenar";
+    return;
+  }
+
+  if (!res?.result?.ok) {
+    toast("No se encontró formulario de login en esta página", "error");
+    btn.classList.remove("filling");
+    btn.textContent = "Llenar";
+    return;
+  }
+
+  toast("¡Campos llenados!");
+  setTimeout(() => window.close(), 900);
 }
 
 // ── Credential list renderer ──────────────────────────────────────────────────
