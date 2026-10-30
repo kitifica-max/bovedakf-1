@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { settleLinkPurchase } from "@/lib/link-purchase";
 import { PACKS, perLink, usd } from "@/lib/packs";
 import { BuyPackButton, PurchasePoller } from "./buy-pack-button";
 import { AppShell } from "../app-shell";
@@ -19,6 +20,8 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const { compra } = await searchParams;
+  // The webhook can miss; coming back from Wompi settles the purchase too (the poller re-runs this).
+  if (compra) await settleLinkPurchase(compra).catch((err) => console.error("[plans] settle failed", err));
 
   const [user, purchases, returned] = await Promise.all([
     db.user.findUnique({ where: { id: session.user.id }, select: { linkCredits: true } }),
