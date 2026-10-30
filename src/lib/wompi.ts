@@ -1,5 +1,4 @@
 import "server-only";
-import crypto from "crypto";
 
 const AUTH_URL = "https://id.wompi.sv/connect/token";
 const API_URL = "https://api.wompi.sv";
@@ -66,12 +65,9 @@ export async function createEnlacePago(opts: {
   });
 }
 
-export function validateWebhookSignature(rawBody: string, signature: string): boolean {
-  const secret = process.env.WOMPI_CLIENT_SECRET!;
-  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(signature, "hex"));
-  } catch {
-    return false;
-  }
+// `transaccionCompra` is the link's last successful transaction, null until one goes through.
+export function getEnlacePago(idEnlace: number) {
+  return wompiRequest<{
+    transaccionCompra: { idTransaccion: string; esReal: boolean; esAprobada: boolean; monto: number } | null;
+  }>(`/EnlacePago/${idEnlace}`);
 }
