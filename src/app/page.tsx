@@ -9,7 +9,7 @@ const jsonLd = {
   applicationCategory: "SecurityApplication",
   operatingSystem: "Web",
   description:
-    "La bóveda para agencias: contraseñas y códigos 2FA de las redes de cada cliente, ordenados y cifrados con AES-256-GCM. Links para compartir que expiran, revocación en un clic y auditoría completa.",
+    "La bóveda para agencias y equipos de marketing: contraseñas y códigos 2FA de las redes de cada cliente, ordenados y cifrados con AES-256-GCM. Links para compartir que expiran, revocación en un clic y auditoría completa.",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 

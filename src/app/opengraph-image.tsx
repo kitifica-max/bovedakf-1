@@ -2,18 +2,18 @@ import { OG_SIZE, Star, display, label, ogImage } from "@/lib/og";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const alt = "Bóveda KF-1 — Chau Excel de contraseñas. La bóveda de las agencias.";
+export const alt = "Bóveda KF-1 — Chau Excel de contraseñas. La bóveda para agencias y equipos de marketing.";
 
 export default function OpengraphImage() {
   return ogImage(
     <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: "#b31f47" }}>
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: 26, padding: "0 0 0 72px", width: 740 }}>
-        <div style={label(22, "#ffd27a")}>BÓVEDA KF-1</div>
+        <div style={label(22, "#ffd27a")}>BÓVEDA KF-1 · PARA AGENCIAS</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <div style={display(100, "#ffffff")}>Chau Excel</div>
           <div style={display(100, "#ffd27a")}>de contraseñas</div>
         </div>
-        <div style={label(21, "#ffffff", { lineHeight: 1.5, maxWidth: 560, fontSize: 19 })}>CONTRASEÑAS Y CÓDIGOS 2FA DE CADA RED, ORDENADOS POR CLIENTE.</div>
+        <div style={label(21, "#ffffff", { lineHeight: 1.5, maxWidth: 560, fontSize: 19 })}>LAS CONTRASEÑAS Y CÓDIGOS 2FA DE LAS REDES DE TUS CLIENTES, ORDENADOS PARA TODO TU EQUIPO.</div>
         <div style={{ display: "flex", gap: 14 }}>
           <div style={label(17, "#a81b42", { background: "#ffd27a", borderRadius: 999, padding: "14px 26px" })}>SIN SUSCRIPCIÓN</div>
           <div style={label(17, "#ffd27a", { border: "3px solid #ffd27a", borderRadius: 999, padding: "11px 26px" })}>CÓDIGOS 2FA</div>

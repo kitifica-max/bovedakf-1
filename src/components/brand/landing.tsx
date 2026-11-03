@@ -19,7 +19,6 @@ function Icon({ d, className = "" }: { d: React.ReactNode; className?: string })
 }
 const phone = <><rect x="7" y="2.5" width="10" height="19" rx="2.5" /><path d="M9.5 12h1M11.5 12h1M13.5 12h1M11 18h2" /></>;
 const lock = <><rect x="5" y="11" width="14" height="10" rx="2.5" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>;
-const refresh = <><path d="M4 12a8 8 0 1 0 8-8" /><path d="M4 5v4h4" /></>;
 const link = <><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1" /><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" /></>;
 const clock = <><circle cx="12" cy="12" r="8" /><path d="M12 8v4l2.5 1.5" /></>;
 const ban = <><circle cx="12" cy="12" r="8" /><path d="M6.4 6.4l11.2 11.2" /></>;
@@ -74,12 +73,15 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           <section className="flex flex-wrap overflow-hidden rounded-[48px] bg-kf-carmesi">
             {/* @container: the headline sizes itself off this column (cqw), so every wrap fits — no orphan words. */}
             <div className="@container flex min-w-0 flex-[1_1_560px] flex-col gap-7 p-8 sm:p-12 lg:p-20">
+              <span data-reveal className="self-start rounded-[20px] bg-kf-manteca px-4 py-1.5 text-[12px] font-extrabold leading-snug tracking-[0.12em] text-kf-carmesi-hondo sm:text-[14px]">
+                PARA AGENCIAS Y EQUIPOS DE MARKETING
+              </span>
               <h1 data-reveal className={`${display} m-0 text-[clamp(16px,15cqw,104px)] leading-[0.96] text-white`}>
                 <span className="block">Chau Excel</span>
                 <span className="block text-kf-manteca">de contraseñas</span>
               </h1>
               <p data-reveal data-delay=".12" className="m-0 text-[15px] font-extrabold leading-relaxed tracking-[0.16em] text-white sm:text-[20px]">
-                CONTRASEÑAS Y CÓDIGOS 2FA DE CADA RED, <span className="text-kf-manteca">ORDENADOS POR CLIENTE.</span>
+                LAS CONTRASEÑAS Y CÓDIGOS 2FA DE LAS REDES DE TUS CLIENTES, <span className="text-kf-manteca">ORDENADOS PARA TODO TU EQUIPO.</span>
               </p>
               <div data-reveal data-delay=".24" className="flex flex-wrap gap-3.5">
                 {signedIn ? (
@@ -136,9 +138,9 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
           {/* Statement */}
           <section id="como" className="scroll-mt-6 px-2 py-8 text-center sm:py-16">
             <p data-reveal className={`${display} mx-auto m-0 max-w-[1180px] text-[clamp(38px,6.4vw,96px)] leading-[1.08] text-kf-azul`}>
-              Un cliente <Icon d={phone} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> un código 2FA y todo tu equipo{" "}
-              <Icon d={lock} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> entrando sin pedirle el celu{" "}
-              <Icon d={refresh} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /> a nadie
+              Las contraseñas de tus clientes,{" "}
+              <span className="whitespace-nowrap">cifradas <Icon d={lock} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /></span> y siempre{" "}
+              <span className="whitespace-nowrap">a mano <Icon d={phone} className="inline h-[0.85em] w-[0.85em] align-[-0.1em]" /></span> para todo tu equipo
             </p>
           </section>
 
@@ -150,7 +152,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
               </svg>
               <h2 className={`${display} m-0 text-[clamp(44px,5vw,76px)] leading-[1.04]`}>Publicás. No pedís códigos.</h2>
               <p className="m-0 max-w-[520px] text-[17px] font-semibold leading-[1.65]">
-                Pasás la verificación en dos pasos de cada cuenta a la bóveda una sola vez. Desde ahí, cada community manager ve el código de 6 dígitos de los clientes que tiene asignados, y queda registrado quién lo vio.
+                Pasás la verificación en dos pasos de cada cuenta a la bóveda una sola vez. Desde ahí, cada community manager de tu agencia ve el código de 6 dígitos de los clientes que tiene asignados, y queda registrado quién lo vio.
               </p>
             </div>
             <div className="flex min-w-0 flex-[1_1_420px] flex-col items-center justify-center gap-5 rounded-[48px] bg-kf-lima p-8 text-kf-bosque-hondo sm:p-14">
@@ -170,7 +172,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
             <div data-reveal className="flex flex-wrap items-end justify-between gap-3">
               <h2 className={`${display} m-0 text-[clamp(44px,5vw,72px)] leading-[1.02] text-kf-azul`}>Cada cliente, su color</h2>
               <span className="max-w-[460px] text-[16px] font-semibold text-kf-tinta-suave">
-                Una bóveda por cliente. Tu equipo ve solo los clientes que le asignás.
+                Una bóveda por cada cliente de tu agencia. Cada persona del equipo ve solo los clientes que le asignás.
               </span>
             </div>
             <div data-stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -190,7 +192,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* Security */}
           <section id="seguridad" className="flex scroll-mt-6 flex-col items-center gap-12 rounded-[48px] bg-kf-amarillo px-8 py-12 text-kf-lavanda sm:px-14 sm:py-20">
-            <h2 data-reveal className={`${display} m-0 text-center text-[clamp(38px,4.4vw,64px)] leading-[1.04]`}>Seguridad nivel banco, vibra nivel agencia</h2>
+            <h2 data-reveal className={`${display} m-0 text-center text-[clamp(38px,4.4vw,64px)] leading-[1.04]`}>Seguridad nivel banco, pensada para agencias</h2>
             <div data-stagger className="grid w-full grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-10">
               {[
                 { icon: lock, t: "Cifrado AES-256", b: "Cada clave se cifra antes de tocar la base de datos." },
@@ -212,7 +214,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
 
           {/* CTA */}
           <section className="flex flex-col items-start gap-8 rounded-[48px] bg-kf-durazno px-8 py-12 sm:px-16 sm:py-20 lg:px-20">
-            <h2 data-reveal className={`${display} m-0 max-w-[900px] text-[clamp(52px,8vw,128px)] leading-[1.02] text-kf-carmesi-hondo`}>¿Seguís pidiendo códigos por chat?</h2>
+            <h2 data-reveal className={`${display} m-0 max-w-[900px] text-[clamp(52px,8vw,128px)] leading-[1.02] text-kf-carmesi-hondo`}>¿Tu agencia sigue pidiendo códigos por chat?</h2>
             <a data-reveal data-delay=".2" href="#planes" className={`${pill} bg-kf-carmesi-hondo text-white`}>VER PRECIOS</a>
           </section>
 
@@ -222,7 +224,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
               <h2 className={`${display} m-0 text-[clamp(48px,5.6vw,84px)] leading-[1.02] text-kf-azul-hondo`}>¿Pagar todos los meses? No.</h2>
               <ul className={`${display} m-0 flex list-none flex-col gap-2 p-0 text-[24px] font-bold text-kf-azul-hondo`}>
                 <li>✓ Sin suscripción ni cobros automáticos</li>
-                <li>✓ Tu equipo entra gratis</li>
+                <li>✓ Hasta 5 personas de tu equipo, gratis</li>
                 <li>✓ Pagás solo los links que compartís</li>
               </ul>
             </div>
@@ -243,7 +245,7 @@ export function BrandLanding({ signedIn }: { signedIn: boolean }) {
                 <div className="flex flex-col gap-2">
                   <div className="text-[13px] font-extrabold tracking-[0.2em] text-kf-tinta-suave">RECARGÁ LINKS</div>
                   <p className="m-0 text-[16px] font-semibold leading-[1.55]">
-                    Cada link comparte una credencial con alguien de afuera: expira solo y lo revocás cuando quieras. Pago único, sin cobros automáticos.
+                    Cada link comparte una credencial con alguien fuera de tu equipo (un cliente, un freelancer): expira solo y lo revocás cuando quieras. Pago único, sin cobros automáticos.
                   </p>
                 </div>
                 <div data-stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2">

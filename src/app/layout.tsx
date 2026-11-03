@@ -44,11 +44,11 @@ const montserrat = Montserrat({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const title = "Bóveda KF-1 — Las contraseñas y códigos 2FA de tus clientes, ordenados";
+const title = "Bóveda KF-1 — Gestor de contraseñas y 2FA para agencias y equipos de marketing";
 const description =
-  "La bóveda para agencias: contraseñas y códigos de verificación de las redes de cada cliente, ordenados y cifrados con AES-256. Compartí accesos con links que expiran y revocalos cuando termines.";
+  "La bóveda para agencias y equipos de marketing: contraseñas y códigos 2FA de las redes de cada cliente, cifrados con AES-256 y ordenados por cliente. Compartí accesos con links que expiran y revocalos cuando termines.";
 
-const ogTitle = "Chau Excel de contraseñas. La bóveda de las agencias.";
+const ogTitle = "Chau Excel de contraseñas. La bóveda para agencias y equipos de marketing.";
 const ogDescription =
   "Contraseñas y códigos 2FA de Instagram, TikTok y más, ordenados por cliente. Cuenta gratis para tu equipo, sin suscripción: pagás solo los links que compartís.";
 

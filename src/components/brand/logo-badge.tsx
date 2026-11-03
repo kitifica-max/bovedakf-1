@@ -24,7 +24,7 @@ export function LogoBadge({
       {fill && <circle cx="100" cy="100" r="98" fill={fill} />}
       <text data-spin="45" fontFamily="var(--font-montserrat), sans-serif" fontWeight={700} fontSize={15} fill={ink}>
         <textPath href={`#${id}`} textLength={472} lengthAdjust="spacing">
-          · BÓVEDA KF-1 · PARA CREATIVOS · SIN CAOS{" "}
+          · BÓVEDA KF-1 · PARA AGENCIAS · SIN CAOS{" "}
         </textPath>
       </text>
       <text x="100" y="119" textAnchor="middle" fontFamily="var(--font-barlow), sans-serif" fontWeight={800} fontSize={58} fill={center}>
