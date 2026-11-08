@@ -88,7 +88,8 @@ export default async function waf(
 
   // 2. User-agent check — allowlist beats blocklist; exempt M2M paths
   const isAllowedBot = ALLOWED_BOT_PATTERNS.some((p) => p.test(ua));
-  const isUAExempt = UA_EXEMPT_PATHS.some((p) => p.test(path));
+  // Public static files (manifest, sw.js, icons) are safe for UA-less clients (PWA validators, Workers).
+  const isUAExempt = STATIC_FILE.test(path) || UA_EXEMPT_PATHS.some((p) => p.test(path));
 
   if (!isAllowedBot && !isUAExempt) {
     const isBadUA = ua === "" || BLOCKED_UA_PATTERNS.some((p) => p.test(ua));
